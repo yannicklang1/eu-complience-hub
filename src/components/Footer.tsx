@@ -120,7 +120,7 @@ export default function Footer() {
               { label: "Über uns", href: "/ueber-uns" },
               { label: "Aktuelles", href: "/aktuelles" },
               { label: "FAQ", href: "/faq" },
-              { label: "Kontakt", href: "/kontakt" },
+              { label: "Compliance-Report", href: "/kontakt" },
               { label: "Impressum", href: "/impressum" },
               { label: "Datenschutz", href: "/datenschutz" },
               { label: "Haftungsausschluss", href: "/haftungsausschluss" },

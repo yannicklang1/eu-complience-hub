@@ -112,7 +112,7 @@ export default function Header() {
               scrolled ? "text-[#3a4a6b] hover:text-[#0A2540] hover:bg-[#0A2540]/[0.04]" : "text-white/80 hover:text-white hover:bg-white/[0.08]"
             }`}
           >
-            Kontakt
+            Compliance-Report
           </Link>
           <Link
             href="/fristen-radar"
@@ -199,13 +199,13 @@ export default function Header() {
             <span className="text-sm font-medium">Alle Tools</span>
           </Link>
 
-          {/* Kontakt (direct link) */}
+          {/* Compliance-Report (direct link) */}
           <Link
             href="/kontakt"
             className="flex items-center justify-between py-3 border-b border-[#0A2540]/[0.04] text-[#3a4a6b]"
             onClick={closeMobileMenu}
           >
-            <span className="text-sm font-medium">Kontakt</span>
+            <span className="text-sm font-medium">Compliance-Report</span>
           </Link>
 
           {/* Accordion sections */}

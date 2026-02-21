@@ -398,8 +398,8 @@ export default function ToolsHubContent() {
             </h2>
             <p className="text-sm text-slate-400 mb-6 max-w-lg mx-auto">
               Unsere Tools geben Ihnen eine erste Einschätzung. Für eine
-              individuelle Analyse kontaktieren Sie uns — die Ersteinschätzung
-              ist kostenlos.
+              personalisierte Compliance-Analyse erstellen Sie Ihren kostenlosen
+              Report — individuell auf Ihr Unternehmen zugeschnitten.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
@@ -411,7 +411,7 @@ export default function ToolsHubContent() {
                     "0 8px 32px rgba(250,204,21,0.3), 0 2px 8px rgba(250,204,21,0.2)",
                 }}
               >
-                Kostenlose Ersteinschätzung
+                Compliance-Report erstellen
               </Link>
               <Link
                 href="/faq"

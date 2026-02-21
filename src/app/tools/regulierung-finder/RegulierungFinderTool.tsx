@@ -653,13 +653,13 @@ export default function RegulierungFinderTool() {
                   {/* CTA Card */}
                   <div className="mt-6 rounded-2xl border border-yellow-400/10 bg-yellow-400/5 p-6 text-center">
                     <p className="text-sm text-slate-300 mb-3">
-                      Möchten Sie eine detaillierte Compliance-Einschätzung?
+                      Möchten Sie einen personalisierten Compliance-Report?
                     </p>
                     <Link
                       href="/kontakt"
                       className="inline-flex items-center gap-2 text-sm font-semibold text-yellow-400 hover:text-yellow-300 transition-colors"
                     >
-                      Kostenlose Erstberatung anfragen
+                      Kostenlosen Compliance-Report erstellen
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                       </svg>

@@ -145,7 +145,7 @@ function UnsubscribeInner() {
                   href="/kontakt"
                   className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-sm text-slate-300 border border-slate-700 hover:border-slate-600 hover:text-slate-200 transition-colors"
                 >
-                  Kontakt aufnehmen
+                  Compliance-Report erstellen
                 </Link>
               </>
             )}

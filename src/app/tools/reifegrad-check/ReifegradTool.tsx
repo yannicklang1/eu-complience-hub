@@ -340,7 +340,7 @@ export default function ReifegradTool() {
                     className="flex-1 py-3 rounded-xl font-bold text-sm text-slate-900 text-center"
                     style={{ background: "linear-gradient(135deg, #FACC15, #EAB308)", boxShadow: "0 8px 32px rgba(250,204,21,0.3)" }}
                   >
-                    Beratung anfragen
+                    Compliance-Report erstellen
                   </Link>
                 </div>
 

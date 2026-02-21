@@ -1,15 +1,15 @@
 import { generateOgImage, ogSize } from "@/lib/og-image";
 
 export const runtime = "edge";
-export const alt = "Kontakt – EU Compliance Hub";
+export const alt = "Compliance-Report – EU Compliance Hub";
 export const size = ogSize;
 export const contentType = "image/png";
 
 export default async function Image() {
   return generateOgImage({
-    title: "Kontakt",
-    subtitle: "Compliance-Beratung anfragen – Kostenlose Ersteinschätzung für Ihr Unternehmen",
+    title: "Compliance-Report",
+    subtitle: "Kostenlose Analyse für Ihr Unternehmen — Regulierungen, Kosten, Reifegrad",
     accentColor: "#FACC15",
-    tags: ["Beratung", "Ersteinschätzung", "EU-Compliance"],
+    tags: ["PDF-Report", "Analyse", "EU-Compliance"],
   });
 }

@@ -292,7 +292,7 @@ export default function FAQContent({ faqData }: { faqData: FAQItem[] }) {
               Ihre Frage war nicht dabei?
             </h2>
             <p className="text-sm text-slate-400 mb-5">
-              Kontaktieren Sie uns — wir beantworten Ihre Compliance-Fragen persönlich.
+              Erstellen Sie einen kostenlosen Compliance-Report — personalisiert für Ihr Unternehmen.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
@@ -303,7 +303,7 @@ export default function FAQContent({ faqData }: { faqData: FAQItem[] }) {
                   boxShadow: "0 8px 32px rgba(250,204,21,0.3)",
                 }}
               >
-                Frage stellen
+                Compliance-Report erstellen
               </Link>
               <Link
                 href="/tools/regulierung-finder"

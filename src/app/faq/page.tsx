@@ -253,7 +253,7 @@ export const faqData: FAQItem[] = [
   /* ── Plattform ── */
   {
     question: "Ist EU Compliance Hub eine Rechtsberatung?",
-    answer: "Nein. EU Compliance Hub ist ein unabhängiges Informationsportal. Alle Inhalte dienen der allgemeinen Information und stellen keine Rechtsberatung dar. Für verbindliche Rechtsauskünfte und die konkrete Umsetzung empfehlen wir die Konsultation spezialisierter Rechtsanwälte oder Compliance-Berater. Über unsere Kontaktseite können Sie eine kostenlose Ersteinschätzung anfragen.",
+    answer: "Nein. EU Compliance Hub ist ein unabhängiges Informationsportal. Alle Inhalte dienen der allgemeinen Information und stellen keine Rechtsberatung dar. Für verbindliche Rechtsauskünfte und die konkrete Umsetzung empfehlen wir die Konsultation spezialisierter Rechtsanwälte oder Compliance-Berater. Über unseren kostenlosen Compliance-Report erhalten Sie eine personalisierte Analyse Ihrer regulatorischen Pflichten.",
     category: "Plattform",
   },
   {

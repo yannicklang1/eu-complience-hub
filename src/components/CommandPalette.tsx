@@ -61,7 +61,7 @@ const SEARCH_INDEX: SearchItem[] = [
   { label: "Branchen-Compliance", href: "/branchen", description: "Regulierungen nach Branche", category: "Branchen", keywords: ["branche", "industrie", "sektor"] },
 
   /* ── Info ── */
-  { label: "Kontakt", href: "/kontakt", description: "Kostenlose Ersteinschätzung anfragen", category: "Info", keywords: ["kontakt", "anfrage", "beratung"] },
+  { label: "Compliance-Report", href: "/kontakt", description: "Kostenlose Compliance-Analyse für Ihr Unternehmen", category: "Tools", keywords: ["report", "analyse", "pdf", "kontakt", "beratung"] },
   { label: "Newsletter", href: "/newsletter", description: "Compliance-Briefing abonnieren", category: "Info", keywords: ["newsletter", "email", "abonnieren"] },
   { label: "Über uns", href: "/ueber-uns", description: "Team und Mission", category: "Info", keywords: ["über", "team", "mission", "about"] },
 ];

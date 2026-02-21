@@ -537,7 +537,7 @@ export default function VergleichContent() {
                 href="/kontakt"
                 className="px-6 py-3 rounded-xl font-semibold text-sm text-slate-300 border border-white/10 hover:bg-white/[0.04] transition-all"
               >
-                Beratung anfragen
+                Compliance-Report erstellen
               </Link>
             </div>
           </div>
