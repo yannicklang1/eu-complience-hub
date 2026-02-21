@@ -1069,42 +1069,18 @@ export default function HomePage() {
         </section>
 
         {/* ════════ COMPLIANCE-BRIEFING (Newsletter) ════════ */}
-        <section aria-label="Compliance-Briefing Newsletter" className="py-16 lg:py-20 relative overflow-hidden bg-[#f4f6fc]">
-          <div className="relative max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
-            <div className="rounded-3xl border border-[#d8dff0] bg-white p-8 sm:p-12 shadow-lg shadow-blue-900/[0.04]">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-                {/* Left: Text */}
-                <Reveal>
-                  <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 mb-5">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                      <span className="text-[11px] font-bold text-blue-700 tracking-wide uppercase">Compliance-Briefing</span>
-                    </div>
-                    <h2 className="font-[Syne] font-extrabold text-2xl sm:text-3xl text-[#060c1a] tracking-tight leading-[1.1] mb-4">
-                      Keine Frist<br /><span className="text-[#1e40af]">verpassen.</span>
-                    </h2>
-                    <p className="text-[15px] text-[#3a4a6b] leading-relaxed mb-2">
-                      Ihr regulatorisches Briefing — nur bei kritischen Fristen und Gesetzesänderungen.
-                    </p>
-                    <div className="flex items-center gap-4 text-[13px] text-[#7a8db0]">
-                      <span className="flex items-center gap-1.5">
-                        <IconCheck className="w-3.5 h-3.5 text-emerald-500" />
-                        Max. 3× pro Monat
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <IconCheck className="w-3.5 h-3.5 text-emerald-500" />
-                        Jederzeit abmeldbar
-                      </span>
-                    </div>
-                  </div>
-                </Reveal>
+        <section aria-label="Compliance-Briefing Newsletter" className="relative py-24 overflow-hidden">
+          <div className="absolute inset-0 bg-[#0A2540]" />
+          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,20,80,0.5) 0%, transparent 70%)" }} />
 
-                {/* Right: Signup form */}
-                <Reveal delay={150}>
-                  <FristenRadarSignup />
-                </Reveal>
-              </div>
-            </div>
+          <div className="relative max-w-2xl mx-auto px-6 lg:px-12 text-center">
+            <h2 className="font-[Syne] font-[800] text-3xl md:text-4xl text-white mb-4">
+              Compliance-Briefing aktivieren
+            </h2>
+            <p className="text-white/45 mb-8 max-w-md mx-auto">
+              Ihr regulatorisches Frühwarnsystem — nur bei kritischen Fristen und Gesetzesänderungen. Maximal 3× pro Monat.
+            </p>
+            <FristenRadarSignup variant="hero" />
           </div>
         </section>
 
