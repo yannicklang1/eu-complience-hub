@@ -31,7 +31,7 @@ const VISUAL_CENTER = { x: 200, y: 200 };
 const ARC_START = 20;
 const ARC_END = 75;
 const ARC_RANGE = ARC_END - ARC_START;
-const SWEEP_PERIOD = 8;
+const SWEEP_PERIOD = 18;
 
 const RING_RADII = [320, 420, 520, 620];
 
@@ -135,15 +135,19 @@ function randomHudMessage(): string {
   return HUD_MESSAGES[Math.floor(Math.random() * HUD_MESSAGES.length)];
 }
 
-/** HUD opacity with flicker effect */
+/** HUD opacity — slow fade-in, hold, gentle fade-out (readable!) */
 function getHudOpacity(timeSincePing: number): number {
-  if (timeSincePing > 0.8) return 0;
-  if (timeSincePing < 0.3) {
-    const flicker = Math.sin(timeSincePing * Math.PI * 10);
-    return 0.6 + flicker * 0.15;
+  if (timeSincePing > 2.2) return 0;
+  if (timeSincePing < 0.15) {
+    // Quick fade-in
+    return (timeSincePing / 0.15) * 0.7;
   }
-  if (timeSincePing < 0.6) return 0.8;
-  return 0.8 * (1 - (timeSincePing - 0.6) / 0.2);
+  if (timeSincePing < 1.4) {
+    // Stable hold — readable
+    return 0.7;
+  }
+  // Gentle fade-out
+  return 0.7 * (1 - (timeSincePing - 1.4) / 0.8);
 }
 
 /** Find nearest ring index for a given distance */
@@ -203,14 +207,14 @@ interface Particle {
 /* ═══════════════════════════════════════════
    CONSTANTS
    ═══════════════════════════════════════════ */
-const MAX_CONNECTIONS = 4;
-const CONNECTION_LIFETIME = 2.5;
-const MAX_RING_PULSES = 4;
-const RING_PULSE_LIFETIME = 1.5;
-const MAX_PARTICLES = 20;
-const PARTICLE_SPAWN_INTERVAL = 0.15;
-const SCAN_PULSE_INTERVAL = 16;
-const SCAN_PULSE_DURATION = 2;
+const MAX_CONNECTIONS = 2;
+const CONNECTION_LIFETIME = 3.5;
+const MAX_RING_PULSES = 3;
+const RING_PULSE_LIFETIME = 2;
+const MAX_PARTICLES = 10;
+const PARTICLE_SPAWN_INTERVAL = 0.4;
+const SCAN_PULSE_INTERVAL = 36;
+const SCAN_PULSE_DURATION = 2.5;
 
 /* ═══════════════════════════════════════════
    DEFAULT MOTION VALUE (fallback when no mouse)
@@ -312,7 +316,7 @@ export default function ComplianceRadar({
         (prevAngle >= blipAngle && currentAngle <= blipAngle);
       const proximity = Math.abs(blipAngle - currentAngle);
 
-      if ((crossed || proximity < 2.5) && elapsed - bs.pingTime > 2.0) {
+      if ((crossed || proximity < 2.5) && elapsed - bs.pingTime > 4.0) {
         needsUpdate = true;
         newlyPinged.push(bs.id);
 
@@ -328,8 +332,8 @@ export default function ComplianceRadar({
 
       const timeSincePing = elapsed - bs.pingTime;
       const newBrightness =
-        timeSincePing < 4.5
-          ? Math.max(cfg.restOpacity, 1 - (timeSincePing / 4.5) * (1 - cfg.restOpacity))
+        timeSincePing < 6
+          ? Math.max(cfg.restOpacity, 1 - (timeSincePing / 6) * (1 - cfg.restOpacity))
           : cfg.restOpacity;
 
       if (Math.abs(newBrightness - bs.brightness) > 0.01) {
@@ -347,7 +351,7 @@ export default function ComplianceRadar({
         for (const bs of updated) {
           if (bs.id === pingedId) continue;
           const timeSinceOtherPing = elapsed - bs.pingTime;
-          if (timeSinceOtherPing < 3.0 && timeSinceOtherPing > 0.01) {
+          if (timeSinceOtherPing < 1.5 && timeSinceOtherPing > 0.01) {
             const key = edgeKey(pingedId, bs.id);
             if (CONNECTION_SET.has(key) && !conns.some((c) => c.key === key)) {
               conns.push({
@@ -640,23 +644,15 @@ export default function ComplianceRadar({
             const age = elapsed - conn.activatedAt;
             const fade = Math.max(0, 1 - age / CONNECTION_LIFETIME);
 
-            // 3-stroke fake glow: wide dim, medium, thin bright
+            // Subtle 2-stroke connection: soft halo + thin core
             return (
               <g key={conn.key}>
                 <line
                   x1={fromPos.x} y1={fromPos.y}
                   x2={toPos.x} y2={toPos.y}
                   stroke="#FACC15"
-                  strokeWidth={4}
-                  opacity={0.06 * fade}
-                  strokeLinecap="round"
-                />
-                <line
-                  x1={fromPos.x} y1={fromPos.y}
-                  x2={toPos.x} y2={toPos.y}
-                  stroke="#FACC15"
-                  strokeWidth={1.5}
-                  opacity={0.18 * fade}
+                  strokeWidth={2.5}
+                  opacity={0.04 * fade}
                   strokeLinecap="round"
                 />
                 <line
@@ -664,8 +660,9 @@ export default function ComplianceRadar({
                   x2={toPos.x} y2={toPos.y}
                   stroke="#FACC15"
                   strokeWidth={0.5}
-                  opacity={0.4 * fade}
+                  opacity={0.15 * fade}
                   strokeLinecap="round"
+                  strokeDasharray="4 6"
                 />
               </g>
             );
@@ -732,17 +729,17 @@ export default function ComplianceRadar({
                 </text>
 
                 {/* HUD micro-detail — Jarvis effect */}
-                {timeSincePing < 0.8 && timeSincePing >= 0 && (
+                {timeSincePing < 2.2 && timeSincePing >= 0 && (
                   <text
-                    x={pos.x + coreR + 12}
+                    x={pos.x + coreR + 10}
                     y={pos.y + 3}
                     textAnchor="start"
-                    fontSize="6.5"
+                    fontSize="5.5"
                     fontFamily="'DM Mono', monospace"
                     fontWeight="500"
                     fill="#FACC15"
                     opacity={getHudOpacity(timeSincePing)}
-                    letterSpacing="0.12em"
+                    letterSpacing="0.08em"
                   >
                     {bs.hudMessage}
                   </text>
