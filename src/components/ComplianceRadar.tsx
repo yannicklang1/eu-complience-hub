@@ -394,9 +394,9 @@ export default function ComplianceRadar({
 
   /* ── Sweep afterglow cones ── */
   const trailCones = useMemo(() => [
-    { offset: 0, width: 3, opacity: 0.06 },
-    { offset: 3, width: 8, opacity: 0.03 },
-    { offset: 8, width: 15, opacity: 0.015 },
+    { offset: 0, width: 3, opacity: 0.03 },
+    { offset: 3, width: 8, opacity: 0.015 },
+    { offset: 8, width: 15, opacity: 0.008 },
   ], []);
 
   return (
@@ -465,23 +465,7 @@ export default function ComplianceRadar({
             />
           ))}
 
-          {/* Subtle radial grid lines */}
-          {[25, 35, 45, 55, 65, 75].map((a) => {
-            const inner = polarToXY(a, 280);
-            const outer = polarToXY(a, 660);
-            return (
-              <line
-                key={a}
-                x1={inner.x}
-                y1={inner.y}
-                x2={outer.x}
-                y2={outer.y}
-                stroke="#FACC15"
-                strokeOpacity="0.03"
-                strokeWidth="0.5"
-              />
-            );
-          })}
+          {/* Radial grid lines removed — too visible on dark backgrounds */}
 
           {/* Ring pulses */}
           {ringPulsesRef.current.map((rp, i) => {
@@ -525,8 +509,8 @@ export default function ComplianceRadar({
             x2={sweepEnd.x}
             y2={sweepEnd.y}
             stroke="#FACC15"
-            strokeOpacity="0.3"
-            strokeWidth="1"
+            strokeOpacity="0.15"
+            strokeWidth="0.5"
           />
 
           {/* Bright tip */}
