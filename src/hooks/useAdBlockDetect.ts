@@ -141,6 +141,7 @@ export function useAdBlockDetect() {
   useEffect(() => {
     const stored = getStored();
     if (stored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDismissCount(stored.dismissCount);
     }
 
@@ -199,7 +200,7 @@ export function useAdBlockDetect() {
     dismiss,
     /** Re-run detection (e.g. after user claims to have disabled adblocker) */
     recheck,
-    /** True when soft overlay exhausted — show hard paywall */
-    shouldShowPaywall: dismissCount >= 3,
+    /** True when soft overlay exhausted — show hard paywall (after 1 dismiss) */
+    shouldShowPaywall: dismissCount >= 1,
   };
 }

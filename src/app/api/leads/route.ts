@@ -1,25 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { log } from "@/lib/logger";
+import { publicFormLimiter, adminLimiter, getClientIp } from "@/lib/rate-limit";
+import { sanitize, validateEmail } from "@/lib/validation";
 
 /* ── Validation helpers ── */
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 const VALID_TOOLS = ["nis2-check", "haftungs-pruefer", "bussgeld-rechner"] as const;
 const VALID_SIZES = ["micro", "small", "medium", "large"] as const;
-
-function sanitize(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  return value.trim().slice(0, 500) || null;
-}
 
 /* ── POST /api/leads ── */
 export async function POST(request: NextRequest) {
   try {
+    /* --- Rate limiting --- */
+    if (publicFormLimiter.isLimited(getClientIp(request))) {
+      return NextResponse.json(
+        { error: "Zu viele Anfragen. Bitte versuchen Sie es in einer Minute erneut." },
+        { status: 429 },
+      );
+    }
+
     const body = await request.json();
 
     /* --- Required field --- */
-    const email = sanitize(body.email);
-    if (!email || !EMAIL_RE.test(email)) {
+    const email = validateEmail(body.email);
+    if (!email) {
       return NextResponse.json(
         { error: "Ungültige E-Mail-Adresse." },
         { status: 400 },
@@ -99,10 +103,18 @@ export async function POST(request: NextRequest) {
     });
 
     if (error) {
-      console.error("[leads] Supabase insert error:", error);
+      log.error("[leads]", "Insert failed", { code: error.code, message: error.message });
+      const isConnectionError =
+        error.message?.includes("fetch") ||
+        error.message?.includes("network") ||
+        error.code === "PGRST301";
       return NextResponse.json(
-        { error: "Fehler beim Speichern. Bitte versuchen Sie es erneut." },
-        { status: 500 },
+        {
+          error: isConnectionError
+            ? "Der Dienst ist vorübergehend nicht erreichbar. Bitte versuchen Sie es in wenigen Minuten erneut."
+            : "Fehler beim Speichern. Bitte versuchen Sie es erneut.",
+        },
+        { status: isConnectionError ? 503 : 500 },
       );
     }
 
@@ -111,7 +123,7 @@ export async function POST(request: NextRequest) {
       { status: 201 },
     );
   } catch (err) {
-    console.error("[leads] Unexpected error:", err);
+    log.error("[leads]", "Unexpected error", { error: err instanceof Error ? err.message : String(err) });
     return NextResponse.json(
       { error: "Server-Fehler. Bitte versuchen Sie es später erneut." },
       { status: 500 },
@@ -121,6 +133,14 @@ export async function POST(request: NextRequest) {
 
 /* ── GET /api/leads — Admin read ── */
 export async function GET(request: NextRequest) {
+  /* --- Rate limiting (brute-force protection for admin key) --- */
+  if (adminLimiter.isLimited(getClientIp(request))) {
+    return NextResponse.json(
+      { error: "Zu viele Anfragen. Bitte versuchen Sie es in einer Minute erneut." },
+      { status: 429 },
+    );
+  }
+
   /* Auth: Accept either the ADMIN_SECRET_KEY or the SUPABASE_SERVICE_ROLE_KEY */
   const authHeader = request.headers.get("x-admin-key");
   const adminKey = process.env.ADMIN_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -152,7 +172,7 @@ export async function GET(request: NextRequest) {
   const { data, error, count } = await query;
 
   if (error) {
-    console.error("[leads] Admin query error:", error);
+    log.error("[leads]", "Admin query failed", { code: error.code, message: error.message });
     return NextResponse.json({ error: "Abfrage fehlgeschlagen." }, { status: 500 });
   }
 

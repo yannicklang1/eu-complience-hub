@@ -9,6 +9,7 @@ import AccordionSection from "@/components/AccordionSection";
 import LawRef from "@/components/LawRef";
 import { SourceRef, SourceList, type Source } from "@/components/SourceRef";
 import ToolRecommendation from "@/components/ToolRecommendation";
+import RelatedGuides from "@/components/RelatedGuides";
 
 /* ─────────────────── Sources ─────────────────── */
 const sources: Source[] = [
@@ -109,65 +110,6 @@ function Section({
   );
 }
 
-/* ─────────────────── Regulation Haftung Card ─────────────────── */
-function RegulationCard({
-  acronym,
-  color,
-  penalty,
-  personalLiability,
-  keyPoints,
-  href,
-}: {
-  acronym: string;
-  color: string;
-  penalty: string;
-  personalLiability: string;
-  keyPoints: string[];
-  href: string;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className="rounded-2xl border border-[#d8dff0] bg-white overflow-hidden"
-    >
-      <div className="h-1.5" style={{ background: color }} />
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <span className="px-3 py-1 rounded-full text-xs font-bold text-white" style={{ background: color }}>
-              {acronym}
-            </span>
-            <span className="font-mono text-xs text-[#7a8db0]">Unternehmensgeldbusse</span>
-          </div>
-          <span className="font-[Syne] font-extrabold text-lg" style={{ color }}>{penalty}</span>
-        </div>
-        <div className="mb-4 p-3 rounded-xl bg-red-50/60 border border-red-100">
-          <span className="text-xs font-bold text-red-700">Persönliche Haftung:</span>
-          <p className="text-sm text-red-800 mt-1">{personalLiability}</p>
-        </div>
-        <ul className="space-y-2 mb-4">
-          {keyPoints.map((point) => (
-            <li key={point} className="flex items-start gap-2 text-sm text-[#3a4a6b]">
-              <span style={{ color }} className="mt-0.5 shrink-0">&#9656;</span>
-              {point}
-            </li>
-          ))}
-        </ul>
-        <Link
-          href={href}
-          className="inline-flex items-center gap-1 text-sm font-medium transition-colors hover:underline"
-          style={{ color }}
-        >
-          Zum vollständigen {acronym}-Guide &#8594;
-        </Link>
-      </div>
-    </motion.div>
-  );
-}
-
-
 /* ══════════════════════════════════════════════════════
    GUIDE CONTENT
    ══════════════════════════════════════════════════════ */
@@ -182,6 +124,7 @@ export default function GuideContent() {
       tocItems={tocItems}
       quickFacts={quickFacts}
       trustBadge={{ lastReview: "18.02.2026", sourceCount: 7 }}
+      href="/haftungs-check"
     >
       {/* ═══════════════ 1. UEBERBLICK ═══════════════ */}
       <Section id="ueberblick" title="Warum Geschäftsführer jetzt handeln müssen">
@@ -799,6 +742,9 @@ export default function GuideContent() {
           ]}
         />
       </Section>
+
+      {/* ═══════════════════ VERWANDTE REGULIERUNGEN ═══════════════════ */}
+      <RelatedGuides currentGuide="haftungs-check" accent="#0A2540" />
 
       {/* ═══════════════════ SOFTWARE-EMPFEHLUNGEN ═══════════════════ */}
       <ToolRecommendation regulationKey="nis2" accent="#ef4444" />

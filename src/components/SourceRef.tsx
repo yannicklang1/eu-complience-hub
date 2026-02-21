@@ -113,7 +113,8 @@ export function SourceRef({
         >
           <span className="block rounded-xl bg-[#0a0f1e]/95 backdrop-blur-md text-white p-3 shadow-lg border border-white/10">
             <span className="flex items-start gap-2.5">
-              {/* Favicon */}
+              {/* Favicon — external dynamic domain, next/image not viable */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={source.favicon || getFaviconUrl(source.url)}
                 alt=""
@@ -176,6 +177,7 @@ export function SourceList({
           {/* Favicon + content */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1 flex-wrap">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={source.favicon || getFaviconUrl(source.url)}
                 alt=""

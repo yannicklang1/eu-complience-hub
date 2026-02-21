@@ -1,8 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getAllBranchenGesetzParams } from "@/data/branchenData";
 import { getAllComparisonSlugs } from "@/data/softwareData";
-
-const BASE_URL = "https://eu-compliance-hub.eu";
+import { BASE_URL } from "@/lib/constants";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
@@ -113,6 +112,43 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.85,
     },
+    {
+      url: `${BASE_URL}/dsa`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${BASE_URL}/ehds`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${BASE_URL}/data-act`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${BASE_URL}/eprivacy`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${BASE_URL}/eidas`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    /* ── Tools Hub ── */
+    {
+      url: `${BASE_URL}/tools`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
     /* ── Interactive Tools ── */
     {
       url: `${BASE_URL}/tools/nis2-betroffenheits-check`,
@@ -132,6 +168,37 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.85,
     },
+    {
+      url: `${BASE_URL}/tools/compliance-checkliste`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/tools/regulierung-finder`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/tools/kosten-kalkulator`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${BASE_URL}/tools/reifegrad-check`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    /* ── Wissen Hub ── */
+    {
+      url: `${BASE_URL}/wissen`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
     /* ── Branchen Hub ── */
     {
       url: `${BASE_URL}/branchen`,
@@ -143,19 +210,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...branchenPages,
     /* ── Software Comparison Pages ── */
     ...comparisonPages,
+    /* ── Glossar ── */
+    {
+      url: `${BASE_URL}/glossar`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
     /* ── Reference ── */
     {
       url: `${BASE_URL}/quellen`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.75,
-    },
-    /* ── Coming Soon ── */
-    {
-      url: `${BASE_URL}/foerdermittel`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
     },
     {
       url: `${BASE_URL}/compliance-verzeichnis`,
@@ -166,8 +233,55 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${BASE_URL}/fristen-radar`,
       lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/newsletter`,
+      lastModified: now,
       changeFrequency: "monthly",
       priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/timeline`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    /* ── Aktuelles ── */
+    {
+      url: `${BASE_URL}/aktuelles`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.85,
+    },
+    /* ── Vergleich ── */
+    {
+      url: `${BASE_URL}/vergleich`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    /* ── FAQ ── */
+    {
+      url: `${BASE_URL}/faq`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    /* ── Kontakt ── */
+    {
+      url: `${BASE_URL}/kontakt`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    /* ── About ── */
+    {
+      url: `${BASE_URL}/ueber-uns`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.6,
     },
     /* ── Legal Pages ── */
     {

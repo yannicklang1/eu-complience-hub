@@ -5,6 +5,9 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TableOfContents, { type TocItem } from "@/components/TableOfContents";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import SocialShareBar from "@/components/SocialShareBar";
+import GuideCTA from "@/components/GuideCTA";
 
 export interface QuickFact {
   label: string;
@@ -32,6 +35,7 @@ export default function GuidePageLayout({
   tocItems,
   heroIcon,
   trustBadge,
+  href,
   children,
 }: {
   title: string;
@@ -44,6 +48,8 @@ export default function GuidePageLayout({
   tocItems: TocItem[];
   heroIcon?: ReactNode;
   trustBadge?: TrustBadgeProps;
+  /** Current page href for breadcrumb JSON-LD, e.g. "/nisg-2026" */
+  href?: string;
   children: ReactNode;
 }) {
   return (
@@ -63,19 +69,12 @@ export default function GuidePageLayout({
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#f4f6fc] to-transparent" />
 
           <div className="relative max-w-7xl mx-auto px-6 lg:px-12">
-            {/* Breadcrumb */}
-            <nav className="flex items-center gap-2 mb-8">
-              <Link
-                href="/"
-                className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors"
-              >
-                Startseite
-              </Link>
-              <span className="font-mono text-[11px] text-white/35">/</span>
-              <span className="font-mono text-[11px] text-white/60">
-                {title}
-              </span>
-            </nav>
+            {/* Breadcrumb with JSON-LD */}
+            <div className="mb-8 [&_nav]:text-white/40 [&_a]:text-white/40 [&_a:hover]:text-white/70 [&_span]:text-white/60 [&_span[aria-hidden]]:text-white/35">
+              <Breadcrumbs
+                items={[{ label: title, href: href }]}
+              />
+            </div>
 
             <div className="flex items-start gap-5">
               {heroIcon && (
@@ -179,11 +178,25 @@ export default function GuidePageLayout({
           <div className="max-w-7xl mx-auto px-6 lg:px-12">
             <div className="flex gap-10 items-start">
               {/* Left: Table of Contents (Desktop) */}
-              <TableOfContents items={tocItems} accent={accent} />
+              <div data-toc="">
+                <TableOfContents items={tocItems} accent={accent} />
+              </div>
 
               {/* Center: Main Content */}
               <div className="flex-1 min-w-0 max-w-3xl">
                 {children}
+
+                {/* Social Sharing */}
+                {href && (
+                  <div data-social-share="">
+                    <SocialShareBar path={href} title={title} accent={accent} />
+                  </div>
+                )}
+
+                {/* Newsletter CTA + Quick Links */}
+                <div data-guide-cta="">
+                  <GuideCTA accent={accent} />
+                </div>
               </div>
 
               {/* Right: Quick Facts Sidebar (Desktop) */}

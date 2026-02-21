@@ -10,18 +10,26 @@ function AccordionItem({
   isOpen,
   onToggle,
   accent = "#0A2540",
+  index,
 }: {
   title: ReactNode;
   children: ReactNode;
   isOpen: boolean;
   onToggle: () => void;
   accent?: string;
+  index: number;
 }) {
+  const panelId = `accordion-panel-${index}`;
+  const headingId = `accordion-heading-${index}`;
+
   return (
     <div className="border border-[#d8dff0] rounded-2xl overflow-hidden transition-all duration-300 hover:border-[#b8c4e0]">
       <button
+        id={headingId}
         onClick={onToggle}
-        className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left transition-colors duration-200 hover:bg-[#f8f9fd]"
+        aria-expanded={isOpen}
+        aria-controls={panelId}
+        className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left transition-colors duration-200 hover:bg-[#f8f9fd] cursor-pointer"
       >
         <span className="font-[Syne] font-bold text-[15px] text-[#060c1a] leading-snug pr-4">
           {title}
@@ -41,6 +49,7 @@ function AccordionItem({
             strokeWidth={2.5}
             strokeLinecap="round"
             strokeLinejoin="round"
+            aria-hidden="true"
           >
             <path d="M6 9l6 6 6-6" />
           </svg>
@@ -50,6 +59,9 @@ function AccordionItem({
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
+            id={panelId}
+            role="region"
+            aria-labelledby={headingId}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -100,6 +112,7 @@ export default function AccordionSection({
           isOpen={openItems.has(i)}
           onToggle={() => toggle(i)}
           accent={accent}
+          index={i}
         >
           {item.content}
         </AccordionItem>

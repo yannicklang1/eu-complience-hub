@@ -69,7 +69,7 @@ export function BrandLogo({ size = 36, className = "" }: LogoProps) {
           <stop offset="0.45" stopColor="#FACC15" stopOpacity="0.2" />
           <stop offset="1" stopColor="#FACC15" stopOpacity="0.05" />
         </linearGradient>
-        {/* Mint gradient for § symbol */}
+        {/* Gold gradient for § symbol */}
         <linearGradient id="ech-g4" x1="28" y1="16" x2="36" y2="52" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#FACC15" />
           <stop offset="1" stopColor="#EAB308" />
@@ -89,7 +89,7 @@ export function BrandLogo({ size = 36, className = "" }: LogoProps) {
         d="M32 4 L55 14.5 V30 C55 44 45 54 32 60 C19 54 9 44 9 30 V14.5 Z"
         fill="url(#ech-g1)"
       />
-      {/* Mint edge glow */}
+      {/* Gold edge glow */}
       <path
         d="M32 4 L55 14.5 V30 C55 44 45 54 32 60 C19 54 9 44 9 30 V14.5 Z"
         fill="none"

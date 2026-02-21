@@ -1,25 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { log } from "@/lib/logger";
+import { publicFormLimiter, getClientIp } from "@/lib/rate-limit";
+import { sanitize, validateEmail } from "@/lib/validation";
+import { sendOptInEmail, sendWelcomeEmail } from "@/lib/resend";
 import crypto from "crypto";
 
-/* ── Validation ── */
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function sanitize(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  return value.trim().slice(0, 500) || null;
-}
-
 /* ══════════════════════════════════════════════════════════════
-   POST /api/subscribe — Register new Fristen-Radar subscriber
+   POST /api/subscribe — Register new Compliance-Briefing subscriber
    ══════════════════════════════════════════════════════════════ */
 export async function POST(request: NextRequest) {
   try {
+    /* --- Rate limiting --- */
+    if (publicFormLimiter.isLimited(getClientIp(request))) {
+      return NextResponse.json(
+        { error: "Zu viele Anfragen. Bitte versuchen Sie es in einer Minute erneut." },
+        { status: 429 },
+      );
+    }
+
     const body = await request.json();
 
     /* --- Email validation --- */
-    const email = sanitize(body.email)?.toLowerCase();
-    if (!email || !EMAIL_RE.test(email)) {
+    const email = validateEmail(body.email);
+    if (!email) {
       return NextResponse.json(
         { error: "Bitte geben Sie eine gültige E-Mail-Adresse ein." },
         { status: 400 },
@@ -40,7 +44,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             message:
-              "Sie sind bereits für den Fristen-Radar angemeldet. Sie erhalten Benachrichtigungen bei kritischen Fristen.",
+              "Sie erhalten bereits das Compliance-Briefing. Wir benachrichtigen Sie bei kritischen Fristen und Gesetzesänderungen.",
           },
           { status: 200 },
         );
@@ -50,6 +54,7 @@ export async function POST(request: NextRequest) {
         /* Re-subscribe */
         const opt_in_token = crypto.randomBytes(32).toString("hex");
         const unsubscribe_token = crypto.randomBytes(32).toString("hex");
+        const commercial_consent = body.commercial_consent === true;
 
         await supabase
           .from("subscribers")
@@ -59,12 +64,14 @@ export async function POST(request: NextRequest) {
             unsubscribe_token,
             opt_in_confirmed_at: null,
             unsubscribed_at: null,
+            commercial_consent,
+            commercial_consent_at: commercial_consent ? new Date().toISOString() : null,
             source_page: sanitize(body.source_page),
           })
           .eq("id", existing.id);
 
-        // TODO: Send double-opt-in email via Resend
-        // await sendOptInEmail(email, opt_in_token);
+        /* Send double-opt-in email via Resend (fire-and-forget, don't block response) */
+        sendOptInEmail(email, opt_in_token).catch(() => {});
 
         return NextResponse.json(
           {
@@ -77,7 +84,18 @@ export async function POST(request: NextRequest) {
       }
 
       /* status === "pending" — resend confirmation */
-      // TODO: Resend opt-in email
+      if (existing.status === "pending") {
+        /* Retrieve existing token for resend */
+        const { data: pending } = await supabase
+          .from("subscribers")
+          .select("opt_in_token")
+          .eq("id", existing.id)
+          .single();
+
+        if (pending?.opt_in_token) {
+          sendOptInEmail(email, pending.opt_in_token).catch(() => {});
+        }
+      }
       return NextResponse.json(
         {
           message:
@@ -91,12 +109,15 @@ export async function POST(request: NextRequest) {
     /* --- New subscriber --- */
     const opt_in_token = crypto.randomBytes(32).toString("hex");
     const unsubscribe_token = crypto.randomBytes(32).toString("hex");
+    const commercial_consent = body.commercial_consent === true;
 
     const { error: insertError } = await supabase.from("subscribers").insert({
       email,
       status: "pending",
       opt_in_token,
       unsubscribe_token,
+      commercial_consent,
+      commercial_consent_at: commercial_consent ? new Date().toISOString() : null,
       source: sanitize(body.source) ?? "fristen-radar",
       source_page: sanitize(body.source_page),
       utm_source: sanitize(body.utm_source),
@@ -105,15 +126,29 @@ export async function POST(request: NextRequest) {
     });
 
     if (insertError) {
-      console.error("[subscribe] Insert error:", insertError);
+      log.error("[subscribe]", "Insert failed", { code: insertError.code, message: insertError.message });
+      const isConnectionError =
+        insertError.message?.includes("fetch") ||
+        insertError.message?.includes("network") ||
+        insertError.code === "PGRST301";
       return NextResponse.json(
-        { error: "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut." },
-        { status: 500 },
+        {
+          error: isConnectionError
+            ? "Der Dienst ist vorübergehend nicht erreichbar. Bitte versuchen Sie es in wenigen Minuten erneut."
+            : "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+        },
+        { status: isConnectionError ? 503 : 500 },
       );
     }
 
-    // TODO: Send double-opt-in email via Resend
-    // await sendOptInEmail(email, opt_in_token);
+    /* Send double-opt-in email via Resend */
+    const emailResult = await sendOptInEmail(email, opt_in_token);
+
+    if (!emailResult.success) {
+      log.warn("[subscribe]", "Opt-in email failed, subscriber saved as pending", {
+        email: email.replace(/(.{2}).*(@.*)/, "$1***$2"),
+      });
+    }
 
     return NextResponse.json(
       {
@@ -124,7 +159,7 @@ export async function POST(request: NextRequest) {
       { status: 201 },
     );
   } catch (err) {
-    console.error("[subscribe] Unexpected error:", err);
+    log.error("[subscribe]", "Unexpected error", { error: err instanceof Error ? err.message : String(err) });
     return NextResponse.json(
       { error: "Ein unerwarteter Fehler ist aufgetreten." },
       { status: 500 },
@@ -149,7 +184,7 @@ export async function GET(request: NextRequest) {
 
   const { data: subscriber, error: fetchError } = await supabase
     .from("subscribers")
-    .select("id, status, email")
+    .select("id, status, email, unsubscribe_token")
     .eq("opt_in_token", token)
     .single();
 
@@ -180,17 +215,22 @@ export async function GET(request: NextRequest) {
     .eq("id", subscriber.id);
 
   if (updateError) {
-    console.error("[subscribe/verify] Update error:", updateError);
+    log.error("[subscribe/verify]", "Update failed", { code: updateError.code, message: updateError.message });
     return NextResponse.json(
       { error: "Ein Fehler bei der Bestätigung. Bitte versuchen Sie es erneut." },
       { status: 500 },
     );
   }
 
+  /* Send welcome email (fire-and-forget) */
+  if (subscriber.unsubscribe_token) {
+    sendWelcomeEmail(subscriber.email, subscriber.unsubscribe_token).catch(() => {});
+  }
+
   return NextResponse.json(
     {
       message:
-        "Ihre E-Mail-Adresse wurde bestätigt! Sie erhalten ab sofort den Fristen-Radar.",
+        "Ihre E-Mail-Adresse wurde bestätigt! Sie erhalten ab sofort das Compliance-Briefing.",
       email: subscriber.email,
     },
     { status: 200 },

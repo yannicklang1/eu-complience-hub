@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { footerRegulations, footerTools } from "@/data/navigation";
 import { BrandLogo } from "./BrandLogo";
+import { useCookieConsent } from "@/hooks/useCookieConsent";
 
 export default function Footer() {
+  const { reset: resetCookieConsent } = useCookieConsent();
+
   return (
     <footer role="contentinfo" aria-label="Seitenfuß" className="relative overflow-hidden bg-[#060c1a]">
       {/* Subtle dot pattern */}
@@ -46,7 +51,7 @@ export default function Footer() {
               und Konzerne.
             </p>
 
-            {/* Accent line divider replacing EU stars */}
+            {/* Accent line divider */}
             <div className="flex items-center gap-2">
               <div className="h-px w-12 bg-gradient-to-r from-[#FACC15]/40 to-transparent" />
               <div className="h-1.5 w-1.5 rounded-full bg-[#FACC15]/30" />
@@ -99,7 +104,7 @@ export default function Footer() {
             EU Compliance Hub ist ein unabhängiges Informationsportal und steht in keiner
             Verbindung zu Institutionen der Europäischen Union oder des Europarats. Alle
             Inhalte dienen ausschließlich der allgemeinen Information und stellen keine
-            Rechtsberatung dar. „EU" wird beschreibend für den Themenbereich europäischer
+            Rechtsberatung dar. {"\u201EEU\u201D"} wird beschreibend für den Themenbereich europäischer
             Regulierungen verwendet.
           </p>
         </div>
@@ -110,21 +115,30 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} EU Compliance Hub. Kein
             Rechtsbeistand. Alle Angaben ohne Gewähr.
           </p>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-6 flex-wrap justify-center">
             {[
+              { label: "Über uns", href: "/ueber-uns" },
+              { label: "Aktuelles", href: "/aktuelles" },
+              { label: "FAQ", href: "/faq" },
+              { label: "Kontakt", href: "/kontakt" },
               { label: "Impressum", href: "/impressum" },
               { label: "Datenschutz", href: "/datenschutz" },
               { label: "Haftungsausschluss", href: "/haftungsausschluss" },
             ].map(({ label, href }) => (
-                <Link
-                  key={label}
-                  href={href}
-                  className="text-[11px] text-white/40 transition-colors duration-200 hover:text-white/60"
-                >
-                  {label}
-                </Link>
-              )
-            )}
+              <Link
+                key={label}
+                href={href}
+                className="text-[11px] text-white/40 transition-colors duration-200 hover:text-white/60"
+              >
+                {label}
+              </Link>
+            ))}
+            <button
+              onClick={resetCookieConsent}
+              className="text-[11px] text-white/40 transition-colors duration-200 hover:text-white/60 cursor-pointer"
+            >
+              Cookie-Einstellungen
+            </button>
           </div>
         </div>
       </div>

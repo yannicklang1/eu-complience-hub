@@ -1,11 +1,16 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import LeadCaptureForm from "@/components/LeadCaptureForm";
+import ToolNextSteps from "@/components/ToolNextSteps";
+
+const LeadCaptureForm = dynamic(() => import("@/components/LeadCaptureForm"), {
+  ssr: false,
+});
 
 /* ═══════════════════════════════════════════════════════════
    DATA: Regulations & risk factors
@@ -328,7 +333,14 @@ export default function HaftungsPrueferTool() {
                 </span>
                 <span className="font-mono text-[11px] font-bold" style={{ color: ACCENT }}>{Math.round(progressPercent)}%</span>
               </div>
-              <div className="h-1.5 rounded-full bg-[#e0e5f0] overflow-hidden">
+              <div
+                className="h-1.5 rounded-full bg-[#e0e5f0] overflow-hidden"
+                role="progressbar"
+                aria-valuenow={Math.round(progressPercent)}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="Fortschritt der Haftungsprüfung"
+              >
                 <motion.div
                   className="h-full rounded-full"
                   style={{ background: `linear-gradient(90deg, ${ACCENT}, #f87171)` }}
@@ -517,6 +529,9 @@ export default function HaftungsPrueferTool() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  aria-live="polite"
+                  role="region"
+                  aria-label="Ergebnis der Haftungsprüfung"
                 >
                   {/* Score Card */}
                   <div className="rounded-2xl border-2 p-6 sm:p-8 mb-6" style={{ background: assessment.bgColor, borderColor: assessment.borderColor }}>
@@ -589,35 +604,13 @@ export default function HaftungsPrueferTool() {
                     </div>
                   </div>
 
-                  {/* CTAs */}
-                  <div className="rounded-2xl border border-[#d8dff0] bg-white p-6 sm:p-8 mb-6">
-                    <h3 className="font-[Syne] font-bold text-lg text-[#060c1a] mb-4">Nächste Schritte</h3>
-                    <div className="grid gap-3">
-                      <Link href="/haftungs-check" className="flex items-center gap-4 p-4 rounded-xl border border-[#d8dff0] hover:border-red-300 hover:shadow-sm transition-all group">
-                        <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
-                          <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                          </svg>
-                        </div>
-                        <div className="flex-1">
-                          <span className="font-[Syne] font-bold text-[14px] text-[#060c1a] group-hover:text-red-700 transition-colors">GF-Haftung — Vollständiger Guide</span>
-                          <span className="block text-[12px] text-[#7a8db0]">Persönliche Haftungsrisiken und Enthaftungsstrategien</span>
-                        </div>
-                        <svg className="w-4 h-4 text-[#c0c8d8] group-hover:text-red-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-                      </Link>
-                      <Link href="/tools/nis2-betroffenheits-check" className="flex items-center gap-4 p-4 rounded-xl border border-[#d8dff0] hover:border-sky-300 hover:shadow-sm transition-all group">
-                        <div className="w-10 h-10 rounded-lg bg-sky-50 flex items-center justify-center flex-shrink-0">
-                          <svg className="w-5 h-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                          </svg>
-                        </div>
-                        <div className="flex-1">
-                          <span className="font-[Syne] font-bold text-[14px] text-[#060c1a] group-hover:text-sky-700 transition-colors">NIS2 Betroffenheits-Check</span>
-                          <span className="block text-[12px] text-[#7a8db0]">Sind Sie überhaupt von NIS2 betroffen?</span>
-                        </div>
-                        <svg className="w-4 h-4 text-[#c0c8d8] group-hover:text-sky-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-                      </Link>
-                    </div>
+                  {/* Cross-links */}
+                  <div className="mb-6">
+                    <ToolNextSteps
+                      currentTool="haftungs-pruefer"
+                      dark={false}
+                      subtext="Haftungsrisiken kennen Sie nun. Analysieren Sie Ihre Compliance-Situation weiter:"
+                    />
                   </div>
 
                   {/* Lead Capture */}

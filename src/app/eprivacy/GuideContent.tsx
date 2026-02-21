@@ -4,9 +4,9 @@ import GuidePageLayout from "@/components/GuidePageLayout";
 import type { TocItem } from "@/components/TableOfContents";
 import type { QuickFact } from "@/components/GuidePageLayout";
 import AccordionSection from "@/components/AccordionSection";
-import LawRef from "@/components/LawRef";
 import { SourceRef, SourceList, type Source } from "@/components/SourceRef";
 import ToolRecommendation from "@/components/ToolRecommendation";
+import RelatedGuides from "@/components/RelatedGuides";
 
 /* ─────────────────── Sources ─────────────────── */
 const sources: Source[] = [
@@ -118,6 +118,7 @@ export default function EPrivacyGuideContent() {
       tocItems={tocItems}
       quickFacts={quickFacts}
       regulationKey="eprivacy"
+      href="/eprivacy"
     >
       {/* ═══════════════ 1. ÜBERBLICK ═══════════════ */}
       <Section id="ueberblick" title="Überblick: Was ist ePrivacy?">
@@ -714,6 +715,9 @@ export default function EPrivacyGuideContent() {
           accent={ACCENT}
         />
       </Section>
+
+      {/* ═══════════════════ VERWANDTE REGULIERUNGEN ═══════════════════ */}
+      <RelatedGuides currentGuide="eprivacy" accent="#6d28d9" />
 
       {/* ═══════════════ TOOL RECOMMENDATION ═══════════════ */}
       <ToolRecommendation regulationKey="eprivacy" accent={ACCENT} />

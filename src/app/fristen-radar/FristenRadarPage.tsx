@@ -1,64 +1,214 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FristenRadarSignup from "@/components/FristenRadarSignup";
-import { isPast, formatDateDE } from "@/data/deadlines";
+import { DEADLINES, isPast, daysUntil, formatDateDE, type Deadline } from "@/data/deadlines";
 
+/* ═══════ All unique regulation names from DEADLINES ═══════ */
+const ALL_REGULATIONS = Array.from(new Set(DEADLINES.map((d) => d.reg)));
+
+/* ═══════ Year range ═══════ */
+const ALL_YEARS = Array.from(new Set(DEADLINES.map((d) => new Date(d.iso).getFullYear()))).sort();
+
+/* ═══════ Status filter options ═══════ */
+type StatusFilter = "all" | "upcoming" | "past";
+
+/* ═══════ Animation helpers ═══════ */
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const },
-  },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const } },
 };
 
-const BENEFITS = [
-  {
-    icon: "📅",
-    title: "Kritische Fristen",
-    description:
-      "Wir informieren Sie rechtzeitig vor NIS2, DORA, AI Act und CRA Deadlines — damit Sie nie eine Frist verpassen.",
-  },
-  {
-    icon: "📜",
-    title: "Gesetzesänderungen",
-    description:
-      "Neue Durchführungsverordnungen, Digital Omnibus, delegierte Rechtsakte — wir filtern das Relevante für Sie.",
-  },
-  {
-    icon: "💰",
-    title: "Neue Förderprogramme",
-    description:
-      "AWS-Zuschüsse, FFG-Programme, EU-Fördertöpfe — sobald ein neues Programm für Compliance-Investitionen aufgelegt wird, erfahren Sie es.",
-  },
-  {
-    icon: "🔔",
-    title: "Maximal 3× pro Monat",
-    description:
-      "Kein Newsletter-Spam. Nur echte Alerts bei kritischen Ereignissen. Ihre Zeit ist wertvoll — das respektieren wir.",
-  },
-];
+const stagger = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.05 } },
+};
 
-const UPCOMING_DEADLINES = [
-  { iso: "2025-01-17", label: "DORA — Anwendungsbeginn", color: "#10b981" },
-  { iso: "2025-02-02", label: "AI Act — Verbotene KI-Systeme", color: "#7c3aed" },
-  { iso: "2025-08-02", label: "AI Act — GPAI Pflichten", color: "#7c3aed" },
-  { iso: "2026-09-11", label: "CRA — Meldepflichten", color: "#8b5cf6" },
-  { iso: "2026-10-01", label: "NISG 2026 — Registrierungspflicht", color: "#0ea5e9" },
-  { iso: "2027-12-11", label: "CRA — Vollständige Anwendung", color: "#8b5cf6" },
-];
+const item = {
+  hidden: { opacity: 0, x: -16 },
+  show: { opacity: 1, x: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as const } },
+};
 
+/* ═══════ Countdown Badge ═══════ */
+function CountdownBadge({ iso }: { iso: string }) {
+  const days = daysUntil(iso);
+  const past = days < 0;
+
+  if (past) {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
+        ✓ In Kraft
+      </span>
+    );
+  }
+
+  const urgent = days <= 90;
+  const warning = days <= 180;
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold border ${
+        urgent
+          ? "bg-red-50 text-red-600 border-red-200"
+          : warning
+          ? "bg-amber-50 text-amber-600 border-amber-200"
+          : "bg-blue-50 text-blue-600 border-blue-200"
+      }`}
+    >
+      {urgent && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
+      {days === 0 ? "Heute" : `${days} Tage`}
+    </span>
+  );
+}
+
+/* ═══════ Progress Bar (visual timeline position) ═══════ */
+function TimelineProgress({ deadlines }: { deadlines: Deadline[] }) {
+  const upcoming = deadlines.filter((d) => !isPast(d.iso));
+  const pastCount = deadlines.length - upcoming.length;
+  const pct = deadlines.length > 0 ? Math.round((pastCount / deadlines.length) * 100) : 0;
+
+  return (
+    <div className="flex items-center gap-4">
+      <div className="flex-1 h-2 rounded-full bg-[#e8ecf4] overflow-hidden">
+        <motion.div
+          className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500"
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        />
+      </div>
+      <span className="text-xs font-mono text-[#7a8db0] whitespace-nowrap">
+        {pastCount}/{deadlines.length} in Kraft
+      </span>
+    </div>
+  );
+}
+
+/* ═══════ Filter Chip ═══════ */
+function FilterChip({
+  label,
+  active,
+  color,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  color?: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-3 py-1.5 rounded-xl text-[12px] font-semibold border transition-all duration-200 ${
+        active
+          ? "text-white shadow-sm"
+          : "bg-white text-[#3a4a6b] border-[#d8dff0] hover:border-[#0A2540]/20 hover:bg-[#f4f6fc]"
+      }`}
+      style={
+        active
+          ? {
+              background: color ?? "#0A2540",
+              borderColor: color ?? "#0A2540",
+            }
+          : undefined
+      }
+    >
+      {label}
+    </button>
+  );
+}
+
+/* ═══════ MAIN COMPONENT ═══════ */
 export default function FristenRadarPage() {
+  const [selectedRegs, setSelectedRegs] = useState<Set<string>>(new Set());
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+
+  /* ── Toggle regulation ── */
+  function toggleReg(reg: string) {
+    setSelectedRegs((prev) => {
+      const next = new Set(prev);
+      if (next.has(reg)) next.delete(reg);
+      else next.add(reg);
+      return next;
+    });
+  }
+
+  /* ── Filtered deadlines ── */
+  const filtered = useMemo(() => {
+    return DEADLINES.filter((d) => {
+      if (selectedRegs.size > 0 && !selectedRegs.has(d.reg)) return false;
+      if (statusFilter === "upcoming" && isPast(d.iso)) return false;
+      if (statusFilter === "past" && !isPast(d.iso)) return false;
+      if (selectedYear && new Date(d.iso).getFullYear() !== selectedYear) return false;
+      return true;
+    });
+  }, [selectedRegs, statusFilter, selectedYear]);
+
+  /* ── Group by year ── */
+  const groupedByYear = useMemo(() => {
+    const map = new Map<number, Deadline[]>();
+    for (const d of filtered) {
+      const year = new Date(d.iso).getFullYear();
+      const list = map.get(year) ?? [];
+      list.push(d);
+      map.set(year, list);
+    }
+    return Array.from(map.entries()).sort(([a], [b]) => a - b);
+  }, [filtered]);
+
+  /* ── Next upcoming deadline ── */
+  const nextDeadline = useMemo(() => {
+    return DEADLINES.find((d) => !isPast(d.iso)) ?? null;
+  }, []);
+
+  /* ── Has active filters ── */
+  const hasFilters = selectedRegs.size > 0 || statusFilter !== "all" || selectedYear !== null;
+
+  function resetFilters() {
+    setSelectedRegs(new Set());
+    setStatusFilter("all");
+    setSelectedYear(null);
+  }
+
+  /* ── Regulation color lookup ── */
+  const regColorMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const d of DEADLINES) map[d.reg] = d.color;
+    return map;
+  }, []);
+
+  /* ── Guide link lookup ── */
+  const guideLinks: Record<string, string> = {
+    DORA: "/dora",
+    "AI Act": "/eu-ai-act",
+    NISG: "/nisg-2026",
+    CRA: "/cra",
+    CSRD: "/csrd-esg",
+    BaFG: "/bafg",
+    HSchG: "/hschg",
+    DSGVO: "/dsgvo",
+    MiCA: "/mica",
+    "Green Claims": "/green-claims",
+    DPP: "/digitaler-produktpass",
+    PLD: "/produkthaftung",
+    DSA: "/dsa",
+    "Data Act": "/data-act",
+    eIDAS: "/eidas",
+    EHDS: "/ehds",
+    ePrivacy: "/eprivacy",
+  };
+
   return (
     <>
       <Header />
       <main>
         {/* ═══════ Hero ═══════ */}
-        <section className="relative pt-32 pb-24 overflow-hidden">
+        <section className="relative pt-32 pb-20 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-[#060c1a] via-[#0a1628] to-[#060c1a]" />
           <div
             className="absolute inset-0"
@@ -77,160 +227,261 @@ export default function FristenRadarPage() {
           />
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#f4f6fc] to-transparent" />
 
-          <div className="relative max-w-3xl mx-auto px-6 lg:px-12 text-center">
+          <div className="relative max-w-4xl mx-auto px-6 lg:px-12 text-center">
             <motion.div variants={fadeUp} initial="hidden" animate="show">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-medium text-blue-300 mb-6">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-                Fristen-Radar
+                Interaktives Tool
               </div>
 
               <h1 className="font-[Syne] font-[800] text-4xl md:text-5xl lg:text-6xl text-white leading-[1.08] tracking-tight mb-5">
-                Keine{" "}
+                Fristen-
                 <span className="bg-gradient-to-r from-blue-300 to-indigo-300 bg-clip-text text-transparent">
-                  Compliance-Frist
-                </span>{" "}
-                verpassen.
+                  Radar
+                </span>
               </h1>
-              <p className="text-lg text-[#94a3c4] max-w-xl mx-auto leading-relaxed mb-10">
-                Nur bei kritischen Fristen, Gesetzesänderungen und neuen
-                Förderprogrammen. Kein Spam. Maximal 3× pro Monat.
+              <p className="text-lg text-[#94a3c4] max-w-xl mx-auto leading-relaxed mb-8">
+                {DEADLINES.length} EU-Compliance-Deadlines auf einen Blick.
+                Filtern Sie nach Regulierung, Jahr oder Status — finden Sie genau die Fristen, die Sie betreffen.
               </p>
-            </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-            >
-              <FristenRadarSignup variant="hero" />
-            </motion.div>
-          </div>
-        </section>
-
-        {/* ═══════ Benefits ═══════ */}
-        <section className="py-20 bg-[#f4f6fc]">
-          <div className="max-w-5xl mx-auto px-6 lg:px-12">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="text-center mb-14"
-            >
-              <h2 className="font-[Syne] font-[800] text-3xl text-[#060c1a] mb-3">
-                Was Sie erwartet
-              </h2>
-              <p className="text-[#7a8db0] max-w-lg mx-auto">
-                Kein klassischer Newsletter. Ein Frühwarnsystem für
-                regulatorische Deadlines und Chancen.
-              </p>
-            </motion.div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              {BENEFITS.map((b, i) => (
+              {/* ── Next deadline highlight ── */}
+              {nextDeadline && (
                 <motion.div
-                  key={b.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{
-                    delay: i * 0.1,
-                    duration: 0.5,
-                    ease: [0.16, 1, 0.3, 1] as const,
-                  }}
-                  className="p-6 rounded-2xl bg-white border border-[#e0e5f0] shadow-sm hover:shadow-md transition-shadow"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-white/[0.06] border border-white/10 backdrop-blur-sm"
                 >
-                  <div className="flex items-start gap-4">
-                    <span className="text-3xl">{b.icon}</span>
-                    <div>
-                      <h3 className="font-[Syne] font-bold text-lg text-[#060c1a] mb-1">
-                        {b.title}
-                      </h3>
-                      <p className="text-sm text-[#3a4a6b] leading-relaxed">
-                        {b.description}
-                      </p>
-                    </div>
-                  </div>
+                  <span className="text-xs text-white/40">Nächste Frist:</span>
+                  <span className="font-mono text-sm font-bold text-white">
+                    {formatDateDE(nextDeadline.iso)}
+                  </span>
+                  <span className="text-sm text-white/60">—</span>
+                  <span className="text-sm text-white/80">{nextDeadline.reg}: {nextDeadline.title}</span>
+                  <CountdownBadge iso={nextDeadline.iso} />
                 </motion.div>
-              ))}
-            </div>
+              )}
+            </motion.div>
           </div>
         </section>
 
-        {/* ═══════ Upcoming Deadlines ═══════ */}
-        <section className="py-20 bg-white">
-          <div className="max-w-3xl mx-auto px-6 lg:px-12">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="text-center mb-12"
-            >
-              <h2 className="font-[Syne] font-[800] text-3xl text-[#060c1a] mb-3">
-                Kommende Fristen
-              </h2>
-              <p className="text-[#7a8db0]">
-                Die wichtigsten EU-Compliance-Deadlines im Überblick.
-              </p>
-            </motion.div>
+        {/* ═══════ Filter Bar (sticky) ═══════ */}
+        <div className="sticky top-[72px] z-40 border-b border-[#e8ecf4]">
+          <div className="bg-white/80 backdrop-blur-xl">
+            <div className="max-w-5xl mx-auto px-6 lg:px-12 py-4">
+              {/* Status Filter */}
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className="font-mono text-[10px] tracking-wider uppercase text-[#7a8db0] mr-1">
+                  Status:
+                </span>
+                {(["all", "upcoming", "past"] as StatusFilter[]).map((s) => (
+                  <FilterChip
+                    key={s}
+                    label={s === "all" ? "Alle" : s === "upcoming" ? "Bevorstehend" : "In Kraft"}
+                    active={statusFilter === s}
+                    color={s === "upcoming" ? "#1e40af" : s === "past" ? "#059669" : "#0A2540"}
+                    onClick={() => setStatusFilter(s)}
+                  />
+                ))}
 
-            <div className="space-y-3">
-              {UPCOMING_DEADLINES.map((d, i) => {
-                const past = isPast(d.iso);
-                return (
-                  <motion.div
-                    key={d.label}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{
-                      delay: i * 0.08,
-                      duration: 0.4,
-                      ease: [0.16, 1, 0.3, 1] as const,
-                    }}
-                    className={`flex items-center gap-4 p-4 rounded-xl border transition-colors ${
-                      past
-                        ? "bg-[#f8fafc] border-[#e0e5f0] opacity-60"
-                        : "bg-white border-[#e0e5f0] hover:border-[#0A2540]/20"
-                    }`}
-                  >
-                    <div
-                      className="w-2 h-2 rounded-full shrink-0"
-                      style={{ backgroundColor: d.color }}
-                    />
-                    <span
-                      className={`font-mono text-sm font-semibold shrink-0 w-32 ${
-                        past ? "text-[#7a8db0] line-through" : "text-[#060c1a]"
-                      }`}
+                <span className="mx-2 w-px h-5 bg-[#e8ecf4]" />
+
+                <span className="font-mono text-[10px] tracking-wider uppercase text-[#7a8db0] mr-1">
+                  Jahr:
+                </span>
+                <FilterChip
+                  label="Alle"
+                  active={selectedYear === null}
+                  onClick={() => setSelectedYear(null)}
+                />
+                {ALL_YEARS.map((y) => (
+                  <FilterChip
+                    key={y}
+                    label={String(y)}
+                    active={selectedYear === y}
+                    onClick={() => setSelectedYear(selectedYear === y ? null : y)}
+                  />
+                ))}
+              </div>
+
+              {/* Regulation Filter */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-mono text-[10px] tracking-wider uppercase text-[#7a8db0] mr-1">
+                  Regulierung:
+                </span>
+                {ALL_REGULATIONS.map((reg) => (
+                  <FilterChip
+                    key={reg}
+                    label={reg}
+                    active={selectedRegs.has(reg)}
+                    color={regColorMap[reg]}
+                    onClick={() => toggleReg(reg)}
+                  />
+                ))}
+
+                {hasFilters && (
+                  <>
+                    <span className="mx-1 w-px h-5 bg-[#e8ecf4]" />
+                    <button
+                      onClick={resetFilters}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-[12px] font-medium text-[#7a8db0] hover:text-red-500 hover:bg-red-50 border border-[#e8ecf4] hover:border-red-200 transition-all"
                     >
-                      {formatDateDE(d.iso)}
-                    </span>
-                    <span
-                      className={`text-sm ${
-                        past ? "text-[#7a8db0]" : "text-[#3a4a6b]"
-                      }`}
-                    >
-                      {d.label}
-                    </span>
-                    {past && (
-                      <span className="ml-auto text-[10px] font-mono font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
-                        In Kraft
-                      </span>
-                    )}
-                  </motion.div>
-                );
-              })}
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      Reset
+                    </button>
+                  </>
+                )}
+
+                <span className="ml-auto font-mono text-[12px] font-bold text-[#7a8db0]">
+                  {filtered.length} Frist{filtered.length !== 1 ? "en" : ""}
+                </span>
+              </div>
             </div>
+          </div>
+        </div>
 
-            <p className="text-center text-xs text-[#7a8db0] mt-6">
-              Stand: {new Date().toLocaleDateString("de-AT", { month: "long", year: "numeric" })}. Änderungen durch delegierte Rechtsakte
-              möglich.
+        {/* ═══════ Timeline Progress ═══════ */}
+        <section className="bg-[#f4f6fc] pt-8 pb-2">
+          <div className="max-w-5xl mx-auto px-6 lg:px-12">
+            <TimelineProgress deadlines={filtered} />
+          </div>
+        </section>
+
+        {/* ═══════ Deadline List grouped by year ═══════ */}
+        <section className="py-12 bg-[#f4f6fc]">
+          <div className="max-w-5xl mx-auto px-6 lg:px-12">
+            {filtered.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center py-16"
+              >
+                <div className="w-16 h-16 rounded-2xl bg-white border border-[#e8ecf4] flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-7 h-7 text-[#7a8db0]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                  </svg>
+                </div>
+                <h3 className="font-[Syne] font-bold text-lg text-[#060c1a] mb-2">Keine Fristen gefunden</h3>
+                <p className="text-sm text-[#7a8db0] mb-4">Passe die Filter an, um Deadlines zu sehen.</p>
+                <button
+                  onClick={resetFilters}
+                  className="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#0A2540] hover:bg-[#0A2540]/90 transition-colors"
+                >
+                  Filter zurücksetzen
+                </button>
+              </motion.div>
+            ) : (
+              <div className="space-y-10">
+                {groupedByYear.map(([year, deadlines]) => (
+                  <div key={year}>
+                    {/* Year header */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="font-[Syne] font-[800] text-2xl text-[#060c1a]">{year}</span>
+                      <div className="flex-1 h-px bg-[#e0e5f0]" />
+                      <span className="font-mono text-[11px] text-[#7a8db0]">
+                        {deadlines.filter((d) => !isPast(d.iso)).length} bevorstehend
+                      </span>
+                    </div>
+
+                    {/* Deadline cards */}
+                    <motion.div
+                      variants={stagger}
+                      initial="hidden"
+                      whileInView="show"
+                      viewport={{ once: true, margin: "-40px" }}
+                      className="space-y-3"
+                    >
+                      <AnimatePresence mode="popLayout">
+                        {deadlines.map((d) => {
+                          const past = isPast(d.iso);
+                          const guide = guideLinks[d.reg];
+                          return (
+                            <motion.div
+                              key={`${d.iso}-${d.reg}-${d.title}`}
+                              variants={item}
+                              layout
+                              className={`group flex items-start gap-4 p-5 rounded-2xl border transition-all duration-300 ${
+                                past
+                                  ? "bg-white/60 border-[#e8ecf4]"
+                                  : "bg-white border-[#e0e5f0] hover:border-[#0A2540]/15 hover:shadow-md hover:shadow-[#0A2540]/[0.04]"
+                              }`}
+                            >
+                              {/* Color dot + line */}
+                              <div className="flex flex-col items-center pt-1">
+                                <div
+                                  className={`w-3 h-3 rounded-full shrink-0 ${past ? "opacity-40" : ""}`}
+                                  style={{ backgroundColor: d.color }}
+                                />
+                                <div className="w-px h-full bg-[#e8ecf4] mt-1" />
+                              </div>
+
+                              {/* Content */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex flex-wrap items-center gap-2 mb-1">
+                                  <span
+                                    className={`font-mono text-sm font-bold ${
+                                      past ? "text-[#7a8db0]" : "text-[#060c1a]"
+                                    }`}
+                                  >
+                                    {formatDateDE(d.iso)}
+                                  </span>
+                                  <span
+                                    className="px-2 py-0.5 rounded-md text-[10px] font-bold font-mono tracking-wide text-white"
+                                    style={{ backgroundColor: past ? "#94a3b8" : d.color }}
+                                  >
+                                    {d.reg}
+                                  </span>
+                                  <CountdownBadge iso={d.iso} />
+                                </div>
+                                <h3
+                                  className={`font-[Syne] font-bold text-[15px] leading-snug mb-1 ${
+                                    past ? "text-[#7a8db0]" : "text-[#060c1a]"
+                                  }`}
+                                >
+                                  {d.title}
+                                </h3>
+                                <p className={`text-sm leading-relaxed ${past ? "text-[#94a3c4]" : "text-[#3a4a6b]"}`}>
+                                  {d.desc}
+                                </p>
+                              </div>
+
+                              {/* Guide link */}
+                              {guide && (
+                                <Link
+                                  href={guide}
+                                  className={`shrink-0 hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-semibold border transition-all duration-200 ${
+                                    past
+                                      ? "text-[#94a3c4] border-[#e8ecf4] hover:text-[#3a4a6b] hover:border-[#d8dff0]"
+                                      : "text-[#3a4a6b] border-[#e0e5f0] hover:text-[#060c1a] hover:border-[#0A2540]/20 hover:bg-[#f4f6fc]"
+                                  }`}
+                                >
+                                  Guide
+                                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                  </svg>
+                                </Link>
+                              )}
+                            </motion.div>
+                          );
+                        })}
+                      </AnimatePresence>
+                    </motion.div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <p className="text-center text-xs text-[#7a8db0] mt-10">
+              Stand: {new Date().toLocaleDateString("de-AT", { month: "long", year: "numeric" })}.
+              Änderungen durch delegierte Rechtsakte möglich. Alle Angaben ohne Gewähr.
             </p>
           </div>
         </section>
 
-        {/* ═══════ Bottom CTA ═══════ */}
+        {/* ═══════ Compliance-Briefing CTA ═══════ */}
         <section className="relative py-24 overflow-hidden">
           <div className="absolute inset-0 bg-[#0A2540]" />
           <div
@@ -243,11 +494,10 @@ export default function FristenRadarPage() {
 
           <div className="relative max-w-2xl mx-auto px-6 lg:px-12 text-center">
             <h2 className="font-[Syne] font-[800] text-3xl md:text-4xl text-white mb-4">
-              Jetzt anmelden.
+              Compliance-Briefing aktivieren
             </h2>
             <p className="text-white/45 mb-8 max-w-md mx-auto">
-              Schließen Sie sich Compliance-Verantwortlichen aus Österreich,
-              Deutschland und der Schweiz an.
+              Ihr regulatorisches Frühwarnsystem — nur bei kritischen Fristen und Gesetzesänderungen. Maximal 3× pro Monat.
             </p>
             <FristenRadarSignup variant="hero" />
           </div>

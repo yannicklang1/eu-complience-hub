@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { BASE_URL } from "@/lib/constants";
 import SoftwareComparisonPage from "@/components/SoftwareComparisonPage";
 import {
   comparisonCategories,
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const category = comparisonCategories[vergleich];
   if (!category) return {};
 
-  const url = `https://eu-compliance-hub.eu/tools/${vergleich}`;
+  const url = `${BASE_URL}/tools/${vergleich}`;
 
   return {
     title: category.metaTitle,
@@ -36,6 +37,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+/* ── Breadcrumb JSON-LD ── */
+function getBreadcrumbJsonLd(slug: string, title: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "EU Compliance Hub", item: BASE_URL },
+      { "@type": "ListItem", position: 2, name: "Tools", item: `${BASE_URL}/tools` },
+      { "@type": "ListItem", position: 3, name: title, item: `${BASE_URL}/tools/${slug}` },
+    ],
+  };
+}
+
 /* ── JSON-LD ── */
 function getJsonLd(slug: string) {
   const category = comparisonCategories[slug];
@@ -46,13 +60,13 @@ function getJsonLd(slug: string) {
     "@type": "Article",
     headline: category.metaTitle,
     description: category.metaDescription,
-    url: `https://eu-compliance-hub.eu/tools/${slug}`,
+    url: `${BASE_URL}/tools/${slug}`,
     datePublished: "2026-02-19",
-    dateModified: "2026-02-19",
+    dateModified: "2026-02-20",
     author: {
       "@type": "Organization",
       name: "EU Compliance Hub",
-      url: "https://eu-compliance-hub.eu",
+      url: BASE_URL,
     },
     about: category.tools.map((t) => ({
       "@type": "SoftwareApplication",
@@ -75,6 +89,7 @@ export default async function VergleichPage({ params }: PageProps) {
   if (!category) notFound();
 
   const jsonLd = getJsonLd(vergleich);
+  const breadcrumbJsonLd = getBreadcrumbJsonLd(vergleich, category.title);
 
   return (
     <>
@@ -84,6 +99,10 @@ export default async function VergleichPage({ params }: PageProps) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <SoftwareComparisonPage category={category} />
     </>
   );

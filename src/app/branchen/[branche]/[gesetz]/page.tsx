@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { BASE_URL } from "@/lib/constants";
 import BranchenLandingPage from "@/components/BranchenLandingPage";
 import {
   branchen,
@@ -23,7 +24,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!branche || !regulation) return {};
 
   const content = getBranchenRegContent(branche, regulation);
-  const url = `https://eu-compliance-hub.eu/branchen/${bSlug}/${gSlug}`;
+  const url = `${BASE_URL}/branchen/${bSlug}/${gSlug}`;
 
   return {
     title: content.title,
@@ -35,6 +36,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url,
     },
     alternates: { canonical: url },
+  };
+}
+
+/* ── Breadcrumb JSON-LD ── */
+function getBreadcrumbJsonLd(bSlug: string, gSlug: string) {
+  const branche = branchen[bSlug];
+  const regulation = regulations[gSlug];
+  if (!branche || !regulation) return null;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "EU Compliance Hub", item: BASE_URL },
+      { "@type": "ListItem", position: 2, name: "Branchen", item: `${BASE_URL}/branchen` },
+      { "@type": "ListItem", position: 3, name: `${regulation.name} für ${branche.name}`, item: `${BASE_URL}/branchen/${bSlug}/${gSlug}` },
+    ],
   };
 }
 
@@ -50,18 +68,18 @@ function getJsonLd(bSlug: string, gSlug: string) {
     "@type": "Article",
     headline: content.title,
     description: content.metaDescription,
-    url: `https://eu-compliance-hub.eu/branchen/${bSlug}/${gSlug}`,
+    url: `${BASE_URL}/branchen/${bSlug}/${gSlug}`,
     datePublished: "2026-02-19",
-    dateModified: "2026-02-19",
+    dateModified: "2026-02-20",
     author: {
       "@type": "Organization",
       name: "EU Compliance Hub",
-      url: "https://eu-compliance-hub.eu",
+      url: BASE_URL,
     },
     publisher: {
       "@type": "Organization",
       name: "EU Compliance Hub",
-      url: "https://eu-compliance-hub.eu",
+      url: BASE_URL,
     },
     about: [
       { "@type": "Thing", name: regulation.fullName },
@@ -99,6 +117,7 @@ export default async function BranchenGesetzPage({ params }: PageProps) {
     .slice(0, 8);
 
   const jsonLd = getJsonLd(bSlug, gSlug);
+  const breadcrumbJsonLd = getBreadcrumbJsonLd(bSlug, gSlug);
 
   return (
     <>
@@ -106,6 +125,12 @@ export default async function BranchenGesetzPage({ params }: PageProps) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      {breadcrumbJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
         />
       )}
       <BranchenLandingPage

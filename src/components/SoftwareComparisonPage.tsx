@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, memo } from "react";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -49,7 +49,7 @@ function Stars({ count, accent }: { count: number; accent: string }) {
 }
 
 /* ─── Tool Card ─── */
-function ToolCard({
+const ToolCard = memo(function ToolCard({
   tool,
   index,
   accent,
@@ -212,7 +212,7 @@ function ToolCard({
       )}
     </motion.div>
   );
-}
+});
 
 /* ═══════════════ Main Component ═══════════════ */
 export default function SoftwareComparisonPage({
@@ -292,6 +292,30 @@ export default function SoftwareComparisonPage({
             </div>
           </div>
         </section>
+
+        {/* ── Freshness Notice ── */}
+        <div className="bg-amber-50 border-b border-amber-200">
+          <div className="max-w-5xl mx-auto px-6 lg:px-12 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-sm text-amber-800">
+              <svg className="w-4 h-4 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>
+                <strong>Stand: Februar 2026.</strong>{" "}
+                Preise, Funktionen und Bewertungen können sich ändern.
+              </span>
+            </div>
+            <a
+              href="mailto:hello@eu-compliance-hub.eu?subject=Software-Vergleich-Korrektur"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-amber-700 bg-amber-100 hover:bg-amber-200 border border-amber-300 transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+              </svg>
+              Fehler melden
+            </a>
+          </div>
+        </div>
 
         {/* ── Content ── */}
         <section

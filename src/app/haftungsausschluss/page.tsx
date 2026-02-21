@@ -1,13 +1,36 @@
 import type { Metadata } from "next";
+import { BASE_URL, SITE_NAME } from "@/lib/constants";
 import LegalPageLayout from "@/components/LegalPageLayout";
 
 export const metadata: Metadata = {
   title: "Haftungsausschluss – EU Compliance Hub",
-  description: "Haftungsausschluss: Keine Rechtsberatung, Haftung für Inhalte und externe Links.",
+  description:
+    "Haftungsausschluss des EU Compliance Hub: Keine Rechtsberatung, Haftungsbeschränkung für redaktionelle Inhalte, externe Links und regulatorische Informationen gemäß ECG.",
+  openGraph: {
+    title: "Haftungsausschluss – EU Compliance Hub",
+    description:
+      "Haftungsausschluss und Disclaimer für Compliance-Informationen gemäß ECG.",
+    url: `${BASE_URL}/haftungsausschluss`,
+  },
+  alternates: { canonical: `${BASE_URL}/haftungsausschluss` },
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: SITE_NAME, item: BASE_URL },
+    { "@type": "ListItem", position: 2, name: "Haftungsausschluss", item: `${BASE_URL}/haftungsausschluss` },
+  ],
 };
 
 export default function HaftungsausschlussPage() {
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
     <LegalPageLayout title="Haftungsausschluss" subtitle="Disclaimer und Haftungsbeschränkung">
       <h2>1. Keine Rechtsberatung</h2>
       <p>
@@ -89,11 +112,45 @@ export default function HaftungsausschlussPage() {
         Rechtsanwaltskanzlei oder die zuständige Behörde.
       </p>
 
-      <h2>6. Verfügbarkeit</h2>
+      <h2>6. Interaktive Tools und Berechnungen</h2>
+      <p>
+        Die auf dieser Website angebotenen interaktiven Tools (darunter
+        Regulierung-Finder, NIS2-Betroffenheits-Check, Compliance-Checkliste,
+        Haftungs-Prüfer, Bußgeld-Rechner, Kosten-Kalkulator, Reifegrad-Check)
+        dienen ausschließlich der unverbindlichen Erstorientierung.
+      </p>
+      <p>
+        Insbesondere weisen wir darauf hin:
+      </p>
+      <ul>
+        <li>Bußgeld-Berechnungen zeigen theoretische Höchstrahmen. Tatsächliche Strafen werden von zuständigen Behörden im Einzelfall festgelegt.</li>
+        <li>Kosten-Kalkulationen basieren auf Durchschnittswerten und Marktbeobachtungen. Reale Implementierungskosten variieren erheblich.</li>
+        <li>Betroffenheits-Checks ersetzen keine rechtliche Prüfung der konkreten Anwendbarkeit einer Regulierung.</li>
+        <li>Checklisten decken typische Anforderungen ab, können aber nicht alle branchenspezifischen oder unternehmensspezifischen Besonderheiten berücksichtigen.</li>
+      </ul>
+
+      <h2>7. Software-Vergleiche und Empfehlungen</h2>
+      <p>
+        Die auf dieser Website dargestellten Software-Vergleiche und
+        Tool-Empfehlungen basieren auf öffentlich zugänglichen Informationen,
+        Herstellerangaben und eigener Recherche. Wir übernehmen keine Gewähr
+        für die Richtigkeit, Vollständigkeit oder Aktualität dieser Angaben.
+        Preise, Funktionsumfänge und Verfügbarkeiten können sich jederzeit
+        ändern.
+      </p>
+
+      <h2>8. Verfügbarkeit</h2>
       <p>
         Wir bemühen uns um eine unterbrechungsfreie Verfügbarkeit unserer
         Website. Es kann jedoch zu vorübergehenden Unterbrechungen kommen, für
         die wir keine Haftung übernehmen.
+      </p>
+
+      <h2>9. Änderungsvorbehalt</h2>
+      <p>
+        Wir behalten uns vor, diesen Haftungsausschluss jederzeit zu ändern
+        oder zu aktualisieren. Die jeweils aktuelle Version gilt ab dem
+        Zeitpunkt ihrer Veröffentlichung auf dieser Website.
       </p>
 
       <hr />
@@ -102,5 +159,6 @@ export default function HaftungsausschlussPage() {
         <em>Stand: Februar 2026</em>
       </p>
     </LegalPageLayout>
+    </>
   );
 }

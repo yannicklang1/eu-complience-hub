@@ -53,7 +53,7 @@ export default function TableOfContents({
   return (
     <>
       {/* Desktop: Sticky sidebar */}
-      <nav className="hidden lg:block sticky top-28 w-56 flex-shrink-0 self-start">
+      <nav aria-label="Inhaltsverzeichnis" className="hidden lg:block sticky top-28 w-56 flex-shrink-0 self-start">
         <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 text-[#7a8db0]">
           Inhalt
         </div>
@@ -67,6 +67,7 @@ export default function TableOfContents({
               <button
                 key={id}
                 onClick={() => scrollTo(id)}
+                aria-current={isActive ? "true" : undefined}
                 className="relative block w-full text-left pl-4 py-1.5 text-[13px] leading-snug transition-all duration-200"
                 style={{
                   color: isActive ? accent : "#7a8db0",
@@ -92,6 +93,8 @@ export default function TableOfContents({
       <div className="lg:hidden fixed bottom-20 right-4 z-[60]">
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? "Inhaltsverzeichnis schließen" : "Inhaltsverzeichnis öffnen"}
+          aria-expanded={mobileOpen}
           className="w-12 h-12 rounded-2xl shadow-xl flex items-center justify-center transition-all duration-200"
           style={{
             background: accent,

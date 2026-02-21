@@ -76,9 +76,13 @@ export const toolsDropdown: NavDropdown = {
       id: "interaktive-tools",
       title: "Interaktive Tools",
       items: [
+        { label: "Regulierung-Finder", href: "/tools/regulierung-finder", description: "Welche Gesetze gelten?", badge: "Neu" },
         { label: "NIS2-Check", href: "/tools/nis2-betroffenheits-check", description: "Betroffenheit prüfen", badge: "Neu" },
+        { label: "Compliance-Checkliste", href: "/tools/compliance-checkliste", description: "Alle Pflichten prüfen", badge: "Neu" },
         { label: "Haftungs-Prüfer", href: "/tools/haftungs-pruefer", description: "Persönliches Risiko" },
         { label: "Bußgeld-Rechner", href: "/tools/bussgeld-rechner", description: "Strafrahmen berechnen" },
+        { label: "Kosten-Kalkulator", href: "/tools/kosten-kalkulator", description: "Compliance-Budget planen", badge: "Neu" },
+        { label: "Reifegrad-Check", href: "/tools/reifegrad-check", description: "Compliance-Reifegrad messen", badge: "Neu" },
       ],
     },
     {
@@ -87,9 +91,10 @@ export const toolsDropdown: NavDropdown = {
       items: [
         { label: "Software-Vergleich", href: "/tools/isms-software-vergleich", description: "ISMS & Compliance Tools" },
         { label: "Compliance-Verzeichnis", href: "/compliance-verzeichnis", description: "Auditoren & Berater" },
-        { label: "Fördermittel-Radar", href: "/foerdermittel", description: "Förderungen finden" },
-        { label: "Fristen-Radar", href: "/fristen-radar", description: "Deadlines im Blick" },
+        { label: "Compliance-Glossar", href: "/glossar", description: "Fachbegriffe erklärt", badge: "Neu" },
+        { label: "Fristen-Radar", href: "/fristen-radar", description: "Deadlines im Blick", badge: "Neu" },
         { label: "Compliance-Timeline", href: "/timeline", description: "Alle Fristen 2025–2027", badge: "Neu" },
+        { label: "Regulierungsvergleich", href: "/vergleich", description: "Regulierungen vergleichen", badge: "Neu" },
       ],
     },
   ],
@@ -101,6 +106,7 @@ export const footerRegulations: NavItem[] = regulierungenDropdown.groups.flatMap
 );
 
 export const footerTools: NavItem[] = [
+  { label: "Alle Tools", href: "/tools" },
   { label: "Branchen-Compliance", href: "/branchen" },
   { label: "Haftungs-Check", href: "/haftungs-check" },
   ...toolsDropdown.groups.flatMap((g) =>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BASE_URL } from "@/lib/constants";
 import VerzeichnisContent from "./VerzeichnisContent";
 
 export const metadata: Metadata = {
@@ -11,10 +12,10 @@ export const metadata: Metadata = {
     title: "Compliance-Verzeichnis – Software, Auditoren, Kanzleien & Berater",
     description:
       "Finden Sie den passenden Partner für Ihre EU-Compliance: Software, Auditoren, Kanzleien und Berater — kuratiert und filterbar.",
-    url: "https://eu-compliance-hub.eu/compliance-verzeichnis",
+    url: `${BASE_URL}/compliance-verzeichnis`,
   },
   alternates: {
-    canonical: "https://eu-compliance-hub.eu/compliance-verzeichnis",
+    canonical: `${BASE_URL}/compliance-verzeichnis`,
   },
 };
 
@@ -25,7 +26,7 @@ const jsonLd = {
   name: "Compliance-Verzeichnis",
   description:
     "Kuratiertes Verzeichnis von Compliance-Software, Auditoren, Kanzleien und Beratern für EU-Regulierungen.",
-  url: "https://eu-compliance-hub.eu/compliance-verzeichnis",
+  url: `${BASE_URL}/compliance-verzeichnis`,
   mainEntity: {
     "@type": "ItemList",
     itemListElement: [
@@ -58,8 +59,17 @@ const jsonLd = {
   publisher: {
     "@type": "Organization",
     name: "EU Compliance Hub",
-    url: "https://eu-compliance-hub.eu",
+    url: BASE_URL,
   },
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "EU Compliance Hub", item: BASE_URL },
+    { "@type": "ListItem", position: 2, name: "Compliance-Verzeichnis", item: `${BASE_URL}/compliance-verzeichnis` },
+  ],
 };
 
 export default function ComplianceVerzeichnisPage() {
@@ -68,6 +78,10 @@ export default function ComplianceVerzeichnisPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <VerzeichnisContent />
     </>

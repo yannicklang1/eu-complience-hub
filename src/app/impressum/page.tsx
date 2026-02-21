@@ -1,13 +1,36 @@
 import type { Metadata } from "next";
+import { BASE_URL, SITE_NAME } from "@/lib/constants";
 import LegalPageLayout from "@/components/LegalPageLayout";
 
 export const metadata: Metadata = {
   title: "Impressum – EU Compliance Hub",
-  description: "Impressum und Angaben gemäß § 5 ECG / § 25 MedienG.",
+  description:
+    "Impressum des EU Compliance Hub gemäß § 5 ECG und § 25 MedienG. Angaben zum Diensteanbieter, Kontakt, Unternehmensgegenstand und anwendbare Rechtsvorschriften.",
+  openGraph: {
+    title: "Impressum – EU Compliance Hub",
+    description:
+      "Impressum gemäß § 5 ECG / § 25 MedienG – Diensteanbieter und Kontaktdaten.",
+    url: `${BASE_URL}/impressum`,
+  },
+  alternates: { canonical: `${BASE_URL}/impressum` },
+};
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: SITE_NAME, item: BASE_URL },
+    { "@type": "ListItem", position: 2, name: "Impressum", item: `${BASE_URL}/impressum` },
+  ],
 };
 
 export default function ImpressumPage() {
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
     <LegalPageLayout title="Impressum" subtitle="Angaben gemäß § 5 ECG / § 25 MedienG">
       <h2>Diensteanbieter</h2>
       <p>
@@ -65,5 +88,6 @@ export default function ImpressumPage() {
         <em>Stand: Februar 2026</em>
       </p>
     </LegalPageLayout>
+    </>
   );
 }

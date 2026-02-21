@@ -1,11 +1,16 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "framer-motion";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import LeadCaptureForm from "@/components/LeadCaptureForm";
+import ToolNextSteps from "@/components/ToolNextSteps";
+
+const LeadCaptureForm = dynamic(() => import("@/components/LeadCaptureForm"), {
+  ssr: false,
+});
 
 /* ═══════════════════════════════════════════════════════════
    FINE CALCULATION DATA
@@ -224,7 +229,9 @@ export default function BussgeldRechnerTool() {
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#7a8db0] font-mono text-sm">EUR</span>
                 <input
                   type="text"
+                  inputMode="numeric"
                   placeholder="z.B. 50.000.000"
+                  aria-label="Jahresumsatz in EUR"
                   value={revenueInput}
                   onChange={(e) => handleInputChange(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") handleRevenueSubmit(); }}
@@ -307,6 +314,9 @@ export default function BussgeldRechnerTool() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  aria-live="polite"
+                  role="region"
+                  aria-label="Berechnungsergebnis"
                 >
                   {/* Total Risk */}
                   <div className="rounded-2xl border-2 border-[#fde68a] bg-gradient-to-br from-[#fffbeb] to-[#fef3c7] p-6 sm:p-8 mb-6 text-center">
@@ -391,36 +401,13 @@ export default function BussgeldRechnerTool() {
                     </div>
                   </div>
 
-                  {/* CTAs */}
-                  <div className="grid sm:grid-cols-2 gap-3 mb-6">
-                    <Link
-                      href="/tools/nis2-betroffenheits-check"
-                      className="flex items-center gap-3 p-4 rounded-xl border border-[#d8dff0] bg-white hover:shadow-md transition-all group"
-                    >
-                      <div className="w-9 h-9 rounded-lg bg-sky-50 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-5 h-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <span className="font-[Syne] font-bold text-[13px] text-[#060c1a] group-hover:text-sky-700 transition-colors block">NIS2-Check</span>
-                        <span className="text-[11px] text-[#7a8db0]">Sind Sie betroffen?</span>
-                      </div>
-                    </Link>
-                    <Link
-                      href="/tools/haftungs-pruefer"
-                      className="flex items-center gap-3 p-4 rounded-xl border border-[#d8dff0] bg-white hover:shadow-md transition-all group"
-                    >
-                      <div className="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <span className="font-[Syne] font-bold text-[13px] text-[#060c1a] group-hover:text-red-700 transition-colors block">Haftungs-Prüfer</span>
-                        <span className="text-[11px] text-[#7a8db0]">Persönliches Risiko?</span>
-                      </div>
-                    </Link>
+                  {/* Tool Cross-Links */}
+                  <div className="mb-6">
+                    <ToolNextSteps
+                      currentTool="bussgeld-rechner"
+                      dark={false}
+                      subtext="Strafrahmen kennen Sie nun. Analysieren Sie Ihre Compliance-Situation weiter:"
+                    />
                   </div>
 
                   {/* Lead Capture */}

@@ -89,6 +89,7 @@ export default function ComplianceRadar({ className = "" }: { className?: string
   const blipStatesRef = useRef(blipStates);
   blipStatesRef.current = blipStates;
 
+  // eslint-disable-next-line react-hooks/purity -- initializing ref with current time is intentional
   const startTimeRef = useRef(Date.now());
 
   /* Main animation loop */

@@ -8,6 +8,7 @@ import AccordionSection from "@/components/AccordionSection";
 import LawRef from "@/components/LawRef";
 import { SourceRef, SourceList, type Source } from "@/components/SourceRef";
 import ToolRecommendation from "@/components/ToolRecommendation";
+import RelatedGuides from "@/components/RelatedGuides";
 
 /* ─────────────────── Sources ─────────────────── */
 const sources: Source[] = [
@@ -188,6 +189,7 @@ export default function GuideContent() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253M3.284 14.253A8.96 8.96 0 003 12c0-.778.099-1.533.284-2.253" />
         </svg>
       }
+      href="/csrd-esg"
     >
       {/* ═══════════════════ 1. ÜBERBLICK ═══════════════════ */}
       <Section id="ueberblick" title="Überblick: Was ist die CSRD?">
@@ -1133,6 +1135,9 @@ export default function GuideContent() {
           ]}
         />
       </Section>
+
+      {/* ═══════════════════ VERWANDTE REGULIERUNGEN ═══════════════════ */}
+      <RelatedGuides currentGuide="csrd-esg" accent="#047857" />
 
       {/* ═══════════════════ QUELLEN ═══════════════════ */}
       <Section id="quellen" title="Quellen & Offizielle Dokumente">

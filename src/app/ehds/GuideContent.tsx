@@ -4,9 +4,9 @@ import GuidePageLayout from "@/components/GuidePageLayout";
 import type { TocItem } from "@/components/TableOfContents";
 import type { QuickFact } from "@/components/GuidePageLayout";
 import AccordionSection from "@/components/AccordionSection";
-import LawRef from "@/components/LawRef";
 import { SourceRef, SourceList, type Source } from "@/components/SourceRef";
 import ToolRecommendation from "@/components/ToolRecommendation";
+import RelatedGuides from "@/components/RelatedGuides";
 
 /* ─────────────────── Sources ─────────────────── */
 const sources: Source[] = [
@@ -142,6 +142,7 @@ export default function EHDSGuideContent() {
       tocItems={tocItems}
       quickFacts={quickFacts}
       regulationKey="ehds"
+      href="/ehds"
     >
       {/* ═══════════════ 1. ÜBERBLICK ═══════════════ */}
       <Section id="ueberblick" title="Überblick: Was ist der EHDS?">
@@ -793,6 +794,9 @@ export default function EHDSGuideContent() {
           accent={ACCENT}
         />
       </Section>
+
+      {/* ═══════════════════ VERWANDTE REGULIERUNGEN ═══════════════════ */}
+      <RelatedGuides currentGuide="ehds" accent="#be123c" />
 
       {/* ═══════════════ TOOL RECOMMENDATION ═══════════════ */}
       <ToolRecommendation regulationKey="ehds" accent={ACCENT} />

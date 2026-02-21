@@ -241,6 +241,7 @@ export default function ToolRecommendation({
 
   return (
     <div
+      data-tool-recommendation=""
       className="rounded-2xl border p-6 sm:p-8 my-8"
       style={{
         background: `linear-gradient(135deg, ${accent}04, ${accent}08)`,
@@ -265,6 +266,9 @@ export default function ToolRecommendation({
         <h3 className="font-[Syne] font-bold text-base text-[#060c1a]">
           {set.title}
         </h3>
+        <span className="ml-auto text-[10px] font-mono font-medium tracking-wider uppercase px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 border border-amber-200 flex-shrink-0">
+          Anzeige
+        </span>
       </div>
       <p className="text-[#7a8db0] text-xs mb-5">{set.subtitle}</p>
 
@@ -281,6 +285,7 @@ export default function ToolRecommendation({
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 rounded-lg bg-[#f4f6fb] border border-[#e8ecf4] flex items-center justify-center flex-shrink-0 overflow-hidden">
                 {tool.logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={tool.logoUrl}
                     alt={`${tool.name} Logo`}
@@ -327,7 +332,8 @@ export default function ToolRecommendation({
           Vollst\u00e4ndigen Vergleich ansehen \u2192
         </Link>
         <span className="text-[10px] text-[#7a8db0]">
-          * Affiliate-Links \u2014 keine Mehrkosten f\u00fcr Sie
+          Anzeige — Affiliate-Links. Keine Mehrkosten f\u00fcr Sie.{" "}
+          <a href="/datenschutz#werbe-inhalte" className="underline hover:text-[#0A2540]">Mehr erfahren</a>
         </span>
       </div>
     </div>

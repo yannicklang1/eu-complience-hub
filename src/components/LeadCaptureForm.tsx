@@ -350,6 +350,7 @@ export default function LeadCaptureForm({
             {step === 0 && (
               <div className="space-y-4">
                 <InputField
+                  id="lead-email"
                   label="E-Mail-Adresse"
                   type="email"
                   value={formData.email}
@@ -360,6 +361,7 @@ export default function LeadCaptureForm({
                   accent={accent}
                 />
                 <InputField
+                  id="lead-name"
                   label="Name"
                   type="text"
                   value={formData.contact_name}
@@ -368,6 +370,7 @@ export default function LeadCaptureForm({
                   accent={accent}
                 />
                 <InputField
+                  id="lead-company"
                   label="Unternehmen"
                   type="text"
                   value={formData.company_name}
@@ -382,6 +385,7 @@ export default function LeadCaptureForm({
             {step === 1 && (
               <div className="space-y-4">
                 <SelectField
+                  id="lead-country"
                   label="Land"
                   value={formData.country}
                   onChange={(v) => updateField("country", v)}
@@ -393,6 +397,7 @@ export default function LeadCaptureForm({
                   accent={accent}
                 />
                 <InputField
+                  id="lead-phone"
                   label="Telefon"
                   type="tel"
                   value={formData.phone}
@@ -401,6 +406,7 @@ export default function LeadCaptureForm({
                   accent={accent}
                 />
                 <SelectField
+                  id="lead-company-size"
                   label="Unternehmensgröße"
                   value={formData.company_size}
                   onChange={(v) => updateField("company_size", v)}
@@ -412,6 +418,7 @@ export default function LeadCaptureForm({
                   accent={accent}
                 />
                 <SelectField
+                  id="lead-branche"
                   label="Branche"
                   value={formData.branche}
                   onChange={(v) => updateField("branche", v)}
@@ -637,6 +644,7 @@ interface InputFieldProps {
   required?: boolean;
   error?: string;
   accent: string;
+  id: string;
 }
 
 function InputField({
@@ -648,19 +656,24 @@ function InputField({
   required = false,
   error,
   accent,
+  id,
 }: InputFieldProps): React.JSX.Element {
+  const errorId = error ? `${id}-error` : undefined;
   return (
     <div>
-      <label className="block text-[13px] font-medium text-[#060c1a] mb-1.5">
+      <label htmlFor={id} className="block text-[13px] font-medium text-[#060c1a] mb-1.5">
         {label}
-        {required && <span className="text-red-500 ml-0.5">*</span>}
+        {required && <span className="text-red-500 ml-0.5" aria-hidden="true">*</span>}
       </label>
       <input
+        id={id}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         required={required}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={errorId}
         className="w-full px-4 py-3 rounded-lg border bg-white text-sm text-[#060c1a] placeholder:text-[#7a8db0] transition-all focus:outline-none"
         style={{
           borderColor: error ? "#ef4444" : "#d8dff0",
@@ -682,7 +695,7 @@ function InputField({
         }}
       />
       {error && (
-        <p className="mt-1 text-[12px] text-red-500">{error}</p>
+        <p id={errorId} className="mt-1 text-[12px] text-red-500" role="alert">{error}</p>
       )}
     </div>
   );
@@ -695,6 +708,7 @@ interface SelectFieldProps {
   options: ReadonlyArray<{ value: string; label: string }>;
   placeholder?: string;
   accent: string;
+  id: string;
 }
 
 function SelectField({
@@ -704,13 +718,15 @@ function SelectField({
   options,
   placeholder,
   accent,
+  id,
 }: SelectFieldProps): React.JSX.Element {
   return (
     <div>
-      <label className="block text-[13px] font-medium text-[#060c1a] mb-1.5">
+      <label htmlFor={id} className="block text-[13px] font-medium text-[#060c1a] mb-1.5">
         {label}
       </label>
       <select
+        id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="w-full px-4 py-3 rounded-lg border border-[#d8dff0] bg-white text-sm text-[#060c1a] transition-all focus:outline-none appearance-none"

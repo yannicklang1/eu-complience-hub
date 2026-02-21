@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* ═══════════════════════════════════════════════════════════
@@ -274,15 +275,23 @@ export default function LeadDashboard() {
             </div>
             <h1 className="font-[Syne] font-bold text-lg text-[#060c1a]">Lead-Dashboard</h1>
           </div>
-          <button
-            onClick={exportCSV}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-[#0A2540] bg-[#0A2540]/5 hover:bg-[#0A2540]/10 transition-all"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-            </svg>
-            CSV Export
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/admin/subscribers"
+              className="px-4 py-2 rounded-lg text-sm font-medium text-[#3a4a6b] hover:bg-[#0A2540]/5 transition-all"
+            >
+              Subscribers
+            </Link>
+            <button
+              onClick={exportCSV}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-[#0A2540] bg-[#0A2540]/5 hover:bg-[#0A2540]/10 transition-all"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+              CSV Export
+            </button>
+          </div>
         </div>
       </div>
 

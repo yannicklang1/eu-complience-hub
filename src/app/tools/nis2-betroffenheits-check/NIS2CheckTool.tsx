@@ -1,11 +1,16 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import LeadCaptureForm from "@/components/LeadCaptureForm";
+import ToolNextSteps from "@/components/ToolNextSteps";
+
+const LeadCaptureForm = dynamic(() => import("@/components/LeadCaptureForm"), {
+  ssr: false,
+});
 
 /* ═══════════════════════════════════════════════════════════
    NIS2 / NISG 2026 — SECTOR & SIZE DATA
@@ -359,7 +364,14 @@ export default function NIS2CheckTool() {
                   {Math.round(progressPercent)}%
                 </span>
               </div>
-              <div className="h-1.5 rounded-full bg-[#e0e5f0] overflow-hidden">
+              <div
+                className="h-1.5 rounded-full bg-[#e0e5f0] overflow-hidden"
+                role="progressbar"
+                aria-valuenow={Math.round(progressPercent)}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="Fortschritt der Betroffenheitsprüfung"
+              >
                 <motion.div
                   className="h-full rounded-full"
                   style={{ background: `linear-gradient(90deg, ${ACCENT}, #38bdf8)` }}
@@ -392,12 +404,13 @@ export default function NIS2CheckTool() {
 
                         {/* Search */}
                         <div className="relative mb-4">
-                          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7a8db0]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7a8db0]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                           </svg>
                           <input
                             type="text"
                             placeholder="Sektor suchen..."
+                            aria-label="Sektor suchen"
                             value={sectorSearch}
                             onChange={(e) => setSectorSearch(e.target.value)}
                             className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#d8dff0] bg-[#f8f9fd] text-sm text-[#060c1a] placeholder:text-[#7a8db0] focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 transition-all"
@@ -672,6 +685,9 @@ export default function NIS2CheckTool() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -30 }}
                   transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  aria-live="polite"
+                  role="region"
+                  aria-label="Ergebnis der NIS2-Betroffenheitsprüfung"
                 >
                   {/* Result Card */}
                   <div
@@ -844,6 +860,15 @@ export default function NIS2CheckTool() {
                         </svg>
                       </Link>
                     </div>
+                  </div>
+
+                  {/* Tool Cross-Links */}
+                  <div className="mb-6">
+                    <ToolNextSteps
+                      currentTool="nis2-check"
+                      dark={false}
+                      subtext="Analysieren Sie Ihre Compliance-Situation weiter mit unseren interaktiven Tools."
+                    />
                   </div>
 
                   {/* Lead Capture */}

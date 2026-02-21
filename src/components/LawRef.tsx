@@ -114,12 +114,9 @@ function buildUrl(law: string, article?: string, paragraph?: string, annex?: str
   return base;
 }
 
-/* Roman numeral helper for display */
-const ROMAN: Record<string, string> = {
-  "I": "I", "II": "II", "III": "III", "IV": "IV", "V": "V",
-  "VI": "VI", "VII": "VII", "VIII": "VIII", "IX": "IX", "X": "X",
-  "XI": "XI", "XII": "XII", "XIII": "XIII",
-};
+/* Roman numeral helper for display — reserved for future citation formatting */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const ROMAN: Record<string, string> = {"I":"I","II":"II","III":"III","IV":"IV","V":"V","VI":"VI","VII":"VII","VIII":"VIII","IX":"IX","X":"X","XI":"XI","XII":"XII","XIII":"XIII"};
 
 /**
  * Build the display text from props.
@@ -172,6 +169,7 @@ function Tooltip({ text, visible, anchorRef }: { text: string; visible: boolean;
   useEffect(() => {
     if (!visible || !anchorRef.current) return;
     const rect = anchorRef.current.getBoundingClientRect();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- positioning based on DOM measurement
     setPos(rect.top < 80 ? "bottom" : "top");
   }, [visible, anchorRef]);
 
@@ -293,9 +291,11 @@ export default function LawRef({
 export function LawRefInline({
   law,
   article,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   absatz,
   paragraph,
   annex,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   nr,
   href,
   accent,

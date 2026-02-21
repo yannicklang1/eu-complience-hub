@@ -8,6 +8,7 @@ import AccordionSection from "@/components/AccordionSection";
 import LawRef from "@/components/LawRef";
 import { SourceRef, SourceList, type Source } from "@/components/SourceRef";
 import ToolRecommendation from "@/components/ToolRecommendation";
+import RelatedGuides from "@/components/RelatedGuides";
 
 /* ─────────────────── Sources ─────────────────── */
 const sources: Source[] = [
@@ -165,6 +166,7 @@ export default function GuideContent() {
       tocItems={tocItems}
       quickFacts={quickFacts}
       trustBadge={{ lastReview: "19.02.2026", sourceCount: 6, factChecked: true }}
+      href="/produkthaftung"
     >
 
       {/* ═══════════════ 1. ÜBERBLICK ═══════════════ */}
@@ -536,6 +538,9 @@ export default function GuideContent() {
           accent={ACCENT}
         />
       </Section>
+
+      {/* ═══════════════════ VERWANDTE REGULIERUNGEN ═══════════════════ */}
+      <RelatedGuides currentGuide="produkthaftung" accent="#991b1b" />
 
       {/* ═══════════════════ SOFTWARE-EMPFEHLUNGEN ═══════════════════ */}
       <ToolRecommendation regulationKey="pld" accent={ACCENT} />

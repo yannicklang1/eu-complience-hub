@@ -289,11 +289,6 @@ export function getBranchenRegContent(
   branche: Branche,
   regulation: Regulation
 ): BranchenRegContent {
-  const b = branche.name;
-  const r = regulation.name;
-  const rFull = regulation.fullName;
-
-  // Master template with industry/regulation-specific content
   return contentMap[`${branche.slug}__${regulation.slug}`] ?? generateGenericContent(branche, regulation);
 }
 

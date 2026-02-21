@@ -14,7 +14,7 @@ const EXEMPT_PATHS = [
 
 export default function AdBlockOverlay() {
   const pathname = usePathname();
-  const { detected, loaded, dismissCount, dismiss, recheck, shouldShowPaywall } =
+  const { detected, loaded, dismiss, recheck, shouldShowPaywall } =
     useAdBlockDetect();
 
   /* Don't render on exempt pages */
@@ -23,7 +23,7 @@ export default function AdBlockOverlay() {
   /* Still loading or no adblocker detected */
   if (!loaded || !detected) return null;
 
-  /* ─── Hard Paywall (after 3 dismissals) ─── */
+  /* ─── Hard Paywall (after 1 dismissal) ─── */
   if (shouldShowPaywall) {
     return (
       <div role="dialog" aria-label="Adblocker-Hinweis" className="fixed inset-0 z-[200] flex items-center justify-center p-6">
@@ -142,22 +142,6 @@ export default function AdBlockOverlay() {
             Bitte deaktivieren Sie Ihren Adblocker, damit wir dieses Angebot
             weiterhin kostenlos bereitstellen können.
           </p>
-
-          {/* Progress */}
-          <div className="flex items-center gap-2 mb-5">
-            <div className="flex-1 h-1 rounded-full bg-white/10 overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{
-                  width: `${((dismissCount + 1) / 3) * 100}%`,
-                  background: "linear-gradient(90deg, #FACC15, #EAB308)",
-                }}
-              />
-            </div>
-            <span className="text-[11px] text-white/30 font-mono">
-              {3 - dismissCount} verbleibend
-            </span>
-          </div>
 
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-3">

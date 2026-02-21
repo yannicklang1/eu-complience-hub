@@ -4,9 +4,9 @@ import GuidePageLayout from "@/components/GuidePageLayout";
 import type { TocItem } from "@/components/TableOfContents";
 import type { QuickFact } from "@/components/GuidePageLayout";
 import AccordionSection from "@/components/AccordionSection";
-import LawRef from "@/components/LawRef";
 import { SourceRef, SourceList, type Source } from "@/components/SourceRef";
 import ToolRecommendation from "@/components/ToolRecommendation";
+import RelatedGuides from "@/components/RelatedGuides";
 
 /* ─────────────────── Sources ─────────────────── */
 const sources: Source[] = [
@@ -130,6 +130,7 @@ export default function EIDASGuideContent() {
       tocItems={tocItems}
       quickFacts={quickFacts}
       regulationKey="eidas"
+      href="/eidas"
     >
       {/* ═══════════════ 1. ÜBERBLICK ═══════════════ */}
       <Section id="ueberblick" title="Überblick: Was ist eIDAS 2.0?">
@@ -704,6 +705,9 @@ export default function EIDASGuideContent() {
           accent={ACCENT}
         />
       </Section>
+
+      {/* ═══════════════════ VERWANDTE REGULIERUNGEN ═══════════════════ */}
+      <RelatedGuides currentGuide="eidas" accent="#0e7490" />
 
       {/* ═══════════════ TOOL RECOMMENDATION ═══════════════ */}
       <ToolRecommendation regulationKey="eidas" accent={ACCENT} />

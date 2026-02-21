@@ -79,11 +79,9 @@ function RegIcon({ reg, className = "w-5 h-5" }: { reg: string; className?: stri
 /* ── Timeline Card ── */
 function TimelineCard({
   deadline,
-  index,
   isLeft,
 }: {
   deadline: (typeof DEADLINES)[0];
-  index: number;
   isLeft: boolean;
 }) {
   const past = isPast(deadline.iso);
@@ -318,7 +316,6 @@ export default function TimelinePage() {
                 <TimelineCard
                   key={`${d.reg}-${d.iso}`}
                   deadline={d}
-                  index={i}
                   isLeft={i % 2 === 0}
                 />
               ))}
@@ -335,11 +332,11 @@ export default function TimelinePage() {
               }}
             >
               <h2 className="font-[Syne] font-bold text-xl text-[#060c1a] mb-3">
-                Keine Frist verpassen
+                Compliance-Briefing aktivieren
               </h2>
               <p className="text-[#3a4a6b] text-sm mb-6 max-w-lg mx-auto">
-                Erhalte automatische Erinnerungen zu allen wichtigen
-                Compliance-Fristen — maximal 3× pro Monat.
+                Ihr regulatorisches Frühwarnsystem — nur bei kritischen Fristen
+                und Gesetzesänderungen. Maximal 3× pro Monat.
               </p>
               <Link
                 href="/fristen-radar"
@@ -349,7 +346,7 @@ export default function TimelinePage() {
                   boxShadow: "0 4px 16px rgba(250,204,21,0.25)",
                 }}
               >
-                Fristen-Radar aktivieren
+                Briefing aktivieren
                 <svg
                   className="w-4 h-4"
                   fill="none"

@@ -1,13 +1,12 @@
 "use client";
 
-import { motion } from "framer-motion";
 import GuidePageLayout from "@/components/GuidePageLayout";
 import type { TocItem } from "@/components/TableOfContents";
 import type { QuickFact } from "@/components/GuidePageLayout";
 import AccordionSection from "@/components/AccordionSection";
-import LawRef from "@/components/LawRef";
 import { SourceRef, SourceList, type Source } from "@/components/SourceRef";
 import ToolRecommendation from "@/components/ToolRecommendation";
+import RelatedGuides from "@/components/RelatedGuides";
 
 /* ─────────────────── Sources ─────────────────── */
 const sources: Source[] = [
@@ -143,6 +142,7 @@ export default function GreenClaimsGuideContent() {
       tocItems={tocItems}
       quickFacts={quickFacts}
       regulationKey="green-claims"
+      href="/green-claims"
     >
       {/* ═══════════════ 1. ÜBERBLICK ═══════════════ */}
       <Section id="ueberblick" title="Überblick: Was ist die Green Claims Directive?">
@@ -811,6 +811,9 @@ export default function GreenClaimsGuideContent() {
           accent={ACCENT}
         />
       </Section>
+
+      {/* ═══════════════════ VERWANDTE REGULIERUNGEN ═══════════════════ */}
+      <RelatedGuides currentGuide="green-claims" accent="#15803d" />
 
       {/* ═══════════════ TOOL RECOMMENDATION ═══════════════ */}
       <ToolRecommendation regulationKey="green-claims" accent={ACCENT} />

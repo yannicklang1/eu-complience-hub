@@ -4,9 +4,9 @@ import GuidePageLayout from "@/components/GuidePageLayout";
 import type { TocItem } from "@/components/TableOfContents";
 import type { QuickFact } from "@/components/GuidePageLayout";
 import AccordionSection from "@/components/AccordionSection";
-import LawRef from "@/components/LawRef";
 import { SourceRef, SourceList, type Source } from "@/components/SourceRef";
 import ToolRecommendation from "@/components/ToolRecommendation";
+import RelatedGuides from "@/components/RelatedGuides";
 
 /* ─────────────────── Sources ─────────────────── */
 const sources: Source[] = [
@@ -143,6 +143,7 @@ export default function DSAGuideContent() {
       tocItems={tocItems}
       quickFacts={quickFacts}
       regulationKey="dsa"
+      href="/dsa"
     >
       {/* ═══════════════ 1. ÜBERBLICK ═══════════════ */}
       <Section id="ueberblick" title="Überblick: Was ist der Digital Services Act?">
@@ -909,6 +910,9 @@ export default function DSAGuideContent() {
           accent={ACCENT}
         />
       </Section>
+
+      {/* ═══════════════════ VERWANDTE REGULIERUNGEN ═══════════════════ */}
+      <RelatedGuides currentGuide="dsa" accent="#4338ca" />
 
       {/* ═══════════════ TOOL RECOMMENDATION ═══════════════ */}
       <ToolRecommendation regulationKey="dsa" accent={ACCENT} />

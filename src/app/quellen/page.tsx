@@ -1,34 +1,35 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BASE_URL } from "@/lib/constants";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "Quellenbibliothek — Alle offiziellen Rechtstexte & Behörden",
   description:
-    "Alle offiziellen Quellen auf einen Blick: EU-Verordnungen, Richtlinien, österreichische Gesetze und Aufsichtsbehörden. Direkt-Links zu EUR-Lex, RIS, JusLine und mehr.",
+    "Alle offiziellen Quellen auf einen Blick: EU-Verordnungen, Richtlinien, österreichische Gesetze und Aufsichtsbehörden. Direkt-Links zu EUR-Lex, RIS und mehr — 18 Regulierungen abgedeckt.",
   keywords:
-    "EU Rechtstexte, EUR-Lex, NIS2 Volltext, AI Act Verordnung, DORA Volltext, CRA Volltext, DSGVO Text, NISG 2026, GmbHG, AktG, Compliance Quellen",
+    "EU Rechtstexte, EUR-Lex, NIS2 Volltext, AI Act Verordnung, DORA Volltext, CRA Volltext, DSGVO Text, NISG 2026, CSRD, BaFG, HSchG, DSA, Data Act, ePrivacy, eIDAS, EHDS, Compliance Quellen",
   openGraph: {
     title: "Quellenbibliothek — Alle offiziellen Rechtstexte",
     description: "EU-Verordnungen, Richtlinien, österreichische Gesetze und Aufsichtsbehörden. Direkt-Links zu allen Volltexten.",
-    url: "https://eu-compliance-hub.eu/quellen",
+    url: `${BASE_URL}/quellen`,
   },
-  alternates: { canonical: "https://eu-compliance-hub.eu/quellen" },
+  alternates: { canonical: `${BASE_URL}/quellen` },
 };
 
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "CollectionPage",
   name: "Quellenbibliothek — Offizielle EU-Rechtstexte & Behörden",
-  url: "https://eu-compliance-hub.eu/quellen",
+  url: `${BASE_URL}/quellen`,
   description: "Kuratierte Sammlung aller offiziellen EU-Rechtstexte, österreichischen Gesetze und Aufsichtsbehörden.",
   inLanguage: "de",
-  publisher: { "@type": "Organization", name: "EU Compliance Hub", url: "https://eu-compliance-hub.eu" },
+  publisher: { "@type": "Organization", name: "EU Compliance Hub", url: BASE_URL },
 };
 
 /* ═══════════════════════════════════════════════════════════
-   SOURCE DATA — Consolidated from all 5 Guides + additional
+   SOURCE DATA — Consolidated from all 18 Regulation Guides
    ═══════════════════════════════════════════════════════════ */
 
 interface SourceEntry {
@@ -168,6 +169,81 @@ const SOURCE_GROUPS: SourceGroup[] = [
       { title: "GDV — Cyber-Versicherung und neue Produkthaftung", url: "https://www.gdv.de/de/themen/news/was-unternehmen-zur-neuen-eu-produkthaftung-wissen-muessen-126864", desc: "Gesamtverband der Deutschen Versicherungswirtschaft: Analyse", type: "Studie" },
     ],
   },
+  {
+    regulation: "CSRD / ESG",
+    accent: "#16a34a",
+    guideUrl: "/csrd-esg",
+    sources: [
+      { title: "Richtlinie (EU) 2022/2464 — CSRD (Volltext DE)", url: "https://eur-lex.europa.eu/eli/dir/2022/2464/oj/deu", desc: "Corporate Sustainability Reporting Directive — EU-weite Nachhaltigkeitsberichterstattung", type: "EU-Richtlinie" },
+      { title: "EFRAG — European Sustainability Reporting Standards (ESRS)", url: "https://www.efrag.org/lab6", desc: "Technische Berichtsstandards der European Financial Reporting Advisory Group", type: "Norm" },
+      { title: "EU-Kommission — Omnibus I Vorschlag", url: "https://ec.europa.eu/commission/presscorner/detail/de/ip_25_614", desc: "Vereinfachungsvorschlag vom Februar 2025: Schwellenwerte und Erleichterungen", type: "Behörde" },
+    ],
+  },
+  {
+    regulation: "BaFG — Barrierefreiheit",
+    accent: "#2563eb",
+    guideUrl: "/bafg",
+    sources: [
+      { title: "Richtlinie (EU) 2019/882 — European Accessibility Act (Volltext DE)", url: "https://eur-lex.europa.eu/eli/dir/2019/882/oj/deu", desc: "EU-Barrierefreiheitsrichtlinie für Produkte und Dienstleistungen", type: "EU-Richtlinie" },
+      { title: "BaFG — Barrierefreiheitsstärkungsgesetz (RIS)", url: "https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=20012451", desc: "Österreichische Umsetzung des European Accessibility Act", type: "Gesetz AT" },
+      { title: "W3C — WCAG 2.1 (Deutsch)", url: "https://www.w3.org/Translations/WCAG21-de/", desc: "Web Content Accessibility Guidelines 2.1 Level AA — technischer Standard", type: "Norm" },
+    ],
+  },
+  {
+    regulation: "HSchG — Hinweisgeberschutz",
+    accent: "#d97706",
+    guideUrl: "/hschg",
+    sources: [
+      { title: "Richtlinie (EU) 2019/1937 — Whistleblower-Richtlinie (Volltext DE)", url: "https://eur-lex.europa.eu/eli/dir/2019/1937/oj/deu", desc: "EU-Richtlinie zum Schutz von Personen, die Verstöße gegen das Unionsrecht melden", type: "EU-Richtlinie" },
+      { title: "HSchG — HinweisgeberInnenschutzgesetz (RIS)", url: "https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=20012407", desc: "Österreichische Umsetzung der Whistleblower-Richtlinie", type: "Gesetz AT" },
+      { title: "BAK — Bundesanstalt für Korruptionsbekämpfung", url: "https://www.bak.gv.at/", desc: "Externe Meldestelle und Korruptionsbekämpfung in Österreich", type: "Aufsicht AT" },
+    ],
+  },
+  {
+    regulation: "DSA — Digital Services Act",
+    accent: "#6366f1",
+    guideUrl: "/dsa",
+    sources: [
+      { title: "Verordnung (EU) 2022/2065 — DSA (Volltext DE)", url: "https://eur-lex.europa.eu/eli/reg/2022/2065/oj/deu", desc: "Gesetz über digitale Dienste — Plattformregulierung und Sorgfaltspflichten", type: "Verordnung" },
+      { title: "EU-Kommission — Digital Services Act Package", url: "https://digital-strategy.ec.europa.eu/en/policies/digital-services-act-package", desc: "Übersicht, FAQ und Leitfäden zum DSA", type: "Behörde" },
+    ],
+  },
+  {
+    regulation: "Data Act",
+    accent: "#0ea5e9",
+    guideUrl: "/data-act",
+    sources: [
+      { title: "Verordnung (EU) 2023/2854 — Data Act (Volltext DE)", url: "https://eur-lex.europa.eu/eli/reg/2023/2854/oj/deu", desc: "EU-Datenverordnung: Datenzugangsrechte, Cloud-Switching, B2B-Datenverträge", type: "Verordnung" },
+      { title: "EU-Kommission — European Data Act", url: "https://digital-strategy.ec.europa.eu/en/policies/data-act", desc: "Hintergründe und FAQ zum EU Data Act", type: "Behörde" },
+    ],
+  },
+  {
+    regulation: "ePrivacy",
+    accent: "#a855f7",
+    guideUrl: "/eprivacy",
+    sources: [
+      { title: "Richtlinie 2002/58/EG — ePrivacy-Richtlinie (Volltext DE)", url: "https://eur-lex.europa.eu/eli/dir/2002/58/oj/deu", desc: "Richtlinie über die Verarbeitung personenbezogener Daten im Bereich der elektronischen Kommunikation", type: "EU-Richtlinie" },
+      { title: "EDPB — Guidelines 05/2020 Cookie-Einwilligung", url: "https://edpb.europa.eu/sites/default/files/files/file1/edpb_guidelines_202005_consent_en.pdf", desc: "Leitlinien des Europäischen Datenschutzausschusses zur Einwilligung", type: "Leitfaden" },
+    ],
+  },
+  {
+    regulation: "eIDAS 2.0",
+    accent: "#0891b2",
+    guideUrl: "/eidas",
+    sources: [
+      { title: "Verordnung (EU) 2024/1183 — eIDAS 2.0 (Volltext DE)", url: "https://eur-lex.europa.eu/eli/reg/2024/1183/oj/deu", desc: "Rahmenverordnung für die europäische digitale Identität (EUDI Wallet)", type: "Verordnung" },
+      { title: "EU-Kommission — European Digital Identity", url: "https://commission.europa.eu/strategy-and-policy/priorities-2019-2024/europe-fit-digital-age/european-digital-identity_en", desc: "Hintergründe zur EU Digital Identity Wallet", type: "Behörde" },
+    ],
+  },
+  {
+    regulation: "EHDS — Gesundheitsdatenraum",
+    accent: "#ec4899",
+    guideUrl: "/ehds",
+    sources: [
+      { title: "Verordnung (EU) — EHDS (Vorschlag)", url: "https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:52022PC0197", desc: "Europäischer Raum für Gesundheitsdaten — Verordnungsvorschlag", type: "Verordnung" },
+      { title: "EU-Kommission — European Health Data Space", url: "https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en", desc: "Übersicht zum europäischen Gesundheitsdatenraum", type: "Behörde" },
+    ],
+  },
 ];
 
 /* ── Type color mapping ── */
@@ -196,10 +272,20 @@ function getFaviconUrl(url: string): string {
 /* Total source count */
 const totalSources = SOURCE_GROUPS.reduce((sum, g) => sum + g.sources.length, 0);
 
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "EU Compliance Hub", item: BASE_URL },
+    { "@type": "ListItem", position: 2, name: "Quellen", item: `${BASE_URL}/quellen` },
+  ],
+};
+
 export default function QuellenPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <Header />
       <main>
         {/* ── Hero ── */}
@@ -298,7 +384,8 @@ export default function QuellenPage() {
                           rel="noopener noreferrer"
                           className="group flex items-start gap-4 rounded-2xl border border-[#d8dff0] bg-white p-4 sm:p-5 hover:shadow-md transition-all duration-200 hover:border-opacity-50"
                         >
-                          {/* Favicon */}
+                          {/* Favicon — external dynamic domain, next/image not viable */}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={getFaviconUrl(source.url)}
                             alt=""

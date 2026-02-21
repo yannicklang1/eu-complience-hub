@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BASE_URL } from "@/lib/constants";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BranchenIcon from "@/components/BranchenIcon";
@@ -15,9 +16,9 @@ export const metadata: Metadata = {
     title: "Branchen-Compliance — EU-Regulierungen nach Branche",
     description:
       "Finden Sie EU-Compliance-Anforderungen speziell für Ihre Branche.",
-    url: "https://eu-compliance-hub.eu/branchen",
+    url: `${BASE_URL}/branchen`,
   },
-  alternates: { canonical: "https://eu-compliance-hub.eu/branchen" },
+  alternates: { canonical: `${BASE_URL}/branchen` },
 };
 
 const jsonLd = {
@@ -26,11 +27,11 @@ const jsonLd = {
   name: "EU-Compliance nach Branche",
   description:
     "Übersicht aller Branchen mit relevanten EU-Regulierungen (NIS2, AI Act, DORA, CRA).",
-  url: "https://eu-compliance-hub.eu/branchen",
+  url: `${BASE_URL}/branchen`,
   author: {
     "@type": "Organization",
     name: "EU Compliance Hub",
-    url: "https://eu-compliance-hub.eu",
+    url: BASE_URL,
   },
 };
 
@@ -40,12 +41,25 @@ const totalPages = branchenList.reduce(
   0
 );
 
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "EU Compliance Hub", item: BASE_URL },
+    { "@type": "ListItem", position: 2, name: "Branchen", item: `${BASE_URL}/branchen` },
+  ],
+};
+
 export default function BranchenHubPage() {
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <Header />
       <main>

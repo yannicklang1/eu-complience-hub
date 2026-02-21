@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BASE_URL } from "@/lib/constants";
 import GuideContent from "./GuideContent";
 
 export const metadata: Metadata = {
@@ -11,10 +12,10 @@ export const metadata: Metadata = {
     title: "Green Claims Directive – Anti-Greenwashing Guide 2026",
     description:
       "Welche Umweltaussagen ab 2026/2027 illegal sind, Nachweispflichten und Compliance-Fahrplan für Marketing & E-Commerce.",
-    url: "https://eu-compliance-hub.eu/green-claims",
+    url: `${BASE_URL}/green-claims`,
   },
   alternates: {
-    canonical: "https://eu-compliance-hub.eu/green-claims",
+    canonical: `${BASE_URL}/green-claims`,
   },
 };
 
@@ -24,13 +25,13 @@ const jsonLd = {
   headline: "Green Claims Directive – Anti-Greenwashing Guide 2026",
   description:
     "Green Claims Directive erklärt: Nachweispflichten für Umweltaussagen, verbotene Claims und Compliance-Fahrplan.",
-  url: "https://eu-compliance-hub.eu/green-claims",
+  url: `${BASE_URL}/green-claims`,
   datePublished: "2026-02-19",
-  dateModified: "2026-02-19",
+  dateModified: "2026-02-20",
   inLanguage: "de",
-  author: { "@type": "Organization", name: "EU Compliance Hub", url: "https://eu-compliance-hub.eu" },
-  publisher: { "@type": "Organization", name: "EU Compliance Hub", url: "https://eu-compliance-hub.eu" },
-  mainEntityOfPage: { "@type": "WebPage", "@id": "https://eu-compliance-hub.eu/green-claims" },
+  author: { "@type": "Organization", name: "EU Compliance Hub", url: BASE_URL },
+  publisher: { "@type": "Organization", name: "EU Compliance Hub", url: BASE_URL },
+  mainEntityOfPage: { "@type": "WebPage", "@id": `${BASE_URL}/green-claims` },
   about: {
     "@type": "Legislation",
     name: "Richtlinie (EU) 2024/825 – Empowering Consumers for the Green Transition",
@@ -38,10 +39,71 @@ const jsonLd = {
   },
 };
 
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "Was ist die Green Claims Directive?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Die Green Claims Directive (Richtlinie (EU) 2024/825) ist eine EU-Richtlinie gegen Greenwashing. Sie verbietet irreführende Umweltaussagen in der Werbung und verlangt, dass Unternehmen Umweltbehauptungen durch unabhängige, wissenschaftlich fundierte Nachweise belegen müssen.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Welche Umweltaussagen sind ab 2026 verboten?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Verboten sind pauschale, unspezifische Aussagen wie 'klimaneutral', 'umweltfreundlich' oder 'grün' ohne konkreten Nachweis. Auch Umwelt-Labels, die nicht auf offiziellen Zertifizierungssystemen basieren, und CO₂-Kompensationsbasierte Klimaneutralitäts-Claims werden untersagt.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Welche Strafen drohen bei Greenwashing nach der Green Claims Directive?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Die Strafen können bis zu 4 % des Jahresumsatzes betragen. Zusätzlich drohen Unterlassungsverfügungen, öffentliche Bekanntmachung der Verstöße und der Ausschluss von öffentlichen Vergabeverfahren. Verbraucher können außerdem Schadensersatz über die Verbandsklagerichtlinie geltend machen.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Ab wann gilt die Green Claims Directive?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Die Richtlinie (EU) 2024/825 zur Stärkung der Verbraucher für den ökologischen Wandel trat am 26. März 2024 in Kraft. Die Mitgliedstaaten müssen sie bis 27. März 2026 in nationales Recht umsetzen. Die weitergehende Green-Claims-Verordnung wird voraussichtlich 2027/2028 gelten.",
+      },
+    },
+  ],
+};
+
+/* ── Breadcrumb Schema ── */
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "EU Compliance Hub",
+      item: BASE_URL,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Green Claims Directive",
+      item: `${BASE_URL}/green-claims`,
+    },
+  ],
+};
+
 export default function GreenClaimsPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <GuideContent />
     </>
   );

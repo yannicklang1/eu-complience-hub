@@ -8,6 +8,7 @@ import AccordionSection from "@/components/AccordionSection";
 import LawRef from "@/components/LawRef";
 import { SourceRef, SourceList, type Source } from "@/components/SourceRef";
 import ToolRecommendation from "@/components/ToolRecommendation";
+import RelatedGuides from "@/components/RelatedGuides";
 
 /* ─────────────────── Sources (Perplexity-style) ─────────────────── */
 const sources: Source[] = [
@@ -351,6 +352,7 @@ export default function GuideContent() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
         </svg>
       }
+      href="/nisg-2026"
     >
       {/* ═══════════════════ 1. ÜBERBLICK ═══════════════════ */}
       <Section id="ueberblick" title="Überblick: Was ist das NISG 2026?">
@@ -1302,6 +1304,9 @@ export default function GuideContent() {
           ]}
         />
       </Section>
+
+      {/* ═══════════════════ VERWANDTE REGULIERUNGEN ═══════════════════ */}
+      <RelatedGuides currentGuide="nisg-2026" accent="#1e40af" />
 
       {/* ═══════════════════ SOFTWARE-EMPFEHLUNGEN ═══════════════════ */}
       <ToolRecommendation regulationKey="nis2" accent="#0ea5e9" />

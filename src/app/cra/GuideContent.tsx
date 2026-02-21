@@ -8,6 +8,7 @@ import AccordionSection from "@/components/AccordionSection";
 import LawRef from "@/components/LawRef";
 import { SourceRef, SourceList, type Source } from "@/components/SourceRef";
 import ToolRecommendation from "@/components/ToolRecommendation";
+import RelatedGuides from "@/components/RelatedGuides";
 
 /* ─────────────────── Sources ─────────────────── */
 const sources: Source[] = [
@@ -256,6 +257,7 @@ export default function GuideContent() {
       tocItems={tocItems}
       quickFacts={quickFacts}
       trustBadge={{ lastReview: "18.02.2026", sourceCount: 5 }}
+      href="/cra"
     >
       {/* ═══════════════ 1. ÜBERBLICK ═══════════════ */}
       <Section id="ueberblick" title="Was ist der Cyber Resilience Act?">
@@ -406,7 +408,7 @@ export default function GuideContent() {
         </div>
 
         <div className="rounded-2xl border border-[#d8dff0] bg-white p-6">
-          <h3 className="font-[Syne] font-bold text-[#060c1a] mb-3 text-sm">Was ist ein \u201EProdukt mit digitalen Elementen"?</h3>
+          <h3 className="font-[Syne] font-bold text-[#060c1a] mb-3 text-sm">Was ist ein {"\u201EProdukt mit digitalen Elementen\u201D"}?</h3>
           <p className="text-sm text-[#3a4a6b] leading-relaxed mb-4">
             Jedes Hardware- oder Softwareprodukt, das direkt oder indirekt mit einem Gerät oder Netzwerk
             verbunden ist oder verbunden werden kann. Dazu gehören auch <strong>Remote-Datenverarbeitungslösungen</strong>,
@@ -946,7 +948,7 @@ export default function GuideContent() {
               <h3 className="font-[Syne] font-bold text-[#060c1a]">EU AI Act</h3>
             </div>
             <p className="text-sm text-[#3a4a6b] leading-relaxed">
-              KI-Systeme, die als \u201EProdukt mit digitalen Elementen" gelten, müssen sowohl den AI Act als auch den
+              KI-Systeme, die als {"\u201EProdukt mit digitalen Elementen\u201D"} gelten, müssen sowohl den AI Act als auch den
               CRA erfüllen. Die Cybersecurity-Anforderungen des CRA gelten zusätzlich zu den KI-spezifischen
               Anforderungen. Hochrisiko-KI-Systeme mit CRA-Konformität erfüllen die Cybersecurity-Anforderung
               des AI Act (<LawRef law="AI Act" article="15">Art. 15</LawRef>) automatisch.
@@ -1112,6 +1114,9 @@ export default function GuideContent() {
           ]}
         />
       </Section>
+
+      {/* ═══════════════════ VERWANDTE REGULIERUNGEN ═══════════════════ */}
+      <RelatedGuides currentGuide="cra" accent="#dc2626" />
 
       {/* ═══════════════════ SOFTWARE-EMPFEHLUNGEN ═══════════════════ */}
       <ToolRecommendation regulationKey="cra" accent="#8b5cf6" />

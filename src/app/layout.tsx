@@ -1,9 +1,35 @@
 import type { Metadata } from "next";
+import { Syne, DM_Sans, DM_Mono } from "next/font/google";
 import CookieConsent from "@/components/CookieConsent";
 import AdBlockOverlay from "@/components/AdBlockOverlay";
+import { AdSenseScript } from "@/components/AdSense";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
+import BackToTop from "@/components/BackToTop";
+import { BASE_URL } from "@/lib/constants";
 import "./globals.css";
 
-const BASE_URL = "https://eu-compliance-hub.eu";
+/* ── Self-hosted Google Fonts via next/font (automatic subsetting + no CLS) ── */
+const syne = Syne({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+  variable: "--font-syne",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
+  variable: "--font-dm-sans",
+});
+
+const dmMono = DM_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
+  variable: "--font-dm-mono",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -67,10 +93,55 @@ const jsonLd = {
     "@type": "SearchAction",
     target: {
       "@type": "EntryPoint",
-      urlTemplate: `${BASE_URL}/?q={search_term_string}`,
+      urlTemplate: `${BASE_URL}/wissen?q={search_term_string}`,
     },
     "query-input": "required name=search_term_string",
   },
+};
+
+/* ── JSON-LD Organization (Knowledge Panel) ── */
+const orgJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "EU Compliance Hub",
+  url: BASE_URL,
+  description:
+    "Europäische Regulierungen klar erklärt — NISG 2026, EU AI Act, DORA, CRA, DSGVO, CSRD, BaFG, HSchG. Für KMUs und Konzerne in Österreich und der EU.",
+  foundingDate: "2026",
+  areaServed: [
+    { "@type": "Country", name: "AT" },
+    { "@type": "Country", name: "DE" },
+    { "@type": "Country", name: "CH" },
+  ],
+  knowsAbout: [
+    "EU Compliance",
+    "NIS2",
+    "DORA",
+    "EU AI Act",
+    "CRA",
+    "DSGVO",
+    "CSRD",
+    "BaFG",
+    "HSchG",
+    "Cybersecurity Regulation",
+  ],
+};
+
+/* ── JSON-LD SiteNavigationElement (Rich Sitelinks) ── */
+const siteNavJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  itemListElement: [
+    { "@type": "SiteNavigationElement", position: 1, name: "NISG 2026", url: `${BASE_URL}/nisg-2026` },
+    { "@type": "SiteNavigationElement", position: 2, name: "EU AI Act", url: `${BASE_URL}/eu-ai-act` },
+    { "@type": "SiteNavigationElement", position: 3, name: "DORA", url: `${BASE_URL}/dora` },
+    { "@type": "SiteNavigationElement", position: 4, name: "CRA", url: `${BASE_URL}/cra` },
+    { "@type": "SiteNavigationElement", position: 5, name: "DSGVO", url: `${BASE_URL}/dsgvo` },
+    { "@type": "SiteNavigationElement", position: 6, name: "Compliance-Tools", url: `${BASE_URL}/tools` },
+    { "@type": "SiteNavigationElement", position: 7, name: "Aktuelles", url: `${BASE_URL}/aktuelles` },
+    { "@type": "SiteNavigationElement", position: 8, name: "FAQ", url: `${BASE_URL}/faq` },
+    { "@type": "SiteNavigationElement", position: 9, name: "Kontakt", url: `${BASE_URL}/kontakt` },
+  ],
 };
 
 export default function RootLayout({
@@ -79,30 +150,34 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="de" className="scroll-smooth">
+    <html lang="de" className={`scroll-smooth ${syne.variable} ${dmSans.variable} ${dmMono.variable}`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap"
-          rel="stylesheet"
-        />
+        {/* DNS-prefetch for third-party services */}
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteNavJsonLd) }}
         />
       </head>
       <body className="antialiased">
         <a href="#main-content" className="skip-link">
           Zum Hauptinhalt springen
         </a>
-        <div id="main-content">{children}</div>
+        <main id="main-content">{children}</main>
         <CookieConsent />
         <AdBlockOverlay />
+        <GoogleAnalytics />
+        <AdSenseScript />
+        <BackToTop />
       </body>
     </html>
   );

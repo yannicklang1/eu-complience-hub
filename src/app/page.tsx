@@ -1,12 +1,18 @@
 "use client";
 
-import { useState, useEffect, useRef, type ReactNode } from "react";
+import { useState, useEffect, useRef, useMemo, type ReactNode } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FristenRadarSignup from "@/components/FristenRadarSignup";
-import ComplianceRadar from "@/components/ComplianceRadar";
+import AnimatedCounter from "@/components/AnimatedCounter";
 import { DEADLINES, isPast, daysUntil } from "@/data/deadlines";
+
+/* Lazy-load ComplianceRadar — heavy framer-motion animation, desktop-only */
+const ComplianceRadar = dynamic(() => import("@/components/ComplianceRadar"), {
+  ssr: false,
+});
 
 /* ─── Data ────────────────────────────────────────── */
 
@@ -68,27 +74,13 @@ const pillars = [
 ];
 
 const toolsList = [
+  { title: "Regulierung-Finder", desc: "Finden Sie in 3 Minuten heraus, welche EU-Regulierungen für Ihr Unternehmen relevant sind — personalisiert nach Branche, Größe und Tätigkeit.", cta: "Quiz starten", href: "/tools/regulierung-finder", badge: "Neu", icon: "compass", accent: "#FACC15", accentLight: "#fef9e7" },
+  { title: "Compliance-Checkliste", desc: "Prüfen Sie Punkt für Punkt, welche EU-Compliance-Anforderungen Ihr Unternehmen bereits erfüllt.", cta: "Checkliste starten", href: "/tools/compliance-checkliste", badge: "Neu", icon: "list", accent: "#FACC15", accentLight: "#fef9e7" },
   { title: "GF-Haftungs-Guide", desc: "Geschäftsführer-Haftung bei NIS2, DORA, AI Act & CRA — persönliche Risiken und Enthaftungsstrategien.", cta: "Guide lesen", href: "/haftungs-check", badge: "Neu", icon: "scale", accent: "#0A2540", accentLight: "#e8eeff" },
-  { title: "Fördermittel-Radar", desc: "Welche Förderungen stehen dir für Compliance-Maßnahmen zu? Finde passende Programme.", cta: "Förderungen finden", href: "/foerdermittel", badge: "Österreich", icon: "coins", accent: "#059669", accentLight: "#ecfdf5" },
-  { title: "Compliance-Verzeichnis", desc: "Kuratierte Liste von Auditoren, Software und Beratern für jedes Regulierungsthema.", cta: "Verzeichnis öffnen", href: "/compliance-verzeichnis", badge: "Kuratiert", icon: "list", accent: "#7c3aed", accentLight: "#f3f0ff" },
+  { title: "Fristen-Radar", desc: "Alle EU-Compliance-Deadlines auf einen Blick — personalisiert nach Ihren relevanten Regulierungen.", cta: "Fristen prüfen", href: "/fristen-radar", badge: "Interaktiv", icon: "calendar", accent: "#1e40af", accentLight: "#e8ecff" },
+  { title: "Kosten-Kalkulator", desc: "Schätzen Sie die Kosten für EU-Compliance — individuell nach Unternehmensgröße, Reifegrad und Regulierungen.", cta: "Kosten berechnen", href: "/tools/kosten-kalkulator", badge: "Neu", icon: "coins", accent: "#16a34a", accentLight: "#f0fdf4" },
+  { title: "Compliance-Glossar", desc: "Über 45 Fachbegriffe aus EU-Compliance verständlich erklärt — von AI Act bis Zero Trust.", cta: "Glossar öffnen", href: "/glossar", badge: "Neu", icon: "book", accent: "#7c3aed", accentLight: "#f3f0ff" },
 ];
-
-/* ─── Brand Shield SVG (decorative, for hero section) ─── */
-function BrandShieldLarge({ size = 200, className = "", opacity = 0.12 }: { size?: number; className?: string; opacity?: number }) {
-  return (
-    <svg viewBox="0 0 64 64" width={size} height={size} className={className} fill="none" style={{ opacity }}>
-      {/* Outer shield */}
-      <path d="M32 4 L55 14.5 V30 C55 44 45 54 32 60 C19 54 9 44 9 30 V14.5 Z"
-        stroke="#FACC15" strokeWidth="1.2" fill="none" />
-      {/* Inner shield */}
-      <path d="M32 10 L50 18.5 V30 C50 42 42 50 32 55 C22 50 14 42 14 30 V18.5 Z"
-        stroke="#FACC15" strokeWidth="0.5" fill="none" opacity="0.4" />
-      {/* § symbol */}
-      <text x="32" y="44" textAnchor="middle" fontFamily="Syne, Georgia, serif"
-        fontWeight="700" fontSize="34" fill="#FACC15" opacity="0.6">&#167;</text>
-    </svg>
-  );
-}
 
 /* ─── Small Brand Shield for cards ─── */
 function BrandShieldSmall({ size = 28 }: { size?: number }) {
@@ -134,6 +126,12 @@ function IconCoins({ className = "w-6 h-6" }: { className?: string }) {
 function IconList({ className = "w-6 h-6" }: { className?: string }) {
   return <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></svg>;
 }
+function IconBook({ className = "w-6 h-6" }: { className?: string }) {
+  return <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" /></svg>;
+}
+function IconCalendar({ className = "w-6 h-6" }: { className?: string }) {
+  return <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>;
+}
 function IconArrowRight({ className = "w-4 h-4" }: { className?: string }) {
   return <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-7-7l7 7-7 7" /></svg>;
 }
@@ -146,10 +144,14 @@ function IconCheck({ className = "w-4 h-4" }: { className?: string }) {
 function IconArrowDown({ className = "w-4 h-4" }: { className?: string }) {
   return <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14m-7-7l7 7 7-7" /></svg>;
 }
+function IconCompass({ className = "w-6 h-6" }: { className?: string }) {
+  return <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" /></svg>;
+}
 
 const iconMap: Record<string, (props: { className?: string }) => ReactNode> = {
   shield: IconShield, brain: IconBrain, building: IconBuilding, cpu: IconCpu,
-  scale: IconScale, coins: IconCoins, list: IconList,
+  scale: IconScale, coins: IconCoins, list: IconList, book: IconBook, calendar: IconCalendar,
+  compass: IconCompass,
 };
 
 /* ── Secondary regulation icons (for "Weitere Regulierungen" section) ── */
@@ -204,6 +206,7 @@ function Countdown({ deadline, label }: { deadline: string; label: string }) {
   const [days, setDays] = useState<number | null>(null);
   useEffect(() => {
     const d = Math.floor((new Date(deadline).getTime() - Date.now()) / 86400000);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDays(d);
   }, [deadline]);
   if (days === null) return null;
@@ -282,7 +285,10 @@ function SectionLabel({ children, dark = false }: { children: ReactNode; dark?: 
    ══════════════════════════════════════════════════════ */
 export default function HomePage() {
   const [filter, setFilter] = useState<"all" | "live" | "upcoming">("all");
-  const filtered = pillars.filter(p => filter === "all" || p.status === filter);
+  const filtered = useMemo(
+    () => pillars.filter(p => filter === "all" || p.status === filter),
+    [filter],
+  );
 
   return (
     <>
@@ -290,7 +296,7 @@ export default function HomePage() {
       <main>
 
         {/* ════════ HERO ════════ */}
-        <section className="relative h-svh max-h-svh flex flex-col overflow-hidden">
+        <section aria-label="Hero – EU Compliance Hub" className="relative h-svh max-h-svh flex flex-col overflow-hidden">
           {/* Multi-layer gradient bg */}
           <div className="absolute inset-0 bg-[#040a18]" />
           <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 60% at 50% 40%, #0a1a55 0%, transparent 70%)" }} />
@@ -342,7 +348,7 @@ export default function HomePage() {
             {/* Subtitle */}
             <p className="animate-slide-up opacity-0 text-white/65 text-sm sm:text-base max-w-xl leading-relaxed mb-6 flex-shrink-0"
               style={{ animationDelay: "0.35s", animationFillMode: "forwards" }}>
-              18 Regulierungen – von NISG über AI Act bis eIDAS – die dein Unternehmen
+              18 Regulierungen – von NISG über AI Act bis eIDAS – die Ihr Unternehmen
               direkt betreffen. Wir übersetzen EU-Amtsblatt in konkrete
               Checklisten, klare Fristen und echte Lösungen.
             </p>
@@ -397,7 +403,7 @@ export default function HomePage() {
         </div>
 
         {/* ════════ STATS ════════ */}
-        <section className="relative bg-[#060c1a] py-24 overflow-hidden">
+        <section aria-label="Statistiken" className="relative bg-[#060c1a] py-24 overflow-hidden">
           <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 60% 60% at 50% 50%, rgba(10,37,64,0.15) 0%, transparent 70%)" }} />
           <div className="relative max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12 md:gap-8">
             <Stat value="18" suffix="Regulierungen" label="im Überblick" />
@@ -408,7 +414,7 @@ export default function HomePage() {
         </section>
 
         {/* ════════ REGULATION PILLARS ════════ */}
-        <section id="regulierungen" className="py-28 lg:py-36 relative overflow-hidden" style={{ background: "linear-gradient(180deg, #f4f6fc 0%, #eef1fa 100%)" }}>
+        <section id="regulierungen" aria-label="Regulierungen im Überblick" className="py-28 lg:py-36 relative overflow-hidden" style={{ background: "linear-gradient(180deg, #f4f6fc 0%, #eef1fa 100%)" }}>
           {/* Subtle dot pattern */}
           <div className="absolute inset-0 pointer-events-none opacity-40" style={{ backgroundImage: "radial-gradient(circle, rgba(10,37,64,0.07) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
 
@@ -417,11 +423,11 @@ export default function HomePage() {
             <Reveal>
               <SectionLabel>Die Kernsäulen</SectionLabel>
               <h2 className="font-[Syne] font-extrabold text-4xl sm:text-5xl md:text-6xl tracking-tight text-[#060c1a] leading-[0.95] mb-5">
-                Was dich<br />
+                Was Sie<br />
                 <span className="bg-gradient-to-r from-[#0A2540] to-[#163560] bg-clip-text text-transparent">betrifft.</span>
               </h2>
               <p className="text-lg text-[#3a4a6b] max-w-lg leading-relaxed mb-10">
-                Vier Regulierungen. Klare Fristen. Echte Strafen. Hier findest du alles, was du jetzt wissen musst.
+                Vier Regulierungen. Klare Fristen. Echte Strafen. Hier finden Sie alles, was Sie jetzt wissen müssen.
               </p>
             </Reveal>
 
@@ -453,7 +459,7 @@ export default function HomePage() {
         </section>
 
         {/* ════════ WEITERE REGULIERUNGEN ════════ */}
-        <section className="py-20 lg:py-24 bg-white relative overflow-hidden">
+        <section aria-label="Weitere EU-Regulierungen" className="py-20 lg:py-24 bg-white relative overflow-hidden">
           <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
             <Reveal>
               <SectionLabel>Weitere EU-Regulierungen</SectionLabel>
@@ -462,7 +468,7 @@ export default function HomePage() {
                 <span className="bg-gradient-to-r from-[#0A2540] to-[#163560] bg-clip-text text-transparent">mehr.</span>
               </h2>
               <p className="text-base text-[#3a4a6b] max-w-lg leading-relaxed mb-12">
-                Von Datenschutz über Nachhaltigkeit bis digitale Identität — vierzehn weitere EU-Regulierungen, die dein Unternehmen betreffen.
+                Von Datenschutz über Nachhaltigkeit bis digitale Identität — dreizehn weitere EU-Regulierungen, die Ihr Unternehmen betreffen.
               </p>
             </Reveal>
 
@@ -519,7 +525,7 @@ export default function HomePage() {
         </section>
 
         {/* ════════ TIMELINE PREVIEW ════════ */}
-        <section className="py-28 lg:py-36 relative overflow-hidden" style={{ background: "linear-gradient(180deg, #060c1a 0%, #0a1633 50%, #060c1a 100%)" }}>
+        <section aria-label="Timeline-Vorschau" className="py-28 lg:py-36 relative overflow-hidden" style={{ background: "linear-gradient(180deg, #060c1a 0%, #0a1633 50%, #060c1a 100%)" }}>
           <div className="absolute inset-0 pointer-events-none opacity-20" style={{ backgroundImage: "radial-gradient(circle, rgba(10,37,64,0.3) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
           <div className="relative max-w-5xl mx-auto px-6 sm:px-8 lg:px-12">
             <Reveal>
@@ -587,8 +593,116 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ════════ TRUST SIGNALS ════════ */}
+        <section aria-label="Plattform in Zahlen" className="py-16 bg-white border-b border-[#e8ecf4]">
+          <div className="max-w-5xl mx-auto px-6 lg:px-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+              {[
+                { target: 18, suffix: "+", label: "EU-Regulierungen erklärt", icon: "📜" },
+                { target: 8, suffix: "", label: "Kostenlose Tools", icon: "⚡" },
+                { target: 70, suffix: "+", label: "Glossar-Einträge", icon: "📖" },
+                { target: 100, suffix: "%", label: "Unabhängig & werbefrei", icon: "🛡️" },
+              ].map((stat) => (
+                <Reveal key={stat.label}>
+                  <div>
+                    <span className="text-lg mb-2 block">{stat.icon}</span>
+                    <AnimatedCounter
+                      target={stat.target}
+                      suffix={stat.suffix}
+                      duration={2}
+                      className="font-[Syne] font-extrabold text-3xl text-[#060c1a] mb-1 block"
+                    />
+                    <div className="text-xs text-[#7a8db0] font-medium">{stat.label}</div>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ QUICK START ════════ */}
+        <section aria-label="Schnelleinstieg" className="py-20 lg:py-24 bg-[#060c1a] relative overflow-hidden">
+          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(250,204,21,0.04) 0%, transparent 70%)" }} />
+          <div className="relative max-w-5xl mx-auto px-6 lg:px-12">
+            <Reveal>
+              <div className="text-center mb-12">
+                <span className="inline-block font-mono text-[11px] font-semibold tracking-widest uppercase text-[#FACC15] mb-4">
+                  In 3 Schritten zur Compliance
+                </span>
+                <h2 className="font-[Syne] font-extrabold text-3xl sm:text-4xl text-white tracking-tight leading-[1.05] mb-4">
+                  So starten Sie
+                </h2>
+                <p className="text-slate-400 text-base max-w-lg mx-auto leading-relaxed">
+                  Von der Erstanalyse bis zum Umsetzungsplan — unser Workflow führt Sie systematisch durch den Compliance-Prozess.
+                </p>
+              </div>
+            </Reveal>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                {
+                  step: "01",
+                  title: "Regulierungen identifizieren",
+                  desc: "Nutzen Sie den Regulierung-Finder, um in 3 Minuten herauszufinden, welche EU-Gesetze für Ihr Unternehmen gelten.",
+                  cta: "Quiz starten",
+                  href: "/tools/regulierung-finder",
+                  accent: "#FACC15",
+                },
+                {
+                  step: "02",
+                  title: "Status prüfen",
+                  desc: "Checken Sie mit der Compliance-Checkliste, welche Anforderungen Sie bereits erfüllen — und wo Lücken bestehen.",
+                  cta: "Checkliste öffnen",
+                  href: "/tools/compliance-checkliste",
+                  accent: "#10b981",
+                },
+                {
+                  step: "03",
+                  title: "Budget & Reifegrad planen",
+                  desc: "Kalkulieren Sie die Umsetzungskosten und messen Sie Ihren aktuellen Compliance-Reifegrad.",
+                  cta: "Kosten berechnen",
+                  href: "/tools/kosten-kalkulator",
+                  accent: "#3b82f6",
+                },
+              ].map((item, i) => (
+                <Reveal key={item.step} delay={i * 100}>
+                  <Link
+                    href={item.href}
+                    className="group flex flex-col h-full rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 sm:p-8 hover:bg-white/[0.05] hover:border-white/10 transition-all duration-300"
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <span
+                        className="font-[Syne] font-extrabold text-2xl"
+                        style={{ color: item.accent }}
+                      >
+                        {item.step}
+                      </span>
+                      <div className="h-px flex-1 bg-white/[0.06]" />
+                    </div>
+                    <h3 className="font-[Syne] font-bold text-lg text-white mb-2 group-hover:text-[#FACC15] transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-slate-400 leading-relaxed flex-1 mb-4">
+                      {item.desc}
+                    </p>
+                    <span
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold transition-all duration-200 group-hover:gap-2.5"
+                      style={{ color: item.accent }}
+                    >
+                      {item.cta}
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                      </svg>
+                    </span>
+                  </Link>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* ════════ TOOLS ════════ */}
-        <section id="tools" className="py-28 lg:py-36 relative overflow-hidden" style={{ background: "linear-gradient(180deg, #f4f6fc 0%, #eef1fa 100%)" }}>
+        <section id="tools" aria-label="Compliance-Tools" className="py-28 lg:py-36 relative overflow-hidden" style={{ background: "linear-gradient(180deg, #f4f6fc 0%, #eef1fa 100%)" }}>
           <div className="absolute inset-0 pointer-events-none opacity-40" style={{ backgroundImage: "radial-gradient(circle, rgba(10,37,64,0.07) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
 
           <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -613,7 +727,7 @@ export default function HomePage() {
         </section>
 
         {/* ════════ WHY US ════════ */}
-        <section className="py-28 lg:py-36 bg-white relative overflow-hidden">
+        <section aria-label="Warum EU Compliance Hub" className="py-28 lg:py-36 bg-white relative overflow-hidden">
           {/* Subtle bg accent */}
           <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(10,37,64,0.04) 0%, transparent 70%)" }} />
 
@@ -627,7 +741,7 @@ export default function HomePage() {
                 </h2>
                 <p className="text-lg text-[#3a4a6b] leading-relaxed mb-10">
                   EU-Verordnungen lesen sich wie Kafka auf Juristendeutsch. Wir lesen
-                  sie für dich – und destillieren das Wesentliche in klare Handlungsschritte.
+                  sie für Sie – und destillieren das Wesentliche in klare Handlungsschritte.
                 </p>
                 <div className="space-y-6">
                   {[
@@ -723,8 +837,63 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ════════ NEWS PREVIEW ════════ */}
+        <section aria-label="Aktuelles und Regulierungsvergleich" className="py-16 lg:py-20 relative overflow-hidden bg-[#f4f6fc]">
+          <div className="max-w-7xl mx-auto px-6 lg:px-12">
+            <Reveal>
+              <div className="text-center mb-10">
+                <h2 className="font-[Syne] font-extrabold text-3xl md:text-4xl text-[#060c1a] tracking-tight leading-tight mb-3">
+                  Aktuelles zur Compliance
+                </h2>
+                <p className="text-[#7a8db0] text-base max-w-lg mx-auto">
+                  Neue Gesetze, kommende Fristen und wichtige Entwicklungen
+                </p>
+              </div>
+            </Reveal>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              {[
+                { date: "25. Juni 2025", label: "NIS2", color: "#1e40af", title: "NISG 2026 veröffentlicht", desc: "Inkrafttreten am 1. Oktober 2026, Registrierung bis Ende 2026", href: "/nisg-2026" },
+                { date: "28. Juni 2025", label: "BaFG", color: "#2563eb", title: "Barrierefreiheitsgesetz in Kraft", desc: "Digitale Produkte und Dienste müssen barrierefrei sein", href: "/bafg" },
+                { date: "1. Jan. 2026", label: "CSRD", color: "#16a34a", title: "CSRD: Zweite Welle für große Unternehmen", desc: "Berichtspflicht ab 250 Mitarbeiter / 50 Mio. Umsatz", href: "/csrd-esg" },
+              ].map((news) => (
+                <Reveal key={news.title}>
+                  <Link
+                    href={news.href}
+                    className="group block rounded-2xl bg-white border border-[#d8dff0] p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-900/[0.06] hover:border-[#b8c4e0] h-full"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-[11px] font-mono text-[#7a8db0]">{news.date}</span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: `${news.color}15`, color: news.color }}>
+                        {news.label}
+                      </span>
+                    </div>
+                    <h3 className="font-[Syne] font-bold text-[15px] text-[#060c1a] group-hover:text-[#1e40af] transition-colors mb-1">
+                      {news.title}
+                    </h3>
+                    <p className="text-xs text-[#7a8db0]">{news.desc}</p>
+                  </Link>
+                </Reveal>
+              ))}
+            </div>
+
+            <Reveal>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link href="/aktuelles" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-[Syne] font-bold text-sm text-white bg-[#0A2540] hover:-translate-y-0.5 transition-all">
+                  Alle News ansehen
+                  <IconArrowRight className="w-4 h-4" />
+                </Link>
+                <Link href="/vergleich" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-[Syne] font-semibold text-sm text-[#3a4a6b] border border-[#d8dff0] hover:bg-white hover:border-[#b8c4e0] transition-all">
+                  Regulierungsvergleich
+                  <IconArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
         {/* ════════ FRISTEN-RADAR ════════ */}
-        <section className="py-28 lg:py-36 relative overflow-hidden">
+        <section aria-label="Compliance-Briefing und Fristen-Radar" className="py-28 lg:py-36 relative overflow-hidden">
           {/* Multi-layer bg */}
           <div className="absolute inset-0 bg-[#0A2540]" />
           <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 60% at 30% 50%, rgba(0,20,80,0.5) 0%, transparent 70%)" }} />
@@ -742,13 +911,13 @@ export default function HomePage() {
 
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-medium text-blue-300 mb-6">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-                Fristen-Radar
+                Compliance-Briefing
               </div>
               <h2 className="font-[Syne] font-extrabold text-4xl md:text-5xl lg:text-6xl text-white tracking-tight leading-[1] mb-6">
                 Keine Frist<br /><span className="text-blue-300">verpassen.</span>
               </h2>
               <p className="text-lg text-white/60 max-w-md mx-auto mb-10 leading-relaxed">
-                Nur bei kritischen Fristen und neuen Fördergeldern. Kein Spam. Maximal 3× pro Monat.
+                Ihr regulatorisches Briefing — nur bei kritischen Fristen und Gesetzesänderungen. Maximal 3× pro Monat.
               </p>
             </Reveal>
 

@@ -3,7 +3,10 @@
 import { useState, type FormEvent } from "react";
 
 /**
- * Fristen-Radar Signup — compact email form with API integration.
+ * Compliance-Briefing Signup — compact email form with API integration.
+ *
+ * Includes legally required separate consent for commercial content
+ * (§26 MedienG AT, §5a UWG DE, §174 TKG 2021).
  *
  * Variants:
  * - "hero" (default): white text on dark bg (for homepage hero / dark sections)
@@ -15,6 +18,7 @@ export default function FristenRadarSignup({
   variant?: "hero" | "card";
 }) {
   const [email, setEmail] = useState("");
+  const [commercialConsent, setCommercialConsent] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
@@ -33,6 +37,7 @@ export default function FristenRadarSignup({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
+          commercial_consent: commercialConsent,
           source: "fristen-radar",
           source_page: typeof window !== "undefined" ? window.location.pathname : "/",
         }),
@@ -60,7 +65,7 @@ export default function FristenRadarSignup({
     return (
       <div className={`flex flex-col items-center gap-3 py-4 ${isHero ? "text-white" : "text-[#060c1a]"}`}>
         <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center">
-          <svg className="w-7 h-7 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="w-7 h-7 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
           </svg>
         </div>
@@ -75,7 +80,7 @@ export default function FristenRadarSignup({
   }
 
   return (
-    <div>
+    <div data-newsletter-signup="">
       <form
         className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
         onSubmit={handleSubmit}
@@ -88,6 +93,7 @@ export default function FristenRadarSignup({
             if (status === "error") setStatus("idle");
           }}
           placeholder="ihre@firma.at"
+          aria-label="E-Mail-Adresse für Compliance-Briefing"
           required
           className={
             isHero
@@ -107,26 +113,45 @@ export default function FristenRadarSignup({
           <span className="relative z-10">
             {status === "loading" ? (
               <span className="flex items-center gap-2">
-                <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
                 Wird gesendet…
               </span>
             ) : (
-              "Anmelden"
+              "Briefing aktivieren"
             )}
           </span>
           <div className="absolute inset-0 bg-gradient-to-r from-amber-300 to-[#FACC15] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </button>
       </form>
 
+      {/* Optional commercial content consent (§26 MedienG AT, §5a UWG DE) */}
+      <label
+        className={`flex items-start gap-3 mt-4 max-w-md mx-auto cursor-pointer group ${
+          isHero ? "text-white/40 hover:text-white/60" : "text-[#7a8db0]/70 hover:text-[#7a8db0]"
+        } transition-colors`}
+      >
+        <input
+          type="checkbox"
+          checked={commercialConsent}
+          onChange={(e) => setCommercialConsent(e.target.checked)}
+          className="mt-0.5 w-4 h-4 rounded border-2 flex-shrink-0 accent-[#FACC15] cursor-pointer"
+        />
+        <span className="text-[11px] leading-relaxed">
+          Ich möchte gelegentlich auch Hinweise auf geprüfte Compliance-Tools erhalten.
+          Diese sind als <strong>Anzeige</strong> gekennzeichnet.{" "}
+          <span className={isHero ? "text-white/25" : "text-[#7a8db0]/50"}>(Optional)</span>
+        </span>
+      </label>
+
       {status === "error" && (
-        <p className="text-sm text-red-400 mt-3">{message}</p>
+        <p className="text-sm text-red-400 mt-3" role="alert">{message}</p>
       )}
 
-      <p className={`font-mono text-[11px] mt-6 tracking-wide ${isHero ? "text-white/20" : "text-[#7a8db0]/60"}`}>
-        Nur bei kritischen Fristen. Max. 3×/Monat. Jederzeit abmeldbar. DSGVO-konform.
+      <p className={`font-mono text-[11px] mt-5 tracking-wide ${isHero ? "text-white/20" : "text-[#7a8db0]/60"}`}>
+        Nur bei kritischen Fristen und Gesetzesänderungen. Max. 3×/Monat. Jederzeit kündbar. DSGVO-konform.
       </p>
     </div>
   );
