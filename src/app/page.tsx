@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, type ReactNode } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FristenRadarSignup from "@/components/FristenRadarSignup";
@@ -290,13 +291,39 @@ export default function HomePage() {
     [filter],
   );
 
+  /* ── Mouse parallax for hero radar ── */
+  const rawMouseX = useMotionValue(0);
+  const rawMouseY = useMotionValue(0);
+  const smoothMouseX = useSpring(rawMouseX, { stiffness: 50, damping: 20 });
+  const smoothMouseY = useSpring(rawMouseY, { stiffness: 50, damping: 20 });
+
+  /* Grid overlay parallax: moves opposite to mouse */
+  const gridTx = useTransform(smoothMouseX, [-1, 1], [12, -12]);
+  const gridTy = useTransform(smoothMouseY, [-1, 1], [10, -10]);
+
+  const handleHeroMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    rawMouseX.set((e.clientX - rect.left) / rect.width * 2 - 1);
+    rawMouseY.set((e.clientY - rect.top) / rect.height * 2 - 1);
+  }, [rawMouseX, rawMouseY]);
+
+  const handleHeroMouseLeave = useCallback(() => {
+    rawMouseX.set(0);
+    rawMouseY.set(0);
+  }, [rawMouseX, rawMouseY]);
+
   return (
     <>
       <Header />
       <main>
 
         {/* ════════ HERO ════════ */}
-        <section aria-label="Hero – EU Compliance Hub" className="relative h-svh max-h-svh flex flex-col overflow-hidden">
+        <section
+          aria-label="Hero – EU Compliance Hub"
+          className="relative h-svh max-h-svh flex flex-col overflow-hidden"
+          onMouseMove={handleHeroMouseMove}
+          onMouseLeave={handleHeroMouseLeave}
+        >
           {/* Multi-layer gradient bg */}
           <div className="absolute inset-0 bg-[#040a18]" />
           <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 60% at 50% 40%, #0a1a55 0%, transparent 70%)" }} />
@@ -308,12 +335,12 @@ export default function HomePage() {
             <div className="absolute bottom-[10%] left-[10%] w-[400px] h-[400px] rounded-full animate-float-delayed" style={{ background: "radial-gradient(circle, rgba(10,37,64,0.08) 0%, transparent 70%)", filter: "blur(40px)" }} />
           </div>
 
-          {/* Subtle grid overlay */}
-          <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)", backgroundSize: "80px 80px" }} />
+          {/* Subtle grid overlay — parallax: moves opposite to mouse */}
+          <motion.div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)", backgroundSize: "80px 80px", x: gridTx, y: gridTy }} />
 
-          {/* Compliance Radar — animated hero visual */}
+          {/* Compliance Radar — animated hero visual with parallax */}
           <div className="absolute top-12 right-0 md:right-8 lg:right-16 pointer-events-none hidden md:block w-[340px] h-[340px] lg:w-[420px] lg:h-[420px]">
-            <ComplianceRadar className="w-full h-full" />
+            <ComplianceRadar className="w-full h-full" mouseX={smoothMouseX} mouseY={smoothMouseY} />
           </div>
 
           {/* Gradient bottom fade */}
