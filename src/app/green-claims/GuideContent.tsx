@@ -99,12 +99,18 @@ function Section({ id, title, children }: { id: string; title: string; children:
 
 /* ─────────────────── Stat card ─────────────────── */
 function StatCard({ value, label, accent = ACCENT }: { value: string; label: string; accent?: string }) {
+  const fontSize = value.length > 14 ? "text-lg sm:text-xl" : value.length > 8 ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl";
   return (
-    <div className="rounded-2xl border border-[#d8dff0] bg-white p-5 text-center">
-      <div className="font-[Syne] font-extrabold text-2xl sm:text-3xl mb-1" style={{ color: accent }}>
+    <div className="rounded-2xl border border-[#d8dff0] bg-white p-5 text-center overflow-hidden">
+      <div
+        className={`font-[Syne] font-extrabold ${fontSize} mb-1 break-words`}
+        style={{ color: accent }}
+      >
         {value}
       </div>
-      <div className="font-mono text-[10px] text-[#7a8db0] uppercase tracking-wider">{label}</div>
+      <div className="font-mono text-[10px] text-[#7a8db0] uppercase tracking-wider">
+        {label}
+      </div>
     </div>
   );
 }
