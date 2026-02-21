@@ -113,10 +113,10 @@ export default function GuidePageLayout({
         {/* ── Trust Badge Bar ── */}
         {trustBadge && (
           <div
-            className="relative z-10"
+            className="relative z-10 pt-5"
             style={{ background: "#f4f6fc" }}
           >
-            <div className="max-w-7xl mx-auto px-6 lg:px-12 -mt-6">
+            <div className="max-w-7xl mx-auto px-6 lg:px-12">
               <div
                 className="inline-flex items-center gap-3 sm:gap-5 rounded-2xl border px-5 py-3 shadow-sm"
                 style={{
@@ -220,8 +220,12 @@ export default function GuidePageLayout({
                             {fact.label}
                           </div>
                           <div
-                            className="font-[Syne] font-bold text-[15px] leading-snug"
-                            style={{ color: accent }}
+                            className="font-[Syne] font-bold leading-snug break-words hyphens-auto"
+                            style={{
+                              color: accent,
+                              fontSize: fact.value.length > 30 ? "12px" : fact.value.length > 20 ? "13px" : "15px",
+                            }}
+                            lang="de"
                           >
                             {fact.value}
                           </div>
