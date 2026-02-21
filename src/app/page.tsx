@@ -565,17 +565,9 @@ export default function HomePage() {
               })}
             </div>
 
-            {/* Already active */}
+            {/* Already active — collapsed by default */}
             <Reveal delay={200}>
-              <div className="flex flex-wrap gap-3 mb-10">
-                {DEADLINES.filter(d => isPast(d.iso)).map(d => (
-                  <div key={`${d.reg}-${d.iso}`} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    <span className="font-mono text-[11px] text-emerald-400 font-semibold">{d.reg}</span>
-                    <span className="font-mono text-[10px] text-emerald-400/70">{d.title}</span>
-                  </div>
-                ))}
-              </div>
+              <PastDeadlinesToggle />
             </Reveal>
 
             {/* CTA to full timeline */}
@@ -713,148 +705,6 @@ export default function HomePage() {
                   </Link>
                 </Reveal>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ════════ COMPLIANCE-REPORT CTA ════════ */}
-        <section aria-label="Compliance-Report" className="py-20 lg:py-28 relative overflow-hidden">
-          {/* Rich golden-navy gradient background */}
-          <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, #0A2540 0%, #0d1f3c 40%, #122042 60%, #0A2540 100%)" }} />
-          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 60% at 30% 50%, rgba(250,204,21,0.08) 0%, transparent 70%)" }} />
-          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 50% 50% at 80% 30%, rgba(250,204,21,0.05) 0%, transparent 60%)" }} />
-          {/* Subtle grid */}
-          <div className="absolute inset-0 pointer-events-none opacity-[0.02]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-
-          <div className="relative max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-              {/* Left: Content */}
-              <Reveal>
-                <div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FACC15]/10 border border-[#FACC15]/20 mb-6">
-                    <svg className="w-4 h-4 text-[#FACC15]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
-                    </svg>
-                    <span className="text-[12px] font-bold text-[#FACC15] tracking-wide uppercase">Kostenlos & personalisiert</span>
-                  </div>
-
-                  <h2 className="font-[Syne] font-extrabold text-3xl sm:text-4xl md:text-[2.75rem] text-white tracking-tight leading-[1.05] mb-5">
-                    Ihr persönlicher<br />
-                    <span className="bg-gradient-to-r from-[#FACC15] via-amber-300 to-[#FACC15] bg-clip-text text-transparent">
-                      Compliance-Report.
-                    </span>
-                  </h2>
-
-                  <p className="text-base text-white/60 leading-relaxed mb-8 max-w-md">
-                    In 5 Minuten erhalten Sie eine vollständige Analyse — welche Regulierungen
-                    für Ihr Unternehmen gelten, was die Umsetzung kostet und wie Sie Ihren Reifegrad verbessern.
-                  </p>
-
-                  {/* Benefits */}
-                  <div className="space-y-4 mb-8">
-                    {[
-                      { icon: "📊", title: "14 Regulierungen geprüft", desc: "Individuell nach Branche, Größe & Tätigkeit" },
-                      { icon: "💰", title: "Kosten-Schätzung inklusive", desc: "Aufgeschlüsselt pro Regulierung & Unternehmensgröße" },
-                      { icon: "📄", title: "PDF-Report per E-Mail", desc: "Professionell formatiert mit Software-Empfehlungen" },
-                    ].map(b => (
-                      <div key={b.title} className="flex items-start gap-3.5">
-                        <div className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center flex-shrink-0 text-lg">
-                          {b.icon}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-[14px] text-white mb-0.5">{b.title}</div>
-                          <div className="text-[13px] text-white/45 leading-relaxed">{b.desc}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* CTA */}
-                  <Link
-                    href="/kontakt"
-                    className="group relative inline-flex items-center gap-3 rounded-2xl px-8 py-4 font-[Syne] font-bold text-[#0A2540] text-[15px] transition-all duration-300 hover:-translate-y-1 overflow-hidden"
-                    style={{ background: "linear-gradient(135deg, #FACC15 0%, #EAB308 100%)", boxShadow: "0 8px 32px rgba(250,204,21,0.35), 0 2px 8px rgba(250,204,21,0.2)" }}
-                  >
-                    <svg className="w-5 h-5 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                    </svg>
-                    <span className="relative z-10">Compliance-Report erstellen</span>
-                    <IconArrowRight className="w-4 h-4 relative z-10 transition-transform group-hover:translate-x-1" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-amber-300 to-[#FACC15] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </Link>
-
-                  <p className="text-[12px] text-white/35 mt-4">
-                    Kostenlos. Unverbindlich. In 5 Minuten erledigt.
-                  </p>
-                </div>
-              </Reveal>
-
-              {/* Right: Visual card preview */}
-              <Reveal delay={200}>
-                <div className="relative">
-                  {/* Report preview card */}
-                  <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm overflow-hidden">
-                    {/* Card header */}
-                    <div className="px-6 py-5 border-b border-white/[0.06] flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-[#FACC15]/10 flex items-center justify-center">
-                        <svg className="w-4 h-4 text-[#FACC15]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                        </svg>
-                      </div>
-                      <div>
-                        <div className="text-sm font-[Syne] font-bold text-white">Compliance-Report</div>
-                        <div className="text-[11px] font-mono text-white/40">Muster GmbH — Feb. 2026</div>
-                      </div>
-                    </div>
-
-                    {/* Report preview items */}
-                    <div className="p-6 space-y-4">
-                      {/* Maturity grade */}
-                      <div className="flex items-center justify-between p-4 rounded-xl bg-white/[0.04] border border-white/[0.06]">
-                        <div>
-                          <div className="text-[10px] font-mono text-white/40 uppercase tracking-wider mb-1">Reifegrad</div>
-                          <div className="text-sm font-semibold text-white">Compliance-Reifegrad</div>
-                        </div>
-                        <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center">
-                          <span className="font-[Syne] font-extrabold text-xl text-amber-400">B</span>
-                        </div>
-                      </div>
-
-                      {/* Applicable regulations */}
-                      <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.06]">
-                        <div className="text-[10px] font-mono text-white/40 uppercase tracking-wider mb-3">Relevante Regulierungen</div>
-                        <div className="flex flex-wrap gap-2">
-                          {["NISG", "AI Act", "DSGVO", "CRA", "CSRD"].map(r => (
-                            <span key={r} className="px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-[11px] font-mono font-semibold text-blue-300">
-                              {r}
-                            </span>
-                          ))}
-                          <span className="px-2.5 py-1 rounded-lg bg-white/[0.06] border border-white/[0.06] text-[11px] font-mono text-white/40">
-                            +3 weitere
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Cost estimate */}
-                      <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.06]">
-                        <div className="text-[10px] font-mono text-white/40 uppercase tracking-wider mb-1">Geschätzte Kosten</div>
-                        <div className="font-[Syne] font-bold text-xl text-white">
-                          €45.000 – €120.000
-                        </div>
-                        <div className="text-[11px] text-white/40 mt-0.5">Gesamtkosten für alle relevanten Regulierungen</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Floating badge */}
-                  <div className="absolute -top-3 -right-3 animate-float">
-                    <div className="rounded-xl px-4 py-2 font-[Syne] font-bold text-xs text-[#0A2540]"
-                      style={{ background: "linear-gradient(135deg, #FACC15 0%, #EAB308 100%)", boxShadow: "0 8px 24px rgba(250,204,21,0.3)" }}>
-                      PDF-Download
-                    </div>
-                  </div>
-                </div>
-              </Reveal>
             </div>
           </div>
         </section>
@@ -1050,44 +900,235 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ════════ FRISTEN-RADAR ════════ */}
-        <section aria-label="Compliance-Briefing und Fristen-Radar" className="py-28 lg:py-36 relative overflow-hidden">
-          {/* Multi-layer bg */}
-          <div className="absolute inset-0 bg-[#0A2540]" />
-          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 80% 60% at 30% 50%, rgba(0,20,80,0.5) 0%, transparent 70%)" }} />
-          <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-          <div className="absolute right-[-10%] top-[-20%] w-[500px] h-[500px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%)", filter: "blur(60px)" }} />
+        {/* ════════ COMPLIANCE-REPORT CTA (Haupt-CTA) ════════ */}
+        <section aria-label="Compliance-Report erstellen" className="py-24 lg:py-32 relative overflow-hidden">
+          {/* Rich golden-navy gradient background */}
+          <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, #0A2540 0%, #0d1f3c 40%, #122042 60%, #0A2540 100%)" }} />
+          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 60% at 30% 50%, rgba(250,204,21,0.08) 0%, transparent 70%)" }} />
+          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 50% 50% at 80% 30%, rgba(250,204,21,0.05) 0%, transparent 60%)" }} />
+          <div className="absolute inset-0 pointer-events-none opacity-[0.02]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
 
-          <div className="relative max-w-2xl mx-auto px-6 text-center">
-            <Reveal>
-              {/* Decorative accent line */}
-              <div className="flex items-center justify-center gap-3 mb-10">
-                <div className="h-px w-16 bg-gradient-to-r from-transparent to-white/20" />
-                <div className="h-2 w-2 rounded-full bg-[#FACC15]/40" />
-                <div className="h-px w-16 bg-gradient-to-l from-transparent to-white/20" />
+          <div className="relative max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+              {/* Left: Content */}
+              <Reveal>
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FACC15]/10 border border-[#FACC15]/20 mb-6">
+                    <svg className="w-4 h-4 text-[#FACC15]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                    </svg>
+                    <span className="text-[12px] font-bold text-[#FACC15] tracking-wide uppercase">Unser wichtigstes Tool</span>
+                  </div>
+
+                  <h2 className="font-[Syne] font-extrabold text-3xl sm:text-4xl md:text-[2.75rem] text-white tracking-tight leading-[1.05] mb-5">
+                    Ihr persönlicher<br />
+                    <span className="bg-gradient-to-r from-[#FACC15] via-amber-300 to-[#FACC15] bg-clip-text text-transparent">
+                      Compliance-Report.
+                    </span>
+                  </h2>
+
+                  <p className="text-base text-white/60 leading-relaxed mb-8 max-w-md">
+                    In 5 Minuten erhalten Sie eine vollständige Analyse — welche Regulierungen
+                    für Ihr Unternehmen gelten, was die Umsetzung kostet und wie Sie Ihren Reifegrad verbessern.
+                  </p>
+
+                  {/* Benefits */}
+                  <div className="space-y-4 mb-8">
+                    {[
+                      { icon: "📊", title: "14 Regulierungen geprüft", desc: "Individuell nach Branche, Größe & Tätigkeit" },
+                      { icon: "💰", title: "Kosten-Schätzung inklusive", desc: "Aufgeschlüsselt pro Regulierung & Unternehmensgröße" },
+                      { icon: "📄", title: "PDF-Report per E-Mail", desc: "Professionell formatiert mit Software-Empfehlungen" },
+                    ].map(b => (
+                      <div key={b.title} className="flex items-start gap-3.5">
+                        <div className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center flex-shrink-0 text-lg">
+                          {b.icon}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-[14px] text-white mb-0.5">{b.title}</div>
+                          <div className="text-[13px] text-white/45 leading-relaxed">{b.desc}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* CTA */}
+                  <Link
+                    href="/kontakt"
+                    className="group relative inline-flex items-center gap-3 rounded-2xl px-8 py-4 font-[Syne] font-bold text-[#0A2540] text-[15px] transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+                    style={{ background: "linear-gradient(135deg, #FACC15 0%, #EAB308 100%)", boxShadow: "0 8px 32px rgba(250,204,21,0.35), 0 2px 8px rgba(250,204,21,0.2)" }}
+                  >
+                    <svg className="w-5 h-5 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                    <span className="relative z-10">Compliance-Report erstellen</span>
+                    <IconArrowRight className="w-4 h-4 relative z-10 transition-transform group-hover:translate-x-1" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-amber-300 to-[#FACC15] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </Link>
+
+                  <p className="text-[12px] text-white/35 mt-4">
+                    Kostenlos. Unverbindlich. In 5 Minuten erledigt.
+                  </p>
+                </div>
+              </Reveal>
+
+              {/* Right: Visual card preview */}
+              <Reveal delay={200}>
+                <div className="relative">
+                  {/* Report preview card */}
+                  <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm overflow-hidden">
+                    {/* Card header */}
+                    <div className="px-6 py-5 border-b border-white/[0.06] flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-[#FACC15]/10 flex items-center justify-center">
+                        <svg className="w-4 h-4 text-[#FACC15]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="text-sm font-[Syne] font-bold text-white">Compliance-Report</div>
+                        <div className="text-[11px] font-mono text-white/40">Muster GmbH — Feb. 2026</div>
+                      </div>
+                    </div>
+
+                    {/* Report preview items */}
+                    <div className="p-6 space-y-4">
+                      {/* Maturity grade */}
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+                        <div>
+                          <div className="text-[10px] font-mono text-white/40 uppercase tracking-wider mb-1">Reifegrad</div>
+                          <div className="text-sm font-semibold text-white">Compliance-Reifegrad</div>
+                        </div>
+                        <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center">
+                          <span className="font-[Syne] font-extrabold text-xl text-amber-400">B</span>
+                        </div>
+                      </div>
+
+                      {/* Applicable regulations */}
+                      <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+                        <div className="text-[10px] font-mono text-white/40 uppercase tracking-wider mb-3">Relevante Regulierungen</div>
+                        <div className="flex flex-wrap gap-2">
+                          {["NISG", "AI Act", "DSGVO", "CRA", "CSRD"].map(r => (
+                            <span key={r} className="px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-[11px] font-mono font-semibold text-blue-300">
+                              {r}
+                            </span>
+                          ))}
+                          <span className="px-2.5 py-1 rounded-lg bg-white/[0.06] border border-white/[0.06] text-[11px] font-mono text-white/40">
+                            +3 weitere
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Cost estimate */}
+                      <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+                        <div className="text-[10px] font-mono text-white/40 uppercase tracking-wider mb-1">Geschätzte Kosten</div>
+                        <div className="font-[Syne] font-bold text-xl text-white">
+                          €45.000 – €120.000
+                        </div>
+                        <div className="text-[11px] text-white/40 mt-0.5">Gesamtkosten für alle relevanten Regulierungen</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Floating badge */}
+                  <div className="absolute -top-3 -right-3 animate-float">
+                    <div className="rounded-xl px-4 py-2 font-[Syne] font-bold text-xs text-[#0A2540]"
+                      style={{ background: "linear-gradient(135deg, #FACC15 0%, #EAB308 100%)", boxShadow: "0 8px 24px rgba(250,204,21,0.3)" }}>
+                      PDF-Download
+                    </div>
+                  </div>
+                </div>
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ COMPLIANCE-BRIEFING (Newsletter) ════════ */}
+        <section aria-label="Compliance-Briefing Newsletter" className="py-16 lg:py-20 relative overflow-hidden bg-[#f4f6fc]">
+          <div className="relative max-w-4xl mx-auto px-6 sm:px-8 lg:px-12">
+            <div className="rounded-3xl border border-[#d8dff0] bg-white p-8 sm:p-12 shadow-lg shadow-blue-900/[0.04]">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+                {/* Left: Text */}
+                <Reveal>
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 mb-5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                      <span className="text-[11px] font-bold text-blue-700 tracking-wide uppercase">Compliance-Briefing</span>
+                    </div>
+                    <h2 className="font-[Syne] font-extrabold text-2xl sm:text-3xl text-[#060c1a] tracking-tight leading-[1.1] mb-4">
+                      Keine Frist<br /><span className="text-[#1e40af]">verpassen.</span>
+                    </h2>
+                    <p className="text-[15px] text-[#3a4a6b] leading-relaxed mb-2">
+                      Ihr regulatorisches Briefing — nur bei kritischen Fristen und Gesetzesänderungen.
+                    </p>
+                    <div className="flex items-center gap-4 text-[13px] text-[#7a8db0]">
+                      <span className="flex items-center gap-1.5">
+                        <IconCheck className="w-3.5 h-3.5 text-emerald-500" />
+                        Max. 3× pro Monat
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <IconCheck className="w-3.5 h-3.5 text-emerald-500" />
+                        Jederzeit abmeldbar
+                      </span>
+                    </div>
+                  </div>
+                </Reveal>
+
+                {/* Right: Signup form */}
+                <Reveal delay={150}>
+                  <FristenRadarSignup />
+                </Reveal>
               </div>
-
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-medium text-blue-300 mb-6">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-                Compliance-Briefing
-              </div>
-              <h2 className="font-[Syne] font-extrabold text-4xl md:text-5xl lg:text-6xl text-white tracking-tight leading-[1] mb-6">
-                Keine Frist<br /><span className="text-blue-300">verpassen.</span>
-              </h2>
-              <p className="text-lg text-white/60 max-w-md mx-auto mb-10 leading-relaxed">
-                Ihr regulatorisches Briefing — nur bei kritischen Fristen und Gesetzesänderungen. Maximal 3× pro Monat.
-              </p>
-            </Reveal>
-
-            <Reveal delay={200}>
-              <FristenRadarSignup />
-            </Reveal>
+            </div>
           </div>
         </section>
 
       </main>
       <Footer />
     </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════
+   PAST DEADLINES TOGGLE (collapsed by default)
+   ═══════════════════════════════════════════════════ */
+function PastDeadlinesToggle() {
+  const [open, setOpen] = useState(false);
+  const pastDeadlines = DEADLINES.filter(d => isPast(d.iso));
+
+  return (
+    <div className="mb-10">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="group flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 transition-all hover:bg-emerald-500/15 hover:border-emerald-500/30"
+        aria-expanded={open}
+      >
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+        <span className="font-mono text-[12px] text-emerald-400 font-semibold">
+          {pastDeadlines.length} bereits in Kraft
+        </span>
+        <svg
+          className={`w-3.5 h-3.5 text-emerald-400/70 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <div
+        className={`overflow-hidden transition-all duration-500 ease-in-out ${
+          open ? "max-h-[500px] opacity-100 mt-4" : "max-h-0 opacity-0 mt-0"
+        }`}
+      >
+        <div className="flex flex-wrap gap-3">
+          {pastDeadlines.map(d => (
+            <div key={`${d.reg}-${d.iso}`} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="font-mono text-[11px] text-emerald-400 font-semibold">{d.reg}</span>
+              <span className="font-mono text-[10px] text-emerald-400/70">{d.title}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
