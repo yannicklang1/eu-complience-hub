@@ -717,6 +717,148 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ════════ COMPLIANCE-REPORT CTA ════════ */}
+        <section aria-label="Compliance-Report" className="py-20 lg:py-28 relative overflow-hidden">
+          {/* Rich golden-navy gradient background */}
+          <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, #0A2540 0%, #0d1f3c 40%, #122042 60%, #0A2540 100%)" }} />
+          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 60% at 30% 50%, rgba(250,204,21,0.08) 0%, transparent 70%)" }} />
+          <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 50% 50% at 80% 30%, rgba(250,204,21,0.05) 0%, transparent 60%)" }} />
+          {/* Subtle grid */}
+          <div className="absolute inset-0 pointer-events-none opacity-[0.02]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
+
+          <div className="relative max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+              {/* Left: Content */}
+              <Reveal>
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FACC15]/10 border border-[#FACC15]/20 mb-6">
+                    <svg className="w-4 h-4 text-[#FACC15]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                    </svg>
+                    <span className="text-[12px] font-bold text-[#FACC15] tracking-wide uppercase">Kostenlos & personalisiert</span>
+                  </div>
+
+                  <h2 className="font-[Syne] font-extrabold text-3xl sm:text-4xl md:text-[2.75rem] text-white tracking-tight leading-[1.05] mb-5">
+                    Ihr persönlicher<br />
+                    <span className="bg-gradient-to-r from-[#FACC15] via-amber-300 to-[#FACC15] bg-clip-text text-transparent">
+                      Compliance-Report.
+                    </span>
+                  </h2>
+
+                  <p className="text-base text-white/60 leading-relaxed mb-8 max-w-md">
+                    In 5 Minuten erhalten Sie eine vollständige Analyse — welche Regulierungen
+                    für Ihr Unternehmen gelten, was die Umsetzung kostet und wie Sie Ihren Reifegrad verbessern.
+                  </p>
+
+                  {/* Benefits */}
+                  <div className="space-y-4 mb-8">
+                    {[
+                      { icon: "📊", title: "14 Regulierungen geprüft", desc: "Individuell nach Branche, Größe & Tätigkeit" },
+                      { icon: "💰", title: "Kosten-Schätzung inklusive", desc: "Aufgeschlüsselt pro Regulierung & Unternehmensgröße" },
+                      { icon: "📄", title: "PDF-Report per E-Mail", desc: "Professionell formatiert mit Software-Empfehlungen" },
+                    ].map(b => (
+                      <div key={b.title} className="flex items-start gap-3.5">
+                        <div className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center flex-shrink-0 text-lg">
+                          {b.icon}
+                        </div>
+                        <div>
+                          <div className="font-semibold text-[14px] text-white mb-0.5">{b.title}</div>
+                          <div className="text-[13px] text-white/45 leading-relaxed">{b.desc}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* CTA */}
+                  <Link
+                    href="/kontakt"
+                    className="group relative inline-flex items-center gap-3 rounded-2xl px-8 py-4 font-[Syne] font-bold text-[#0A2540] text-[15px] transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+                    style={{ background: "linear-gradient(135deg, #FACC15 0%, #EAB308 100%)", boxShadow: "0 8px 32px rgba(250,204,21,0.35), 0 2px 8px rgba(250,204,21,0.2)" }}
+                  >
+                    <svg className="w-5 h-5 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                    <span className="relative z-10">Compliance-Report erstellen</span>
+                    <IconArrowRight className="w-4 h-4 relative z-10 transition-transform group-hover:translate-x-1" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-amber-300 to-[#FACC15] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </Link>
+
+                  <p className="text-[12px] text-white/35 mt-4">
+                    Kostenlos. Unverbindlich. In 5 Minuten erledigt.
+                  </p>
+                </div>
+              </Reveal>
+
+              {/* Right: Visual card preview */}
+              <Reveal delay={200}>
+                <div className="relative">
+                  {/* Report preview card */}
+                  <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm overflow-hidden">
+                    {/* Card header */}
+                    <div className="px-6 py-5 border-b border-white/[0.06] flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-[#FACC15]/10 flex items-center justify-center">
+                        <svg className="w-4 h-4 text-[#FACC15]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="text-sm font-[Syne] font-bold text-white">Compliance-Report</div>
+                        <div className="text-[11px] font-mono text-white/40">Muster GmbH — Feb. 2026</div>
+                      </div>
+                    </div>
+
+                    {/* Report preview items */}
+                    <div className="p-6 space-y-4">
+                      {/* Maturity grade */}
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+                        <div>
+                          <div className="text-[10px] font-mono text-white/40 uppercase tracking-wider mb-1">Reifegrad</div>
+                          <div className="text-sm font-semibold text-white">Compliance-Reifegrad</div>
+                        </div>
+                        <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center">
+                          <span className="font-[Syne] font-extrabold text-xl text-amber-400">B</span>
+                        </div>
+                      </div>
+
+                      {/* Applicable regulations */}
+                      <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+                        <div className="text-[10px] font-mono text-white/40 uppercase tracking-wider mb-3">Relevante Regulierungen</div>
+                        <div className="flex flex-wrap gap-2">
+                          {["NISG", "AI Act", "DSGVO", "CRA", "CSRD"].map(r => (
+                            <span key={r} className="px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-[11px] font-mono font-semibold text-blue-300">
+                              {r}
+                            </span>
+                          ))}
+                          <span className="px-2.5 py-1 rounded-lg bg-white/[0.06] border border-white/[0.06] text-[11px] font-mono text-white/40">
+                            +3 weitere
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Cost estimate */}
+                      <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.06]">
+                        <div className="text-[10px] font-mono text-white/40 uppercase tracking-wider mb-1">Geschätzte Kosten</div>
+                        <div className="font-[Syne] font-bold text-xl text-white">
+                          €45.000 – €120.000
+                        </div>
+                        <div className="text-[11px] text-white/40 mt-0.5">Gesamtkosten für alle relevanten Regulierungen</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Floating badge */}
+                  <div className="absolute -top-3 -right-3 animate-float">
+                    <div className="rounded-xl px-4 py-2 font-[Syne] font-bold text-xs text-[#0A2540]"
+                      style={{ background: "linear-gradient(135deg, #FACC15 0%, #EAB308 100%)", boxShadow: "0 8px 24px rgba(250,204,21,0.3)" }}>
+                      PDF-Download
+                    </div>
+                  </div>
+                </div>
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
         {/* ════════ TOOLS ════════ */}
         <section id="tools" aria-label="Compliance-Tools" className="py-28 lg:py-36 relative overflow-hidden" style={{ background: "linear-gradient(180deg, #f4f6fc 0%, #eef1fa 100%)" }}>
           <div className="absolute inset-0 pointer-events-none opacity-40" style={{ backgroundImage: "radial-gradient(circle, rgba(10,37,64,0.07) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />

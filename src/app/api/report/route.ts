@@ -83,75 +83,95 @@ export async function POST(request: NextRequest) {
     });
 
     /* ── Generate PDF ── */
-    /* @react-pdf/renderer types expect Document element directly;
-       our wrapper component returns <Document> internally, so we cast. */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const pdfElement = React.createElement(ReportDocument, { data: reportData }) as any;
-    const pdfStream = await pdf(pdfElement).toBuffer();
+    let pdfBuffer: Buffer | null = null;
+    try {
+      /* @react-pdf/renderer types expect Document element directly;
+         our wrapper component returns <Document> internally, so we cast. */
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const pdfElement = React.createElement(ReportDocument, { data: reportData }) as any;
+      const pdfStream = await pdf(pdfElement).toBuffer();
 
-    // toBuffer() may return Buffer or ReadableStream depending on version
-    let pdfBuffer: Buffer;
-    if (Buffer.isBuffer(pdfStream)) {
-      pdfBuffer = pdfStream;
-    } else {
-      // ReadableStream → Buffer
-      const reader = (pdfStream as unknown as ReadableStream<Uint8Array>).getReader();
-      const chunks: Uint8Array[] = [];
-      let done = false;
-      while (!done) {
-        const result = await reader.read();
-        done = result.done;
-        if (result.value) chunks.push(result.value);
+      // toBuffer() may return Buffer or ReadableStream depending on version
+      if (Buffer.isBuffer(pdfStream)) {
+        pdfBuffer = pdfStream;
+      } else {
+        // ReadableStream → Buffer
+        const reader = (pdfStream as unknown as ReadableStream<Uint8Array>).getReader();
+        const chunks: Uint8Array[] = [];
+        let done = false;
+        while (!done) {
+          const result = await reader.read();
+          done = result.done;
+          if (result.value) chunks.push(result.value);
+        }
+        pdfBuffer = Buffer.concat(chunks);
       }
-      pdfBuffer = Buffer.concat(chunks);
+
+      log.info("[report]", "PDF generated", { sizeKB: Math.round(pdfBuffer.length / 1024) });
+    } catch (pdfErr) {
+      log.error("[report]", "PDF generation failed, continuing without PDF", {
+        error: pdfErr instanceof Error ? pdfErr.message : String(pdfErr),
+      });
     }
 
-    log.info("[report]", "PDF generated", { sizeKB: Math.round(pdfBuffer.length / 1024) });
-
-    /* ── Store report in Supabase ── */
+    /* ── Store report in Supabase (non-blocking — don't fail if DB not ready) ── */
     const reportToken = crypto.randomUUID();
-    const supabase = getSupabaseAdmin();
+    let storagePath: string | null = null;
 
-    // Upload PDF to Supabase Storage
-    const storagePath = `reports/${reportToken}.pdf`;
-    const { error: uploadError } = await supabase.storage
-      .from("reports")
-      .upload(storagePath, pdfBuffer, {
-        contentType: "application/pdf",
-        upsert: false,
+    try {
+      const supabase = getSupabaseAdmin();
+
+      // Upload PDF to Supabase Storage (only if PDF was generated)
+      if (pdfBuffer) {
+        storagePath = `reports/${reportToken}.pdf`;
+        const { error: uploadError } = await supabase.storage
+          .from("reports")
+          .upload(storagePath, pdfBuffer, {
+            contentType: "application/pdf",
+            upsert: false,
+          });
+
+        if (uploadError) {
+          log.warn("[report]", "PDF storage upload failed", { error: uploadError.message });
+          storagePath = null;
+        }
+      }
+
+      // Insert report metadata
+      const { error: dbError } = await supabase.from("reports").insert({
+        report_token: reportToken,
+        email,
+        contact_name: contactName,
+        company_name: companyName,
+        company_size: companySize,
+        branche: input.branche,
+        evaluated_regulations: reportData.regulations,
+        cost_estimate: { costs: reportData.costs, totalMin: reportData.totalCostMin, totalMax: reportData.totalCostMax },
+        maturity_grade: reportData.maturityGrade.letter,
+        pdf_storage_path: storagePath,
+        gdpr_consent: true,
+        commercial_consent: input.commercialConsent,
       });
 
-    if (uploadError) {
-      log.warn("[report]", "PDF storage upload failed, continuing without storage", {
-        error: uploadError.message,
+      if (dbError) {
+        log.warn("[report]", "DB insert failed, continuing", { error: dbError.message });
+      }
+    } catch (dbErr) {
+      log.warn("[report]", "Supabase operations failed, continuing", {
+        error: dbErr instanceof Error ? dbErr.message : String(dbErr),
       });
-    }
-
-    // Insert report metadata
-    const { error: dbError } = await supabase.from("reports").insert({
-      report_token: reportToken,
-      email,
-      contact_name: contactName,
-      company_name: companyName,
-      company_size: companySize,
-      branche: input.branche,
-      evaluated_regulations: reportData.regulations,
-      cost_estimate: { costs: reportData.costs, totalMin: reportData.totalCostMin, totalMax: reportData.totalCostMax },
-      maturity_grade: reportData.maturityGrade.letter,
-      pdf_storage_path: uploadError ? null : storagePath,
-      gdpr_consent: true,
-      commercial_consent: input.commercialConsent,
-    });
-
-    if (dbError) {
-      log.warn("[report]", "DB insert failed, continuing", { error: dbError.message });
     }
 
     /* ── Send email with PDF attachment ── */
-    const emailResult = await sendReportEmail(email, contactName, companyName, reportData, pdfBuffer);
-
-    if (!emailResult.success) {
-      log.error("[report]", "Email send failed", { error: emailResult.error });
+    let emailSent = false;
+    if (pdfBuffer) {
+      const emailResult = await sendReportEmail(email, contactName, companyName, reportData, pdfBuffer);
+      emailSent = emailResult.success;
+      if (!emailResult.success) {
+        log.error("[report]", "Email send failed", { error: emailResult.error });
+      }
+    } else {
+      log.warn("[report]", "Skipping email — no PDF generated");
     }
 
     return NextResponse.json({
@@ -159,7 +179,7 @@ export async function POST(request: NextRequest) {
       reportToken,
       regulationsCount: reportData.regulations.length,
       maturityGrade: reportData.maturityGrade.letter,
-      emailSent: emailResult.success,
+      emailSent,
     });
   } catch (err) {
     log.error("[report]", "Unexpected error", {

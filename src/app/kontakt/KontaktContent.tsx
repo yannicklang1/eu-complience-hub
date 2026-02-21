@@ -19,9 +19,10 @@ interface FormData {
   email: string;
   companyName: string;
   phone: string;
-  companySize: string;
-  branche: string;
+  employeeCount: string;
   annualRevenue: string;
+  companySize: string; // derived from employees + revenue
+  branche: string;
   sectors: string[];
   dataTypes: string[];
   activities: string[];
@@ -35,14 +36,29 @@ interface FormData {
 
 type SubmitStatus = "idle" | "submitting" | "success" | "error";
 
+/* Derive company size from employee count + revenue */
+function deriveCompanySize(employees: string, revenue: string): string {
+  // EU SME definition: size = max(employee-based, revenue-based)
+  const empSizeMap: Record<string, number> = { "1-9": 0, "10-49": 1, "50-249": 2, "250-999": 3, "1000+": 3 };
+  const revSizeMap: Record<string, number> = { "< 2 Mio. \u20AC": 0, "2-10 Mio. \u20AC": 1, "10-50 Mio. \u20AC": 2, "> 50 Mio. \u20AC": 3 };
+  const empLevel = empSizeMap[employees] ?? -1;
+  const revLevel = revSizeMap[revenue] ?? -1;
+  const level = Math.max(empLevel, revLevel);
+  if (level <= 0) return "micro";
+  if (level === 1) return "small";
+  if (level === 2) return "medium";
+  return "large";
+}
+
 const INITIAL_FORM: FormData = {
   contactName: "",
   email: "",
   companyName: "",
   phone: "",
+  employeeCount: "",
+  annualRevenue: "",
   companySize: "",
   branche: "",
-  annualRevenue: "",
   sectors: [],
   dataTypes: [],
   activities: [],
@@ -50,8 +66,8 @@ const INITIAL_FORM: FormData = {
   maturityAnswers: [
     { category: "governance", level: 0 },
     { category: "datenschutz", level: 0 },
-    { category: "cybersicherheit", level: 0 },
-    { category: "ki", level: 0 },
+    { category: "cybersecurity", level: 0 },
+    { category: "ki-compliance", level: 0 },
     { category: "reporting", level: 0 },
   ],
   urgency: "",
@@ -62,47 +78,19 @@ const INITIAL_FORM: FormData = {
 
 /* ── Static Data ── */
 
+const EMPLOYEE_RANGES = [
+  { value: "1-9", label: "1–9 Mitarbeiter" },
+  { value: "10-49", label: "10–49 Mitarbeiter" },
+  { value: "50-249", label: "50–249 Mitarbeiter" },
+  { value: "250-999", label: "250–999 Mitarbeiter" },
+  { value: "1000+", label: "1.000+ Mitarbeiter" },
+] as const;
+
 const COMPANY_SIZES = [
-  {
-    value: "micro",
-    label: "Kleinstunternehmen",
-    description: "1-9 Mitarbeiter, < 2 Mio. \u20AC Umsatz",
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-      </svg>
-    ),
-  },
-  {
-    value: "small",
-    label: "Kleinunternehmen",
-    description: "10-49 Mitarbeiter, < 10 Mio. \u20AC Umsatz",
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-      </svg>
-    ),
-  },
-  {
-    value: "medium",
-    label: "Mittleres Unternehmen",
-    description: "50-249 Mitarbeiter, < 50 Mio. \u20AC Umsatz",
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5M3.75 3v18m4.5-18v18m4.5-18v18m4.5-18v18m4.5-18v18M3.75 3h16.5M3.75 9h16.5m-16.5 6h16.5" />
-      </svg>
-    ),
-  },
-  {
-    value: "large",
-    label: "Gro\u00DFunternehmen",
-    description: "250+ Mitarbeiter, > 50 Mio. \u20AC Umsatz",
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
-      </svg>
-    ),
-  },
+  { value: "micro", label: "Kleinstunternehmen" },
+  { value: "small", label: "Kleinunternehmen" },
+  { value: "medium", label: "Mittleres Unternehmen" },
+  { value: "large", label: "Gro\u00DFunternehmen" },
 ] as const;
 
 const BRANCHEN = [
@@ -157,15 +145,16 @@ const LOCATIONS = [
 const MATURITY_QUESTIONS = [
   { category: "governance", label: "Gibt es eine klar definierte Compliance-Verantwortung?" },
   { category: "datenschutz", label: "Sind Datenschutz-Grundlagen umgesetzt (Verarbeitungsverzeichnis, TOMs)?" },
-  { category: "cybersicherheit", label: "Gibt es ein ISMS oder dokumentierte IT-Sicherheitsma\u00DFnahmen?" },
-  { category: "ki", label: "Sind eingesetzte KI-Systeme inventarisiert und klassifiziert?" },
+  { category: "cybersecurity", label: "Gibt es ein ISMS oder dokumentierte IT-Sicherheitsma\u00DFnahmen?" },
+  { category: "ki-compliance", label: "Sind eingesetzte KI-Systeme inventarisiert und klassifiziert?" },
   { category: "reporting", label: "Werden Compliance-Ma\u00DFnahmen dokumentiert und auditiert?" },
 ] as const;
 
 const MATURITY_LEVELS = [
-  { value: 0, label: "Nicht umgesetzt", color: "border-red-500/30 bg-red-500/10 text-red-400" },
-  { value: 1, label: "Teilweise", color: "border-yellow-500/30 bg-yellow-500/10 text-yellow-400" },
-  { value: 2, label: "Vollst\u00E4ndig", color: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" },
+  { value: 0, label: "N/A", color: "border-slate-500/30 bg-slate-500/10 text-slate-400" },
+  { value: 1, label: "Nicht umgesetzt", color: "border-red-500/30 bg-red-500/10 text-red-400" },
+  { value: 2, label: "Teilweise", color: "border-yellow-500/30 bg-yellow-500/10 text-yellow-400" },
+  { value: 3, label: "Vollst\u00E4ndig", color: "border-emerald-500/30 bg-emerald-500/10 text-emerald-400" },
 ] as const;
 
 const URGENCY_OPTIONS = [
@@ -252,7 +241,7 @@ export default function KontaktContent() {
           isEmailValid(form.email)
         );
       case 1:
-        return form.companySize.length > 0 && form.branche.length > 0;
+        return form.employeeCount.length > 0 && form.branche.length > 0;
       case 2:
         return true; // all optional, but user can proceed
       case 3:
@@ -378,8 +367,12 @@ export default function KontaktContent() {
 
   /* ── Summary label helpers ── */
   const sizeLabel = COMPANY_SIZES.find((s) => s.value === form.companySize)?.label ?? "-";
-  const maturityAvg = form.maturityAnswers.reduce((sum, a) => sum + a.level, 0) / form.maturityAnswers.length;
-  const maturityLabel = maturityAvg < 0.7 ? "Gering" : maturityAvg < 1.4 ? "Mittel" : "Hoch";
+  const employeeLabel = EMPLOYEE_RANGES.find((e) => e.value === form.employeeCount)?.label ?? "-";
+  const applicable = form.maturityAnswers.filter(a => a.level > 0);
+  const maturityAvg = applicable.length > 0
+    ? applicable.reduce((sum, a) => sum + a.level, 0) / applicable.length
+    : 0;
+  const maturityLabel = maturityAvg < 1.5 ? "Gering" : maturityAvg < 2.5 ? "Mittel" : "Hoch";
 
   return (
     <>
@@ -613,7 +606,7 @@ export default function KontaktContent() {
                   {/* ═══ Step 2: Groesse & Branche ═══ */}
                   {step === 1 && (
                     <div className="space-y-6">
-                      {/* Company Size Cards */}
+                      {/* Employees + Revenue */}
                       <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 sm:p-8">
                         <div className="flex items-center gap-3 mb-6">
                           <div className="w-10 h-10 rounded-xl bg-yellow-400/10 flex items-center justify-center">
@@ -625,59 +618,28 @@ export default function KontaktContent() {
                             <h2 className="font-[Syne] font-bold text-xl text-white">
                               Unternehmensgr{"\u00F6"}{"\u00DF"}e
                             </h2>
-                            <p className="text-xs text-slate-500">W{"\u00E4"}hlen Sie Ihre Unternehmensgr{"\u00F6"}{"\u00DF"}e</p>
+                            <p className="text-xs text-slate-500">Mitarbeiteranzahl und Jahresumsatz getrennt angeben</p>
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          {COMPANY_SIZES.map((size) => {
-                            const selected = form.companySize === size.value;
-                            return (
-                              <button
-                                key={size.value}
-                                onClick={() => updateField("companySize", size.value)}
-                                className={`text-left px-4 py-4 rounded-xl border transition-all duration-200 cursor-pointer ${
-                                  selected
-                                    ? "border-yellow-400/40 bg-yellow-400/10 shadow-[0_0_20px_rgba(250,204,21,0.08)]"
-                                    : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10"
-                                }`}
-                              >
-                                <div className="flex items-start gap-3">
-                                  <div className={`mt-0.5 transition-colors ${selected ? "text-yellow-400" : "text-slate-500"}`}>
-                                    {size.icon}
-                                  </div>
-                                  <div>
-                                    <span className={`text-sm font-semibold block ${selected ? "text-yellow-400" : "text-white"}`}>
-                                      {size.label}
-                                    </span>
-                                    <span className="text-xs text-slate-500 mt-0.5 block">
-                                      {size.description}
-                                    </span>
-                                  </div>
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Branche + Revenue */}
-                      <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 sm:p-8">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label htmlFor="branche-select" className="block text-xs font-semibold text-slate-400 mb-1.5">
-                              Branche <span className="text-red-400">*</span>
+                            <label htmlFor="employee-select" className="block text-xs font-semibold text-slate-400 mb-1.5">
+                              Mitarbeiteranzahl <span className="text-red-400">*</span>
                             </label>
                             <select
-                              id="branche-select"
-                              value={form.branche}
-                              onChange={(e) => updateField("branche", e.target.value)}
+                              id="employee-select"
+                              value={form.employeeCount}
+                              onChange={(e) => {
+                                updateField("employeeCount", e.target.value);
+                                updateField("companySize", deriveCompanySize(e.target.value, form.annualRevenue));
+                              }}
                               className="w-full px-4 py-2.5 rounded-lg bg-slate-800/60 border border-white/10 text-white text-sm focus:outline-none focus:border-yellow-400/40 transition-colors appearance-none cursor-pointer"
                               style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
                             >
                               <option value="">Bitte w{"\u00E4"}hlen</option>
-                              {BRANCHEN.map((b) => (
-                                <option key={b} value={b}>{b}</option>
+                              {EMPLOYEE_RANGES.map((e) => (
+                                <option key={e.value} value={e.value}>{e.label}</option>
                               ))}
                             </select>
                           </div>
@@ -688,7 +650,10 @@ export default function KontaktContent() {
                             <select
                               id="revenue-select"
                               value={form.annualRevenue}
-                              onChange={(e) => updateField("annualRevenue", e.target.value)}
+                              onChange={(e) => {
+                                updateField("annualRevenue", e.target.value);
+                                updateField("companySize", deriveCompanySize(form.employeeCount, e.target.value));
+                              }}
                               className="w-full px-4 py-2.5 rounded-lg bg-slate-800/60 border border-white/10 text-white text-sm focus:outline-none focus:border-yellow-400/40 transition-colors appearance-none cursor-pointer"
                               style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
                             >
@@ -698,6 +663,40 @@ export default function KontaktContent() {
                               ))}
                             </select>
                           </div>
+                        </div>
+
+                        {/* Derived size indicator */}
+                        {form.companySize && (
+                          <div className="mt-4 flex items-center gap-2 px-3 py-2 rounded-lg bg-yellow-400/5 border border-yellow-400/15">
+                            <svg className="w-4 h-4 text-yellow-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                            </svg>
+                            <span className="text-xs text-yellow-400/80">
+                              EU-Einstufung: <span className="font-semibold text-yellow-400">{COMPANY_SIZES.find(s => s.value === form.companySize)?.label}</span>
+                              {" "}(basierend auf dem h{"\u00F6"}heren Wert von Mitarbeiter/Umsatz)
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Branche */}
+                      <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 sm:p-8">
+                        <div>
+                          <label htmlFor="branche-select" className="block text-xs font-semibold text-slate-400 mb-1.5">
+                            Branche <span className="text-red-400">*</span>
+                          </label>
+                          <select
+                            id="branche-select"
+                            value={form.branche}
+                            onChange={(e) => updateField("branche", e.target.value)}
+                            className="w-full px-4 py-2.5 rounded-lg bg-slate-800/60 border border-white/10 text-white text-sm focus:outline-none focus:border-yellow-400/40 transition-colors appearance-none cursor-pointer"
+                            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
+                          >
+                            <option value="">Bitte w{"\u00E4"}hlen</option>
+                            {BRANCHEN.map((b) => (
+                              <option key={b} value={b}>{b}</option>
+                            ))}
+                          </select>
                         </div>
                       </div>
                     </div>
@@ -914,9 +913,10 @@ export default function KontaktContent() {
                             <SummaryItem label="Kontakt" value={form.contactName} />
                             <SummaryItem label="E-Mail" value={form.email} />
                             <SummaryItem label="Telefon" value={form.phone || "-"} />
-                            <SummaryItem label="Gr\u00F6\u00DFe" value={sizeLabel} />
-                            <SummaryItem label="Branche" value={form.branche || "-"} />
+                            <SummaryItem label="Mitarbeiter" value={employeeLabel} />
                             <SummaryItem label="Umsatz" value={form.annualRevenue || "-"} />
+                            <SummaryItem label="EU-Einstufung" value={sizeLabel} />
+                            <SummaryItem label="Branche" value={form.branche || "-"} />
                             <SummaryItem label="Reifegrad" value={maturityLabel} />
                           </div>
 
