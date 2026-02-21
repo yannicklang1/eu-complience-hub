@@ -598,14 +598,30 @@ export default function HomePage() {
           <div className="max-w-5xl mx-auto px-6 lg:px-12">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
               {[
-                { target: 18, suffix: "+", label: "EU-Regulierungen erklärt", icon: "📜" },
-                { target: 8, suffix: "", label: "Kostenlose Tools", icon: "⚡" },
-                { target: 70, suffix: "+", label: "Glossar-Einträge", icon: "📖" },
-                { target: 100, suffix: "%", label: "Unabhängig & werbefrei", icon: "🛡️" },
+                { target: 18, suffix: "+", label: "EU-Regulierungen erklärt", icon: (
+                  <svg className="w-6 h-6 mx-auto mb-3 text-[#b89b5e]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                  </svg>
+                )},
+                { target: 8, suffix: "", label: "Kostenlose Tools", icon: (
+                  <svg className="w-6 h-6 mx-auto mb-3 text-[#b89b5e]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.049.58.025 1.193-.14 1.743" />
+                  </svg>
+                )},
+                { target: 70, suffix: "+", label: "Glossar-Einträge", icon: (
+                  <svg className="w-6 h-6 mx-auto mb-3 text-[#b89b5e]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342" />
+                  </svg>
+                )},
+                { target: 100, suffix: "%", label: "Unabhängig & werbefrei", icon: (
+                  <svg className="w-6 h-6 mx-auto mb-3 text-[#b89b5e]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+                  </svg>
+                )},
               ].map((stat) => (
                 <Reveal key={stat.label}>
                   <div>
-                    <span className="text-lg mb-2 block">{stat.icon}</span>
+                    {stat.icon}
                     <AnimatedCounter
                       target={stat.target}
                       suffix={stat.suffix}
