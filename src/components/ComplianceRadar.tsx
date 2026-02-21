@@ -372,8 +372,6 @@ export default function ComplianceRadar({
   }, []);
 
   /* ── Current render values ── */
-  const sweepAngle = sweepAngleRef.current;
-  const sweepEnd = polarToXY(sweepAngle, 720);
   const elapsed = elapsedRef.current;
 
   /* Arc path builder */
@@ -392,12 +390,7 @@ export default function ComplianceRadar({
     return `M ${start.x} ${start.y} A ${radius} ${radius} 0 0 0 ${end.x} ${end.y}`;
   }, []);
 
-  /* ── Sweep afterglow cones ── */
-  const trailCones = useMemo(() => [
-    { offset: 0, width: 3, opacity: 0.03 },
-    { offset: 3, width: 8, opacity: 0.015 },
-    { offset: 8, width: 15, opacity: 0.008 },
-  ], []);
+  /* Sweep afterglow cones removed */
 
   return (
     <div className={`relative ${className}`}>
@@ -457,11 +450,10 @@ export default function ComplianceRadar({
               key={r}
               d={makeArc(r)}
               stroke="#FACC15"
-              strokeOpacity={0.06 + i * 0.025}
-              strokeWidth={0.8}
+              strokeOpacity={0.025 + i * 0.01}
+              strokeWidth={0.5}
               fill="none"
-              strokeDasharray="3 8"
-              filter="url(#arc-glow)"
+              strokeDasharray="2 12"
             />
           ))}
 
@@ -486,41 +478,7 @@ export default function ComplianceRadar({
 
         {/* ══════════ SWEEP LAYER (no parallax) ══════════ */}
         <g>
-          {/* 3-layer afterglow cones */}
-          {trailCones.map(({ offset, width, opacity }, i) => {
-            const coneA1 = sweepAngle - offset;
-            const coneA2 = sweepAngle - offset - width;
-            const p1 = polarToXY(coneA1, 720);
-            const p2 = polarToXY(coneA2, 720);
-            return (
-              <path
-                key={`trail-${i}`}
-                d={`M ${SWEEP_ORIGIN.x} ${SWEEP_ORIGIN.y} L ${p1.x} ${p1.y} A 720 720 0 0 1 ${p2.x} ${p2.y} Z`}
-                fill="#FACC15"
-                opacity={opacity}
-              />
-            );
-          })}
-
-          {/* Sweep line */}
-          <line
-            x1={SWEEP_ORIGIN.x}
-            y1={SWEEP_ORIGIN.y}
-            x2={sweepEnd.x}
-            y2={sweepEnd.y}
-            stroke="#FACC15"
-            strokeOpacity="0.15"
-            strokeWidth="0.5"
-          />
-
-          {/* Bright tip */}
-          <circle
-            cx={sweepEnd.x}
-            cy={sweepEnd.y}
-            r="2"
-            fill="#FACC15"
-            opacity="0.5"
-          />
+          {/* Sweep line, afterglow cones and bright tip removed — too visible */}
 
           {/* Particle trail */}
           {particlesRef.current.map((p, i) => {
