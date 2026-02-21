@@ -29,7 +29,7 @@ export default function Footer() {
 
       <div className="relative max-w-7xl mx-auto px-6 lg:px-12 pt-20 pb-8">
         {/* Top: Logo + Nav */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 pb-14 border-b border-white/[0.06]">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-6 pb-14 border-b border-white/[0.06]">
           {/* Brand */}
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-5">
@@ -59,36 +59,62 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Regulierungen */}
-          <div>
-            <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase mb-5 text-[#FACC15]/70">
-              Regulierungen
-            </div>
-            <ul className="space-y-3">
-              {footerRegulations.map((item) => (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className="text-sm text-white/50 transition-colors duration-200 hover:text-white/80"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Regulierungen — split into 2 columns */}
+          {(() => {
+            const half = Math.ceil(footerRegulations.length / 2);
+            const col1 = footerRegulations.slice(0, half);
+            const col2 = footerRegulations.slice(half);
+            return (
+              <>
+                <div>
+                  <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 text-[#FACC15]/70">
+                    Regulierungen
+                  </div>
+                  <ul className="space-y-2">
+                    {col1.map((item) => (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          className="text-[13px] text-white/50 transition-colors duration-200 hover:text-white/80"
+                        >
+                          {item.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 text-[#FACC15]/70 md:opacity-0" aria-hidden="true">
+                    &nbsp;
+                  </div>
+                  <ul className="space-y-2">
+                    {col2.map((item) => (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          className="text-[13px] text-white/50 transition-colors duration-200 hover:text-white/80"
+                        >
+                          {item.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            );
+          })()}
 
           {/* Tools */}
           <div>
-            <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase mb-5 text-[#FACC15]/70">
+            <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 text-[#FACC15]/70">
               Tools
             </div>
-            <ul className="space-y-3">
+            <ul className="space-y-2">
               {footerTools.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-sm text-white/50 transition-colors duration-200 hover:text-white/80"
+                    className="text-[13px] text-white/50 transition-colors duration-200 hover:text-white/80"
                   >
                     {item.label}
                   </Link>
