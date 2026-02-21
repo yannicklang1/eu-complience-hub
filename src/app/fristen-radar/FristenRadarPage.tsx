@@ -375,102 +375,18 @@ export default function FristenRadarPage() {
               </motion.div>
             ) : (
               <div className="space-y-10">
-                {groupedByYear.map(([year, deadlines]) => (
-                  <div key={year}>
-                    {/* Year header */}
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="font-[Syne] font-[800] text-2xl text-[#060c1a]">{year}</span>
-                      <div className="flex-1 h-px bg-[#e0e5f0]" />
-                      <span className="font-mono text-[11px] text-[#7a8db0]">
-                        {deadlines.filter((d) => !isPast(d.iso)).length} bevorstehend
-                      </span>
-                    </div>
-
-                    {/* Deadline cards */}
-                    <motion.div
-                      variants={stagger}
-                      initial="hidden"
-                      whileInView="show"
-                      viewport={{ once: true, margin: "-40px" }}
-                      className="space-y-3"
-                    >
-                      <AnimatePresence mode="popLayout">
-                        {deadlines.map((d) => {
-                          const past = isPast(d.iso);
-                          const guide = guideLinks[d.reg];
-                          return (
-                            <motion.div
-                              key={`${d.iso}-${d.reg}-${d.title}`}
-                              variants={item}
-                              layout
-                              className={`group flex items-start gap-4 p-5 rounded-2xl border transition-all duration-300 ${
-                                past
-                                  ? "bg-white/60 border-[#e8ecf4]"
-                                  : "bg-white border-[#e0e5f0] hover:border-[#0A2540]/15 hover:shadow-md hover:shadow-[#0A2540]/[0.04]"
-                              }`}
-                            >
-                              {/* Color dot + line */}
-                              <div className="flex flex-col items-center pt-1">
-                                <div
-                                  className={`w-3 h-3 rounded-full shrink-0 ${past ? "opacity-40" : ""}`}
-                                  style={{ backgroundColor: d.color }}
-                                />
-                                <div className="w-px h-full bg-[#e8ecf4] mt-1" />
-                              </div>
-
-                              {/* Content */}
-                              <div className="flex-1 min-w-0">
-                                <div className="flex flex-wrap items-center gap-2 mb-1">
-                                  <span
-                                    className={`font-mono text-sm font-bold ${
-                                      past ? "text-[#7a8db0]" : "text-[#060c1a]"
-                                    }`}
-                                  >
-                                    {formatDateDE(d.iso)}
-                                  </span>
-                                  <span
-                                    className="px-2 py-0.5 rounded-md text-[10px] font-bold font-mono tracking-wide text-white"
-                                    style={{ backgroundColor: past ? "#94a3b8" : d.color }}
-                                  >
-                                    {d.reg}
-                                  </span>
-                                  <CountdownBadge iso={d.iso} />
-                                </div>
-                                <h3
-                                  className={`font-[Syne] font-bold text-[15px] leading-snug mb-1 ${
-                                    past ? "text-[#7a8db0]" : "text-[#060c1a]"
-                                  }`}
-                                >
-                                  {d.title}
-                                </h3>
-                                <p className={`text-sm leading-relaxed ${past ? "text-[#94a3c4]" : "text-[#3a4a6b]"}`}>
-                                  {d.desc}
-                                </p>
-                              </div>
-
-                              {/* Guide link */}
-                              {guide && (
-                                <Link
-                                  href={guide}
-                                  className={`shrink-0 hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-semibold border transition-all duration-200 ${
-                                    past
-                                      ? "text-[#94a3c4] border-[#e8ecf4] hover:text-[#3a4a6b] hover:border-[#d8dff0]"
-                                      : "text-[#3a4a6b] border-[#e0e5f0] hover:text-[#060c1a] hover:border-[#0A2540]/20 hover:bg-[#f4f6fc]"
-                                  }`}
-                                >
-                                  Guide
-                                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                  </svg>
-                                </Link>
-                              )}
-                            </motion.div>
-                          );
-                        })}
-                      </AnimatePresence>
-                    </motion.div>
-                  </div>
-                ))}
+                {groupedByYear.map(([year, deadlines]) => {
+                  const allPast = deadlines.every((d) => isPast(d.iso));
+                  return (
+                    <YearGroup
+                      key={year}
+                      year={year}
+                      deadlines={deadlines}
+                      allPast={allPast}
+                      guideLinks={guideLinks}
+                    />
+                  );
+                })}
               </div>
             )}
 
@@ -505,5 +421,116 @@ export default function FristenRadarPage() {
       </main>
       <Footer />
     </>
+  );
+}
+
+/* ═══════ Collapsible Year Group ═══════ */
+function YearGroup({
+  year,
+  deadlines,
+  allPast,
+  guideLinks,
+}: {
+  year: number;
+  deadlines: Deadline[];
+  allPast: boolean;
+  guideLinks: Record<string, string>;
+}) {
+  const [open, setOpen] = useState(!allPast);
+
+  return (
+    <div>
+      {/* Year header — clickable to toggle */}
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="group flex items-center gap-3 mb-5 w-full text-left"
+        aria-expanded={open}
+      >
+        <span className="font-[Syne] font-[800] text-2xl text-[#060c1a]">{year}</span>
+        <span className="flex-1 h-px bg-[#d8dff0]" aria-hidden="true" />
+        {allPast ? (
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
+            ✓ {deadlines.length} in Kraft
+          </span>
+        ) : (
+          <span className="text-xs font-mono text-[#7a8db0]">
+            {deadlines.filter((d) => !isPast(d.iso)).length} bevorstehend
+          </span>
+        )}
+        <svg
+          className={`w-4 h-4 text-[#7a8db0] transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {/* Collapsible content */}
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key={`year-${year}`}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <motion.div
+              variants={stagger}
+              initial="hidden"
+              animate="show"
+              className="space-y-3"
+            >
+              {deadlines.map((d, idx) => (
+                <motion.div
+                  key={`${d.reg}-${d.iso}-${idx}`}
+                  variants={item}
+                  className="flex items-start gap-4 p-4 rounded-2xl bg-white border border-[#e8ecf4] hover:border-[#0A2540]/10 hover:shadow-sm transition-all duration-200 group/card"
+                >
+                  {/* Color dot */}
+                  <div
+                    className="w-3 h-3 rounded-full mt-1 shrink-0 ring-4 ring-opacity-10"
+                    style={{ backgroundColor: d.color, boxShadow: `0 0 0 4px ${d.color}1a` }}
+                  />
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-3 mb-1">
+                      <div>
+                        <span className="text-[11px] font-mono font-bold text-[#7a8db0] uppercase tracking-wider">
+                          {d.reg}
+                        </span>
+                        <h3 className="font-[Syne] font-bold text-sm text-[#060c1a] leading-snug mt-0.5">
+                          {d.title}
+                        </h3>
+                      </div>
+                      <CountdownBadge iso={d.iso} />
+                    </div>
+                    <p className="text-[13px] text-[#5a6a8a] leading-relaxed mt-1">{d.desc}</p>
+                    <div className="flex items-center gap-3 mt-2">
+                      <span className="text-[11px] font-mono text-[#7a8db0]">
+                        {formatDateDE(d.iso)}
+                      </span>
+                      {guideLinks[d.reg] && (
+                        <Link
+                          href={guideLinks[d.reg]}
+                          className="text-[11px] font-semibold text-[#0A2540]/60 hover:text-[#0A2540] transition-colors"
+                        >
+                          Guide →
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

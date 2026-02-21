@@ -107,15 +107,15 @@ export default function Header() {
         <div className="hidden md:flex items-center gap-3">
           <CommandPalette scrolled={scrolled} />
           <Link
-            href="/kontakt"
+            href="/fristen-radar"
             className={`px-4 py-2 rounded-xl text-[13px] font-[Syne] font-semibold tracking-[-0.01em] transition-all duration-200 ${
               scrolled ? "text-[#3a4a6b] hover:text-[#0A2540] hover:bg-[#0A2540]/[0.04]" : "text-white/80 hover:text-white hover:bg-white/[0.08]"
             }`}
           >
-            Compliance-Report
+            Compliance-Briefing
           </Link>
           <Link
-            href="/fristen-radar"
+            href="/kontakt"
             className="px-5 py-2.5 rounded-xl text-sm font-[Syne] font-bold transition-all duration-300 hover:-translate-y-0.5"
             style={{
               background: "linear-gradient(135deg, #FACC15, #EAB308)",
@@ -123,7 +123,7 @@ export default function Header() {
               boxShadow: "0 4px 16px rgba(250,204,21,0.3)",
             }}
           >
-            Compliance-Briefing
+            Compliance-Report
           </Link>
         </div>
 
@@ -199,13 +199,13 @@ export default function Header() {
             <span className="text-sm font-medium">Alle Tools</span>
           </Link>
 
-          {/* Compliance-Report (direct link) */}
+          {/* Compliance-Briefing (direct link) */}
           <Link
-            href="/kontakt"
+            href="/fristen-radar"
             className="flex items-center justify-between py-3 border-b border-[#0A2540]/[0.04] text-[#3a4a6b]"
             onClick={closeMobileMenu}
           >
-            <span className="text-sm font-medium">Compliance-Report</span>
+            <span className="text-sm font-medium">Compliance-Briefing</span>
           </Link>
 
           {/* Accordion sections */}
@@ -213,7 +213,7 @@ export default function Header() {
           <MobileNavAccordion dropdown={toolsDropdown} onNavigate={closeMobileMenu} />
 
           <Link
-            href="/fristen-radar"
+            href="/kontakt"
             className="mt-4 w-full py-3 rounded-xl text-center font-[Syne] font-bold text-sm block"
             style={{
               background: "linear-gradient(135deg, #FACC15, #EAB308)",
@@ -221,7 +221,7 @@ export default function Header() {
             }}
             onClick={closeMobileMenu}
           >
-            Compliance-Briefing
+            Compliance-Report erstellen
           </Link>
         </nav>
       )}
