@@ -26,7 +26,7 @@ import {
    GEOMETRY
    ═══════════════════════════════════════════ */
 const SWEEP_ORIGIN = { x: -80, y: 520 };
-const VISUAL_CENTER = { x: 200, y: 200 };
+const VISUAL_CENTER = { x: 240, y: 160 };
 
 const ARC_START = 20;
 const ARC_END = 75;
@@ -67,33 +67,6 @@ const BLIPS: Blip[] = [
   { id: "greencl",  label: "Green Cl.",  color: "#4ade80", baseAngle: 72, baseDist: 550, tier: 3 },
 ];
 
-/* ═══════════════════════════════════════════
-   CONSTELLATION NETWORK — Connection edges
-   ═══════════════════════════════════════════ */
-const CONNECTION_EDGES: [string, string][] = [
-  ["nisg", "dora"],
-  ["nisg", "cra"],
-  ["aiact", "dsgvo"],
-  ["dora", "dsgvo"],
-  ["dora", "mica"],
-  ["dsgvo", "eprivacy"],
-  ["csrd", "greencl"],
-  ["csrd", "bafg"],
-  ["bafg", "dsa"],
-  ["bafg", "dsgvo"],
-  ["hschg", "dsgvo"],
-  ["hschg", "nisg"],
-  ["dsa", "eprivacy"],
-  ["dsa", "mica"],
-  ["dsa", "aiact"],
-  ["dsgvo", "greencl"],
-];
-
-function edgeKey(a: string, b: string): string {
-  return a < b ? `${a}-${b}` : `${b}-${a}`;
-}
-
-const CONNECTION_SET = new Set(CONNECTION_EDGES.map(([a, b]) => edgeKey(a, b)));
 
 /* ═══════════════════════════════════════════
    HUD MESSAGES
@@ -184,13 +157,6 @@ interface BlipState extends Blip {
   hudMessage: string;
 }
 
-interface ActiveConnection {
-  key: string;
-  fromId: string;
-  toId: string;
-  activatedAt: number;
-}
-
 interface RingPulse {
   ringIndex: number;
   centerAngle: number;
@@ -207,8 +173,6 @@ interface Particle {
 /* ═══════════════════════════════════════════
    CONSTANTS
    ═══════════════════════════════════════════ */
-const MAX_CONNECTIONS = 2;
-const CONNECTION_LIFETIME = 3.5;
 const MAX_RING_PULSES = 3;
 const RING_PULSE_LIFETIME = 2;
 const MAX_PARTICLES = 10;
@@ -279,7 +243,6 @@ export default function ComplianceRadar({
   blipStatesRef.current = blipStates;
 
   /* ── Additional effect refs ── */
-  const activeConnectionsRef = useRef<ActiveConnection[]>([]);
   const ringPulsesRef = useRef<RingPulse[]>([]);
   const particlesRef = useRef<Particle[]>([]);
   const lastParticleSpawnRef = useRef(0);
@@ -343,30 +306,9 @@ export default function ComplianceRadar({
       return bs;
     });
 
-    /* ── Constellation: activate connections for newly pinged blips ── */
+    /* ── Ring pulse for newly pinged blips ── */
     if (newlyPinged.length > 0) {
-      const conns = activeConnectionsRef.current;
       for (const pingedId of newlyPinged) {
-        // Check if any recently pinged blip is connected
-        for (const bs of updated) {
-          if (bs.id === pingedId) continue;
-          const timeSinceOtherPing = elapsed - bs.pingTime;
-          if (timeSinceOtherPing < 1.5 && timeSinceOtherPing > 0.01) {
-            const key = edgeKey(pingedId, bs.id);
-            if (CONNECTION_SET.has(key) && !conns.some((c) => c.key === key)) {
-              conns.push({
-                key,
-                fromId: pingedId,
-                toId: bs.id,
-                activatedAt: elapsed,
-              });
-              // Cap at MAX_CONNECTIONS
-              while (conns.length > MAX_CONNECTIONS) conns.shift();
-            }
-          }
-        }
-
-        // Ring pulse
         const pingedBlip = updated.find((b) => b.id === pingedId);
         if (pingedBlip) {
           const rp = ringPulsesRef.current;
@@ -379,11 +321,6 @@ export default function ComplianceRadar({
         }
       }
     }
-
-    /* ── Cleanup expired connections ── */
-    activeConnectionsRef.current = activeConnectionsRef.current.filter(
-      (c) => elapsed - c.activatedAt < CONNECTION_LIFETIME
-    );
 
     /* ── Cleanup expired ring pulses ── */
     ringPulsesRef.current = ringPulsesRef.current.filter(
@@ -631,44 +568,6 @@ export default function ComplianceRadar({
           />
         )}
 
-        {/* ══════════ CONNECTION LAYER (parallax: with mouse) ══════════ */}
-        <g transform={blipTransformRef.current}>
-          {/* Constellation connection lines */}
-          {activeConnectionsRef.current.map((conn) => {
-            const fromBlip = blipStates.find((b) => b.id === conn.fromId);
-            const toBlip = blipStates.find((b) => b.id === conn.toId);
-            if (!fromBlip || !toBlip) return null;
-
-            const fromPos = polarToXY(fromBlip.currentAngle, fromBlip.currentDist);
-            const toPos = polarToXY(toBlip.currentAngle, toBlip.currentDist);
-            const age = elapsed - conn.activatedAt;
-            const fade = Math.max(0, 1 - age / CONNECTION_LIFETIME);
-
-            // Subtle 2-stroke connection: soft halo + thin core
-            return (
-              <g key={conn.key}>
-                <line
-                  x1={fromPos.x} y1={fromPos.y}
-                  x2={toPos.x} y2={toPos.y}
-                  stroke="#FACC15"
-                  strokeWidth={2.5}
-                  opacity={0.04 * fade}
-                  strokeLinecap="round"
-                />
-                <line
-                  x1={fromPos.x} y1={fromPos.y}
-                  x2={toPos.x} y2={toPos.y}
-                  stroke="#FACC15"
-                  strokeWidth={0.5}
-                  opacity={0.15 * fade}
-                  strokeLinecap="round"
-                  strokeDasharray="4 6"
-                />
-              </g>
-            );
-          })}
-        </g>
-
         {/* ══════════ BLIP LAYER (parallax: with mouse) ══════════ */}
         <g transform={blipTransformRef.current}>
           {blipStates.map((bs) => {
@@ -752,14 +651,14 @@ export default function ComplianceRadar({
         {/* ══════════ SYMBOL LAYER (no parallax, anchored) ══════════ */}
         <text
           x={VISUAL_CENTER.x}
-          y={VISUAL_CENTER.y + 8}
+          y={VISUAL_CENTER.y}
           textAnchor="middle"
           dominantBaseline="central"
           fontFamily="Syne, Georgia, 'Times New Roman', serif"
           fontWeight="700"
-          fontSize="42"
+          fontSize="34"
           fill="url(#para-grad)"
-          opacity="0.5"
+          opacity="0.3"
         >
           &#167;
         </text>
