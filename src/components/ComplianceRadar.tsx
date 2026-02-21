@@ -372,6 +372,8 @@ export default function ComplianceRadar({
   }, []);
 
   /* ── Current render values ── */
+  const sweepAngle = sweepAngleRef.current;
+  const sweepEnd = polarToXY(sweepAngle, 720);
   const elapsed = elapsedRef.current;
 
   /* Arc path builder */
@@ -381,16 +383,7 @@ export default function ComplianceRadar({
     return `M ${start.x} ${start.y} A ${radius} ${radius} 0 0 0 ${end.x} ${end.y}`;
   }, []);
 
-  /* Short arc path for ring pulse (15-degree segment) */
-  const makeShortArc = useCallback((radius: number, centerAngle: number, halfSpan: number) => {
-    const a1 = Math.max(ARC_START, centerAngle - halfSpan);
-    const a2 = Math.min(ARC_END, centerAngle + halfSpan);
-    const start = polarToXY(a1, radius);
-    const end = polarToXY(a2, radius);
-    return `M ${start.x} ${start.y} A ${radius} ${radius} 0 0 0 ${end.x} ${end.y}`;
-  }, []);
-
-  /* Sweep afterglow cones removed */
+  /* Ring pulse arcs and multi-layer afterglow cones removed */
 
   return (
     <div className={`relative ${className}`}>
@@ -459,26 +452,36 @@ export default function ComplianceRadar({
 
           {/* Radial grid lines removed — too visible on dark backgrounds */}
 
-          {/* Ring pulses */}
-          {ringPulsesRef.current.map((rp, i) => {
-            const age = elapsed - rp.activatedAt;
-            const fade = Math.max(0, 1 - age / RING_PULSE_LIFETIME);
-            return (
-              <path
-                key={`rp-${i}`}
-                d={makeShortArc(RING_RADII[rp.ringIndex], rp.centerAngle, 7.5)}
-                stroke="#FACC15"
-                strokeOpacity={fade * 0.35}
-                strokeWidth={2}
-                fill="none"
-              />
-            );
-          })}
+          {/* Ring pulses removed — looked like random arcs */}
         </g>
 
         {/* ══════════ SWEEP LAYER (no parallax) ══════════ */}
         <g>
-          {/* Sweep line, afterglow cones and bright tip removed — too visible */}
+          {/* Afterglow cone (single subtle wedge behind sweep) */}
+          {(() => {
+            const coneA1 = sweepAngle;
+            const coneA2 = sweepAngle - 12;
+            const p1 = polarToXY(coneA1, 720);
+            const p2 = polarToXY(coneA2, 720);
+            return (
+              <path
+                d={`M ${SWEEP_ORIGIN.x} ${SWEEP_ORIGIN.y} L ${p1.x} ${p1.y} A 720 720 0 0 1 ${p2.x} ${p2.y} Z`}
+                fill="#FACC15"
+                opacity={0.025}
+              />
+            );
+          })()}
+
+          {/* Sweep line */}
+          <line
+            x1={SWEEP_ORIGIN.x}
+            y1={SWEEP_ORIGIN.y}
+            x2={sweepEnd.x}
+            y2={sweepEnd.y}
+            stroke="#FACC15"
+            strokeOpacity="0.12"
+            strokeWidth="0.7"
+          />
 
           {/* Particle trail */}
           {particlesRef.current.map((p, i) => {
