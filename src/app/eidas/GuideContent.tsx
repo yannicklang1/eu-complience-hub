@@ -90,7 +90,7 @@ function Section({ id, title, children }: { id: string; title: string; children:
 }
 
 function StatCard({ value, label, accent = ACCENT }: { value: string; label: string; accent?: string }) {
-  const fontSize = value.length > 14 ? "text-lg sm:text-xl" : value.length > 8 ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl";
+  const fontSize = value.length <= 5 ? "text-xl sm:text-2xl" : value.length <= 10 ? "text-lg sm:text-xl" : "text-base sm:text-lg";
   return (
     <div className="rounded-2xl border border-[#d8dff0] bg-white p-5 text-center overflow-hidden">
       <div

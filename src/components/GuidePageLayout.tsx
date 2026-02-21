@@ -178,7 +178,7 @@ export default function GuidePageLayout({
           <div className="max-w-7xl mx-auto px-6 lg:px-12">
             <div className="flex gap-10 items-start">
               {/* Left: Table of Contents (Desktop) */}
-              <div data-toc="">
+              <div data-toc="" className="hidden lg:block sticky top-28 w-56 flex-shrink-0 self-start">
                 <TableOfContents items={tocItems} accent={accent} />
               </div>
 

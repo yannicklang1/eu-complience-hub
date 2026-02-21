@@ -53,7 +53,7 @@ export default function TableOfContents({
   return (
     <>
       {/* Desktop: Sticky sidebar */}
-      <nav aria-label="Inhaltsverzeichnis" className="hidden lg:block sticky top-28 w-56 flex-shrink-0 self-start">
+      <nav aria-label="Inhaltsverzeichnis">
         <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 text-[#7a8db0]">
           Inhalt
         </div>
