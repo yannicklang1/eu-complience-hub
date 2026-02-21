@@ -18,7 +18,6 @@ export default function FristenRadarSignup({
   variant?: "hero" | "card";
 }) {
   const [email, setEmail] = useState("");
-  const [commercialConsent, setCommercialConsent] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
@@ -37,7 +36,7 @@ export default function FristenRadarSignup({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
-          commercial_consent: commercialConsent,
+          commercial_consent: true,
           source: "fristen-radar",
           source_page: typeof window !== "undefined" ? window.location.pathname : "/",
         }),
@@ -127,31 +126,13 @@ export default function FristenRadarSignup({
         </button>
       </form>
 
-      {/* Optional commercial content consent (§26 MedienG AT, §5a UWG DE) */}
-      <label
-        className={`flex items-start gap-3 mt-4 max-w-md mx-auto cursor-pointer group ${
-          isHero ? "text-white/40 hover:text-white/60" : "text-[#7a8db0]/70 hover:text-[#7a8db0]"
-        } transition-colors`}
-      >
-        <input
-          type="checkbox"
-          checked={commercialConsent}
-          onChange={(e) => setCommercialConsent(e.target.checked)}
-          className="mt-0.5 w-4 h-4 rounded border-2 flex-shrink-0 accent-[#FACC15] cursor-pointer"
-        />
-        <span className="text-[11px] leading-relaxed">
-          Ich möchte gelegentlich auch Hinweise auf geprüfte Compliance-Tools erhalten.
-          Diese sind als <strong>Anzeige</strong> gekennzeichnet.{" "}
-          <span className={isHero ? "text-white/25" : "text-[#7a8db0]/50"}>(Optional)</span>
-        </span>
-      </label>
-
       {status === "error" && (
         <p className="text-sm text-red-400 mt-3" role="alert">{message}</p>
       )}
 
       <p className={`font-mono text-[11px] mt-5 tracking-wide ${isHero ? "text-white/20" : "text-[#7a8db0]/60"}`}>
         Nur bei kritischen Fristen und Gesetzesänderungen. Max. 3×/Monat. Jederzeit kündbar. DSGVO-konform.
+        *Gelegentlich erhalten Sie auch Hinweise auf geprüfte Compliance-Tools (als Anzeige gekennzeichnet).
       </p>
     </div>
   );
