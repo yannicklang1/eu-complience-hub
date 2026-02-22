@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
+import { useTranslations } from "@/i18n/use-translations";
 
 /* ══════════════════════════════════════════════════════════════
    Regulation Finder — Interactive Quiz (English)
@@ -335,6 +336,7 @@ function evaluateRegulations(answers: Answer[]): Regulation[] {
 /* ═══════════════════════ Main Component ═══════════════════════ */
 
 export default function RegulierungFinderToolEN() {
+  const { locale } = useTranslations();
   const [step, setStep] = useState(0); // 0..QUESTIONS.length = quiz, QUESTIONS.length = results
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [currentSelection, setCurrentSelection] = useState<string[]>([]);
@@ -572,7 +574,7 @@ export default function RegulierungFinderToolEN() {
                         transition={{ delay: i * 0.08, duration: 0.3 }}
                       >
                         <Link
-                          href={reg.href}
+                          href={`/${locale}${reg.href}`}
                           className="block rounded-2xl border border-white/5 bg-slate-900/40 p-5 sm:p-6 hover:bg-slate-900/60 hover:border-white/10 transition-all duration-200 group"
                         >
                           <div className="flex items-start gap-4">
@@ -631,7 +633,7 @@ export default function RegulierungFinderToolEN() {
                       Start again
                     </button>
                     <Link
-                      href="/tools/compliance-checkliste"
+                      href={`/${locale}/tools/compliance-checkliste`}
                       className="flex-1 py-3 rounded-xl font-bold text-sm text-slate-900 text-center transition-all"
                       style={{
                         background: "linear-gradient(135deg, #FACC15, #EAB308)",
@@ -656,7 +658,7 @@ export default function RegulierungFinderToolEN() {
                       Would you like a personalised compliance report?
                     </p>
                     <Link
-                      href="/kontakt"
+                      href={`/${locale}/kontakt`}
                       className="inline-flex items-center gap-2 text-sm font-semibold text-yellow-400 hover:text-yellow-300 transition-colors"
                     >
                       Create a free compliance report

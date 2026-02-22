@@ -7,6 +7,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
+import { useTranslations } from "@/i18n/use-translations";
 
 const LeadCaptureForm = dynamic(() => import("@/components/LeadCaptureForm"), {
   ssr: false,
@@ -254,6 +255,7 @@ const ACCENT = "#ef4444";
 const TOTAL_STEPS = 3;
 
 export default function HaftungsPrueferTool() {
+  const { locale } = useTranslations();
   const [step, setStep] = useState(0);
   const [selectedRegs, setSelectedRegs] = useState<string[]>([]);
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
@@ -301,9 +303,9 @@ export default function HaftungsPrueferTool() {
           <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#f4f6fc] to-transparent" />
           <div className="relative max-w-3xl mx-auto px-6 text-center">
             <nav className="flex items-center justify-center gap-2 mb-8">
-              <Link href="/" className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">Startseite</Link>
+              <Link href={`/${locale}`} className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">Startseite</Link>
               <span className="font-mono text-[11px] text-white/35">/</span>
-              <Link href="/haftungs-check" className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">GF-Haftung</Link>
+              <Link href={`/${locale}/haftungs-check`} className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">GF-Haftung</Link>
               <span className="font-mono text-[11px] text-white/35">/</span>
               <span className="font-mono text-[11px] text-white/60">Haftungs-Prüfer</span>
             </nav>

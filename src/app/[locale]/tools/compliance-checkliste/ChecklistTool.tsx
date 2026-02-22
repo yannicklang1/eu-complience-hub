@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
+import { useTranslations } from "@/i18n/use-translations";
 
 /* ══════════════════════════════════════════════════════════════
    Data Model — Regulation Checklists
@@ -149,6 +150,7 @@ const REGULATIONS: RegulationChecklist[] = [
    ══════════════════════════════════════════════════════════════ */
 
 export default function ChecklistTool() {
+  const { locale } = useTranslations();
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
   const [expandedReg, setExpandedReg] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
@@ -368,7 +370,7 @@ export default function ChecklistTool() {
                           {/* Link to guide */}
                           <div className="pt-3 flex items-center gap-2">
                             <Link
-                              href={reg.href}
+                              href={`/${locale}${reg.href}`}
                               className="inline-flex items-center gap-1.5 text-xs font-semibold transition-colors"
                               style={{ color: reg.accent }}
                             >
@@ -484,7 +486,7 @@ export default function ChecklistTool() {
                         </p>
                       </div>
                       <Link
-                        href="/fristen-radar"
+                        href={`/${locale}/fristen-radar`}
                         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-xs text-slate-900 flex-shrink-0"
                         style={{
                           background: "linear-gradient(135deg, #FACC15, #EAB308)",
@@ -514,7 +516,7 @@ export default function ChecklistTool() {
           <div className="max-w-4xl mx-auto mt-8 px-4">
             <p className="text-[11px] text-slate-500 text-center leading-relaxed">
               Diese Checkliste dient als Orientierungshilfe und ersetzt keine Rechtsberatung. Die Anforderungen variieren je nach Unternehmensgröße, Branche und spezifischer Situation.{" "}
-              <Link href="/haftungsausschluss" className="underline underline-offset-2 hover:text-slate-400">
+              <Link href={`/${locale}/haftungsausschluss`} className="underline underline-offset-2 hover:text-slate-400">
                 Haftungsausschluss
               </Link>
             </p>

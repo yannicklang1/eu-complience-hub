@@ -7,6 +7,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
+import { useTranslations } from "@/i18n/use-translations";
 
 const LeadCaptureForm = dynamic(() => import("@/components/LeadCaptureForm"), {
   ssr: false,
@@ -148,6 +149,7 @@ const REVENUE_PRESETS = [
 ];
 
 export default function BussgeldRechnerTool() {
+  const { locale } = useTranslations();
   const [revenue, setRevenue] = useState<number | null>(null);
   const [revenueInput, setRevenueInput] = useState("");
   const [showResults, setShowResults] = useState(false);
@@ -197,7 +199,7 @@ export default function BussgeldRechnerTool() {
           <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#f4f6fc] to-transparent" />
           <div className="relative max-w-3xl mx-auto px-6 text-center">
             <nav className="flex items-center justify-center gap-2 mb-8">
-              <Link href="/" className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">Home</Link>
+              <Link href={`/${locale}`} className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">Home</Link>
               <span className="font-mono text-[11px] text-white/35">/</span>
               <span className="font-mono text-[11px] text-white/60">Fine Calculator</span>
             </nav>
@@ -343,7 +345,7 @@ export default function BussgeldRechnerTool() {
                           transition={{ delay: 0.1 + index * 0.1, duration: 0.4 }}
                         >
                           <Link
-                            href={item.guideUrl}
+                            href={`/${locale}${item.guideUrl}`}
                             className="block rounded-2xl border border-[#d8dff0] bg-white p-5 hover:shadow-md hover:border-opacity-60 transition-all group"
                           >
                             <div className="flex items-center justify-between mb-2">

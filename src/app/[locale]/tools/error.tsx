@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 export default function ToolsError({
   error,
@@ -9,6 +10,8 @@ export default function ToolsError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { locale } = useParams<{ locale: string }>();
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#060c1a] px-6">
       <div className="text-center max-w-lg">
@@ -50,7 +53,7 @@ export default function ToolsError({
             Erneut versuchen
           </button>
           <Link
-            href="/"
+            href={`/${locale}`}
             className="px-6 py-3 rounded-xl font-[Syne] font-semibold text-sm text-white/70 border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:text-white transition-all duration-200"
           >
             Zur Startseite
@@ -64,9 +67,9 @@ export default function ToolsError({
           </p>
           <div className="flex flex-wrap gap-2 justify-center">
             {[
-              { label: "NIS2-Check", href: "/tools/nis2-betroffenheits-check" },
-              { label: "Bußgeld-Rechner", href: "/tools/bussgeld-rechner" },
-              { label: "Haftungs-Prüfer", href: "/tools/haftungs-pruefer" },
+              { label: "NIS2-Check", href: `/${locale}/tools/nis2-betroffenheits-check` },
+              { label: "Bußgeld-Rechner", href: `/${locale}/tools/bussgeld-rechner` },
+              { label: "Haftungs-Prüfer", href: `/${locale}/tools/haftungs-pruefer` },
             ].map(({ label, href }) => (
               <Link
                 key={href}

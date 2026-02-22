@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
+import { useTranslations } from "@/i18n/use-translations";
 
 /* ══════════════════════════════════════════════════════════════
    Compliance Cost Calculator (English)
@@ -176,6 +177,7 @@ function formatEuro(amount: number): string {
 /* ═══════════════════════ Main Component ═══════════════════════ */
 
 export default function KostenKalkulatorToolEN() {
+  const { locale } = useTranslations();
   const [size, setSize] = useState<CompanySize | null>(null);
   const [maturity, setMaturity] = useState<MaturityLevel | null>(null);
   const [selectedRegs, setSelectedRegs] = useState<Set<string>>(new Set());
@@ -293,7 +295,7 @@ export default function KostenKalkulatorToolEN() {
               </div>
               <p className="text-xs text-slate-500 mb-4">
                 Not sure? Use the{" "}
-                <Link href="/tools/regulierung-finder" className="text-yellow-400/80 underline underline-offset-2">
+                <Link href={`/${locale}/tools/regulierung-finder`} className="text-yellow-400/80 underline underline-offset-2">
                   Regulation Finder
                 </Link>{" "}
                 to determine which regulations apply to you.
@@ -425,7 +427,7 @@ export default function KostenKalkulatorToolEN() {
                               ))}
                               <div className="pt-2">
                                 <Link
-                                  href={reg.href}
+                                  href={`/${locale}${reg.href}`}
                                   className="text-xs text-yellow-400/70 hover:text-yellow-400 transition-colors"
                                 >
                                   Learn more about {reg.name} →
@@ -449,7 +451,7 @@ export default function KostenKalkulatorToolEN() {
                           This estimate is for rough orientation only. Actual costs depend on many factors: existing infrastructure, chosen tools, external consultants vs. in-house implementation, complexity of business processes. Synergies between regulations can reduce total costs by 20–40%.
                         </p>
                         <Link
-                          href="/kontakt"
+                          href={`/${locale}/kontakt`}
                           className="inline-flex items-center gap-1.5 text-xs font-semibold text-yellow-400 hover:text-yellow-300 transition-colors"
                         >
                           Create a detailed compliance report

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useTranslations } from "@/i18n/use-translations";
 
 /* ==================================================================
    Tools Hub (EN) -- Central landing page for all interactive tools
@@ -169,6 +170,7 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
 }
 
 export default function ToolsHubContent() {
+  const { locale } = useTranslations();
   const [category, setCategory] = useState<ToolCategory>("all");
 
   const filtered =
@@ -247,7 +249,7 @@ export default function ToolsHubContent() {
                     transition={{ duration: 0.2 }}
                   >
                     <Link
-                      href={tool.href}
+                      href={`/${locale}${tool.href}`}
                       className="group block rounded-2xl border border-white/5 bg-slate-900/40 p-6 hover:border-white/10 hover:bg-slate-900/60 transition-all duration-300"
                     >
                       {/* Header */}
@@ -336,10 +338,10 @@ export default function ToolsHubContent() {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {[
-                { title: "Compliance Directory", description: "Find auditors & consultants", href: "/compliance-verzeichnis", icon: "\uD83D\uDCC7" },
-                { title: "Deadline Radar", description: "All deadlines at a glance", href: "/fristen-radar", icon: "\uD83D\uDCC5" },
-                { title: "Compliance Timeline", description: "Deadlines 2025\u20132027", href: "/timeline", icon: "\uD83D\uDDD3\uFE0F" },
-                { title: "Compliance Glossary", description: "Key terms explained", href: "/glossar", icon: "\uD83D\uDCDA" },
+                { title: "Compliance Directory", description: "Find auditors & consultants", href: `/${locale}/compliance-verzeichnis`, icon: "\uD83D\uDCC7" },
+                { title: "Deadline Radar", description: "All deadlines at a glance", href: `/${locale}/fristen-radar`, icon: "\uD83D\uDCC5" },
+                { title: "Compliance Timeline", description: "Deadlines 2025\u20132027", href: `/${locale}/timeline`, icon: "\uD83D\uDDD3\uFE0F" },
+                { title: "Compliance Glossary", description: "Key terms explained", href: `/${locale}/glossar`, icon: "\uD83D\uDCDA" },
               ].map((res) => (
                 <Link
                   key={res.href}
@@ -403,7 +405,7 @@ export default function ToolsHubContent() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
-                href="/kontakt"
+                href={`/${locale}/kontakt`}
                 className="px-6 py-3 rounded-xl font-bold text-sm text-slate-900"
                 style={{
                   background: "linear-gradient(135deg, #FACC15, #EAB308)",
@@ -414,7 +416,7 @@ export default function ToolsHubContent() {
                 Create Compliance Report
               </Link>
               <Link
-                href="/faq"
+                href={`/${locale}/faq`}
                 className="px-6 py-3 rounded-xl font-semibold text-sm text-slate-300 border border-white/10 hover:bg-white/[0.04] transition-all"
               >
                 Frequently Asked Questions

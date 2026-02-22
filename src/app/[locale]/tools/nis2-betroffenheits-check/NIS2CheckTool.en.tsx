@@ -7,6 +7,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
+import { useTranslations } from "@/i18n/use-translations";
 
 const LeadCaptureForm = dynamic(() => import("@/components/LeadCaptureForm"), {
   ssr: false,
@@ -260,6 +261,7 @@ const TOTAL_STEPS = 4;
 const ACCENT = "#0ea5e9"; // Sky blue, matching NISG guide
 
 export default function NIS2CheckTool() {
+  const { locale } = useTranslations();
   const [step, setStep] = useState(0);
   const [selectedSector, setSelectedSector] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<CompanySize | null>(null);
@@ -324,11 +326,11 @@ export default function NIS2CheckTool() {
 
           <div className="relative max-w-3xl mx-auto px-6 text-center">
             <nav className="flex items-center justify-center gap-2 mb-8">
-              <Link href="/" className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">
+              <Link href={`/${locale}`} className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">
                 Home
               </Link>
               <span className="font-mono text-[11px] text-white/35">/</span>
-              <Link href="/nisg-2026" className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">
+              <Link href={`/${locale}/nisg-2026`} className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">
                 NISG 2026
               </Link>
               <span className="font-mono text-[11px] text-white/35">/</span>
@@ -817,7 +819,7 @@ export default function NIS2CheckTool() {
 
                     <div className="grid gap-3">
                       <Link
-                        href="/nisg-2026"
+                        href={`/${locale}/nisg-2026`}
                         className="flex items-center gap-4 p-4 rounded-xl border border-[#d8dff0] hover:border-sky-300 hover:shadow-sm transition-all group"
                       >
                         <div className="w-10 h-10 rounded-lg bg-sky-50 flex items-center justify-center flex-shrink-0">
@@ -839,7 +841,7 @@ export default function NIS2CheckTool() {
                       </Link>
 
                       <Link
-                        href="/haftungs-check"
+                        href={`/${locale}/haftungs-check`}
                         className="flex items-center gap-4 p-4 rounded-xl border border-[#d8dff0] hover:border-red-300 hover:shadow-sm transition-all group"
                       >
                         <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">

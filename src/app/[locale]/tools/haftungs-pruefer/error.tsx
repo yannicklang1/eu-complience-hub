@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 export default function HaftungsPrueferError({
   error,
@@ -9,6 +10,8 @@ export default function HaftungsPrueferError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { locale } = useParams<{ locale: string }>();
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#060c1a] px-6">
       <div className="text-center max-w-lg">
@@ -35,7 +38,7 @@ export default function HaftungsPrueferError({
             Erneut versuchen
           </button>
           <Link
-            href="/tools"
+            href={`/${locale}/tools`}
             className="px-6 py-3 rounded-xl font-[Syne] font-semibold text-sm text-white/70 border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:text-white transition-all duration-200"
           >
             Alle Tools
