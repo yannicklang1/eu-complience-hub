@@ -31,16 +31,18 @@ export async function GET(request: NextRequest) {
   const limit = Math.min(parseInt(url.searchParams.get("limit") ?? "50", 10), 200);
   const offset = (page - 1) * limit;
   const status = url.searchParams.get("status"); // active, pending, unsubscribed
+  const country = url.searchParams.get("country");
 
   let query = adminClient
     .from("subscribers")
-    .select("id, email, status, source, source_page, commercial_consent, created_at, opt_in_confirmed_at, unsubscribed_at", { count: "exact" })
+    .select("id, email, status, source, source_page, country, commercial_consent, created_at, opt_in_confirmed_at, unsubscribed_at", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
   if (status && ["active", "pending", "unsubscribed"].includes(status)) {
     query = query.eq("status", status);
   }
+  if (country) query = query.eq("country", country);
 
   const { data, error, count } = await query;
 

@@ -159,6 +159,7 @@ export async function GET(request: NextRequest) {
 
   const source = url.searchParams.get("source");
   const branche = url.searchParams.get("branche");
+  const country = url.searchParams.get("country");
 
   let query = adminClient
     .from("leads")
@@ -168,6 +169,7 @@ export async function GET(request: NextRequest) {
 
   if (source) query = query.eq("source_tool", source);
   if (branche) query = query.eq("branche", branche);
+  if (country) query = query.eq("country", country);
 
   const { data, error, count } = await query;
 

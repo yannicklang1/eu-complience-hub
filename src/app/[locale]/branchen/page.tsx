@@ -5,6 +5,7 @@ import { LOCALES, LOCALE_OG, type Locale } from "@/i18n/config";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BranchenIcon from "@/components/BranchenIcon";
+import CountryBadge from "@/components/CountryBadge";
 import { branchen, regulations } from "@/data/branchenData";
 
 /* ── Static params for all locales ── */
@@ -203,13 +204,14 @@ export default async function BranchenHubPage({
               </span>
             </nav>
 
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-3 mb-3 flex-wrap">
               <span className="font-mono text-[11px] font-semibold tracking-[0.15em] uppercase text-white/40">
                 {ui.programmaticSeo}
               </span>
               <span className="text-[10px] px-2.5 py-1 rounded-lg font-mono font-bold tracking-wide text-white bg-[#0A2540]">
                 {ui.pagesLabel(totalPages)}
               </span>
+              <CountryBadge />
             </div>
 
             <h1 className="font-[Syne] font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.1] mb-4">

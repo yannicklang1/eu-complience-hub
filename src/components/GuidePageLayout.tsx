@@ -140,7 +140,7 @@ export default function GuidePageLayout({
                 </div>
               )}
               <div>
-                <div className="flex items-center gap-3 mb-3">
+                <div className="flex items-center gap-3 mb-3 flex-wrap">
                   <span className="font-mono text-[11px] font-semibold tracking-[0.15em] uppercase text-white/40">
                     {regulationKey}
                   </span>
@@ -151,6 +151,12 @@ export default function GuidePageLayout({
                     >
                       {badgeLabel}
                     </span>
+                  )}
+                  {countryMeta && (
+                    <div className="flex items-center gap-1.5 rounded-full bg-white/[0.06] border border-white/[0.1] px-2.5 py-1">
+                      <span className="text-sm leading-none">{countryMeta.flag}</span>
+                      <span className="font-mono text-[10px] text-white/60 font-medium">{countryMeta.nameDE}</span>
+                    </div>
                   )}
                 </div>
                 <h1 className="font-[Syne] font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.1] mb-4">

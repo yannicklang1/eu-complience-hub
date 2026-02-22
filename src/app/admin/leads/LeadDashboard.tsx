@@ -72,23 +72,15 @@ const SIZE_LABELS: Record<string, string> = {
 };
 
 const COUNTRY_LABELS: Record<string, string> = {
-  AT: "🇦🇹 AT",
-  DE: "🇩🇪 DE",
-  CH: "🇨🇭 CH",
-  LI: "🇱🇮 LI",
-  LU: "🇱🇺 LU",
-  IT: "🇮🇹 IT",
-  FR: "🇫🇷 FR",
-  NL: "🇳🇱 NL",
-  BE: "🇧🇪 BE",
-  PL: "🇵🇱 PL",
-  CZ: "🇨🇿 CZ",
-  SK: "🇸🇰 SK",
-  HU: "🇭🇺 HU",
-  SI: "🇸🇮 SI",
-  HR: "🇭🇷 HR",
-  OTHER_EU: "🇪🇺 EU",
-  OTHER: "🌍",
+  AT: "🇦🇹 AT", DE: "🇩🇪 DE", BE: "🇧🇪 BE", BG: "🇧🇬 BG",
+  HR: "🇭🇷 HR", CY: "🇨🇾 CY", CZ: "🇨🇿 CZ", DK: "🇩🇰 DK",
+  EE: "🇪🇪 EE", FI: "🇫🇮 FI", FR: "🇫🇷 FR", GR: "🇬🇷 GR",
+  HU: "🇭🇺 HU", IE: "🇮🇪 IE", IT: "🇮🇹 IT", LV: "🇱🇻 LV",
+  LT: "🇱🇹 LT", LU: "🇱🇺 LU", MT: "🇲🇹 MT", NL: "🇳🇱 NL",
+  PL: "🇵🇱 PL", PT: "🇵🇹 PT", RO: "🇷🇴 RO", SK: "🇸🇰 SK",
+  SI: "🇸🇮 SI", ES: "🇪🇸 ES", SE: "🇸🇪 SE",
+  CH: "🇨🇭 CH", LI: "🇱🇮 LI",
+  OTHER_EU: "🇪🇺 EU", OTHER: "🌍",
 };
 
 const ITEMS_PER_PAGE = 25;
@@ -106,13 +98,14 @@ export default function LeadDashboard() {
   const [page, setPage] = useState(1);
   const [filterSource, setFilterSource] = useState("");
   const [filterBranche, setFilterBranche] = useState("");
+  const [filterCountry, setFilterCountry] = useState("");
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
 
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
 
   const fetchLeads = useCallback(
-    async (p: number, source: string, branche: string) => {
+    async (p: number, source: string, branche: string, country: string) => {
       setAuthState("loading");
       try {
         const params = new URLSearchParams({
@@ -121,6 +114,7 @@ export default function LeadDashboard() {
         });
         if (source) params.set("source", source);
         if (branche) params.set("branche", branche);
+        if (country) params.set("country", country);
 
         const res = await fetch(`/api/leads?${params.toString()}`, {
           headers: { "x-admin-key": adminKey },
@@ -154,15 +148,15 @@ export default function LeadDashboard() {
   function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     if (!adminKey.trim()) return;
-    fetchLeads(1, filterSource, filterBranche);
+    fetchLeads(1, filterSource, filterBranche, filterCountry);
   }
 
   useEffect(() => {
     if (authState === "authenticated") {
-      fetchLeads(page, filterSource, filterBranche);
+      fetchLeads(page, filterSource, filterBranche, filterCountry);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, filterSource, filterBranche]);
+  }, [page, filterSource, filterBranche, filterCountry]);
 
   function exportCSV() {
     if (leads.length === 0) return;
@@ -298,11 +292,16 @@ export default function LeadDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6">
         {/* Stats Cards */}
         {stats && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
             <StatCard label="Gesamt" value={stats.total_leads} accent="#0A2540" />
             <StatCard label="Letzte 7 Tage" value={stats.leads_last_7d} accent="#0ea5e9" />
             <StatCard label="Letzte 30 Tage" value={stats.leads_last_30d} accent="#10b981" />
             <StatCard label="Marketing Opt-in" value={stats.marketing_opted_in} accent="#d97706" />
+            <StatCard
+              label="Unique Länder"
+              value={new Set(leads.map((l) => l.country).filter(Boolean)).size}
+              accent="#8b5cf6"
+            />
           </div>
         )}
 
@@ -346,6 +345,20 @@ export default function LeadDashboard() {
               "Sonstige",
             ].map((b) => (
               <option key={b} value={b}>{b}</option>
+            ))}
+          </select>
+
+          <select
+            value={filterCountry}
+            onChange={(e) => {
+              setFilterCountry(e.target.value);
+              setPage(1);
+            }}
+            className="px-3 py-2 rounded-lg border border-[#d8dff0] bg-white text-sm text-[#060c1a] focus:outline-none focus:border-[#0A2540]"
+          >
+            <option value="">Alle Länder</option>
+            {Object.entries(COUNTRY_LABELS).map(([val, label]) => (
+              <option key={val} value={val}>{label}</option>
             ))}
           </select>
 

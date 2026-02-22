@@ -4,6 +4,7 @@ import { BASE_URL } from "@/lib/constants";
 import { LOCALES, LOCALE_OG, type Locale } from "@/i18n/config";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import CountryBadge from "@/components/CountryBadge";
 
 /* ── Static params for all locales ── */
 export function generateStaticParams() {
@@ -460,11 +461,12 @@ export default async function QuellenPage({
                 </svg>
               </div>
               <div>
-                <div className="flex items-center gap-3 mb-3">
+                <div className="flex items-center gap-3 mb-3 flex-wrap">
                   <span className="font-mono text-[11px] font-semibold tracking-[0.15em] uppercase text-white/40">{ui.refLabel}</span>
                   <span className="text-[10px] px-2.5 py-1 rounded-lg font-mono font-bold tracking-wide text-white bg-indigo-600">
                     {ui.sourcesCount(totalSources)}
                   </span>
+                  <CountryBadge />
                 </div>
                 <h1 className="font-[Syne] font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.1] mb-4">
                   {ui.heroTitle}
@@ -512,7 +514,7 @@ export default async function QuellenPage({
                     </div>
                     {group.guideUrl !== "#" && (
                       <Link
-                        href={group.guideUrl}
+                        href={`/${locale}${group.guideUrl}`}
                         className="text-[12px] font-medium transition-colors flex items-center gap-1 hover:gap-2"
                         style={{ color: group.accent }}
                       >
