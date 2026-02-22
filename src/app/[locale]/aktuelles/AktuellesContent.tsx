@@ -7,6 +7,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SocialShareBar from "@/components/SocialShareBar";
 import { useTranslations } from "@/i18n/use-translations";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
 import type { NewsItem } from "./page";
 
 /* ══════════════════════════════════════════════════════════════
@@ -69,6 +71,8 @@ export default function AktuellesContent({
   newsItems: NewsItem[];
 }) {
   const { locale } = useTranslations();
+  const { countryCode } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
   const [filter, setFilter] = useState<FilterType>("all");
 
   const sorted = useMemo(() => {
@@ -105,14 +109,22 @@ export default function AktuellesContent({
             }}
           />
           <div className="relative max-w-4xl mx-auto px-6 text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-yellow-400/10 border border-yellow-400/20 mb-6">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-400" />
-              </span>
-              <span className="text-yellow-400 text-xs font-semibold">
-                Compliance-News
-              </span>
+            <div className="flex items-center justify-center gap-2 flex-wrap mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-yellow-400/10 border border-yellow-400/20">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-400" />
+                </span>
+                <span className="text-yellow-400 text-xs font-semibold">
+                  Compliance-News
+                </span>
+              </div>
+              {countryMeta && (
+                <div className="flex items-center gap-1.5 rounded-full bg-white/[0.06] border border-white/[0.1] px-2.5 py-1">
+                  <span className="text-sm leading-none">{countryMeta.flag}</span>
+                  <span className="font-mono text-[10px] text-white/60 font-medium">{countryMeta.nameDE}</span>
+                </div>
+              )}
             </div>
             <h1 className="font-[Syne] font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.1] mb-5">
               Aktuelles zur{" "}

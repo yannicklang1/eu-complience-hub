@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useTranslations } from "@/i18n/use-translations";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
 import type { FAQItem } from "./page";
 
 /* ══════════════════════════════════════════════════════════════
@@ -57,6 +59,8 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export default function FAQContent({ faqData }: { faqData: FAQItem[] }) {
   const { locale } = useTranslations();
+  const { countryCode } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
   const [activeCategory, setActiveCategory] = useState<string>("Alle");
   const [search, setSearch] = useState("");
   const [openIndices, setOpenIndices] = useState<Set<number>>(new Set());
@@ -107,6 +111,14 @@ export default function FAQContent({ faqData }: { faqData: FAQItem[] }) {
             }}
           />
           <div className="relative max-w-3xl mx-auto px-6 text-center">
+            {countryMeta && (
+              <div className="flex items-center justify-center gap-2 flex-wrap mb-6">
+                <div className="flex items-center gap-1.5 rounded-full bg-white/[0.06] border border-white/[0.1] px-2.5 py-1">
+                  <span className="text-sm leading-none">{countryMeta.flag}</span>
+                  <span className="font-mono text-[10px] text-white/60 font-medium">{countryMeta.nameDE}</span>
+                </div>
+              </div>
+            )}
             <h1 className="font-[Syne] font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.1] mb-5">
               Häufige{" "}
               <span className="bg-gradient-to-r from-yellow-400 to-yellow-500 bg-clip-text text-transparent">

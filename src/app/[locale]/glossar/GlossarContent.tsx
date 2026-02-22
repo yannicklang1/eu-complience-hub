@@ -5,6 +5,8 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
 
 /* ══════════════════════════════════════════════════════════════
    Glossary Data
@@ -137,6 +139,8 @@ const ALPHABET = Array.from(new Set(GLOSSARY.map((g) => g.term[0].toUpperCase())
    ══════════════════════════════════════════════════════════════ */
 
 export default function GlossarContent() {
+  const { countryCode } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<Category>("Alle");
 
@@ -176,11 +180,19 @@ export default function GlossarContent() {
             }}
           />
           <div className="relative max-w-4xl mx-auto px-6 text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-400/10 border border-violet-400/20 text-violet-400 text-xs font-mono font-semibold tracking-wider uppercase mb-6">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-              </svg>
-              Nachschlagewerk
+            <div className="flex items-center justify-center gap-2 flex-wrap mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-400/10 border border-violet-400/20 text-violet-400 text-xs font-mono font-semibold tracking-wider uppercase">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                </svg>
+                Nachschlagewerk
+              </div>
+              {countryMeta && (
+                <div className="flex items-center gap-1.5 rounded-full bg-white/[0.06] border border-white/[0.1] px-2.5 py-1">
+                  <span className="text-sm leading-none">{countryMeta.flag}</span>
+                  <span className="font-mono text-[10px] text-white/60 font-medium">{countryMeta.nameDE}</span>
+                </div>
+              )}
             </div>
             <h1 className="font-[Syne] font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.1] mb-5">
               Compliance-

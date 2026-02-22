@@ -7,6 +7,8 @@ import Footer from "@/components/Footer";
 import AccordionSection from "@/components/AccordionSection";
 import BranchenIcon from "@/components/BranchenIcon";
 import { useTranslations } from "@/i18n/use-translations";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
 import type {
   Branche,
   Regulation,
@@ -41,6 +43,8 @@ export default function BranchenLandingPage({
   otherBranchen: Branche[];
 }) {
   const { locale } = useTranslations();
+  const { countryCode } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
   const accent = regulation.accent;
   const maxFine =
     branche.typicalRevenue > 0
@@ -101,6 +105,12 @@ export default function BranchenLandingPage({
               >
                 {regulation.name}
               </span>
+              {countryMeta && (
+                <div className="flex items-center gap-1.5 rounded-full bg-white/[0.06] border border-white/[0.1] px-2.5 py-1">
+                  <span className="text-sm leading-none">{countryMeta.flag}</span>
+                  <span className="font-mono text-[10px] text-white/60 font-medium">{countryMeta.nameDE}</span>
+                </div>
+              )}
             </div>
 
             <h1 className="font-[Syne] font-extrabold text-3xl sm:text-4xl lg:text-[2.8rem] text-white tracking-tight leading-[1.1] mb-5 max-w-3xl">
