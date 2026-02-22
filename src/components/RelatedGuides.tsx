@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import { useTranslations } from "@/i18n/use-translations";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
+import type { RegulationKey, ImplementationStatus } from "@/i18n/country/types";
 
 /* ── Guide Metadata ── */
 interface GuideInfo {
@@ -12,6 +15,35 @@ interface GuideInfo {
   badgeColor?: string;
   accent: string;
 }
+
+/* ── Slug → RegulationKey mapping ── */
+const SLUG_TO_REG_KEY: Partial<Record<string, RegulationKey>> = {
+  "nisg-2026": "nis2",
+  "eu-ai-act": "ai-act",
+  dora: "dora",
+  cra: "cra",
+  dsgvo: "dsgvo",
+  "csrd-esg": "csrd",
+  bafg: "bafg",
+  hschg: "hschg",
+  produkthaftung: "produkthaftung",
+  "digitaler-produktpass": "dpp",
+  "green-claims": "green-claims",
+  mica: "mica",
+  dsa: "dsa",
+  "data-act": "data-act",
+  eprivacy: "eprivacy",
+  eidas: "eidas",
+  ehds: "ehds",
+};
+
+/* ── Implementation Status → Badge config ── */
+const STATUS_CONFIG: Record<ImplementationStatus, { label: string; color: string }> = {
+  implemented: { label: "In Kraft", color: "#059669" },
+  pending: { label: "Ausstehend", color: "#d97706" },
+  overdue: { label: "Überfällig", color: "#dc2626" },
+  not_applicable: { label: "N/A", color: "#6b7280" },
+};
 
 const GUIDES: Record<string, GuideInfo> = {
   "nisg-2026": {
@@ -180,6 +212,30 @@ const RELATIONSHIPS: Record<string, string[]> = {
   "haftungs-check": ["nisg-2026", "dora", "eu-ai-act"],
 };
 
+/* ── Resolve badge for a guide: country-specific or fallback ── */
+function resolveBadge(
+  guideKey: string,
+  guide: GuideInfo,
+  countryData: import("@/i18n/country/types").CountryData | null,
+): { text: string; color: string; isCountrySpecific: boolean } | null {
+  const regKey = SLUG_TO_REG_KEY[guideKey];
+  if (regKey && countryData?.regulations?.[regKey]) {
+    const reg = countryData.regulations[regKey]!;
+    const status = reg.implementationStatus;
+    const cfg = STATUS_CONFIG[status];
+    // For pending: use nationalDeadline if available
+    const text = status === "pending" && reg.nationalDeadline
+      ? reg.nationalDeadline.replace(/^(\d{1,2}\.\s?\w+\s?\d{4}).*/, "$1")
+      : cfg.label;
+    return { text, color: cfg.color, isCountrySpecific: true };
+  }
+  // Fallback to hardcoded badge
+  if (guide.badge) {
+    return { text: guide.badge, color: guide.badgeColor ?? "#6b7280", isCountrySpecific: false };
+  }
+  return null;
+}
+
 /* ── Component ── */
 export default function RelatedGuides({
   currentGuide,
@@ -189,14 +245,17 @@ export default function RelatedGuides({
   accent?: string;
 }) {
   const { locale } = useTranslations();
+  const { countryCode, countryData } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
   const related = RELATIONSHIPS[currentGuide];
   if (!related || related.length === 0) return null;
 
-  const guides = related
-    .map((key) => GUIDES[key])
-    .filter(Boolean);
+  // Build related list with keys for badge resolution
+  const guidesWithKeys = related
+    .map((key) => ({ key, guide: GUIDES[key] }))
+    .filter((entry): entry is { key: string; guide: GuideInfo } => Boolean(entry.guide));
 
-  if (guides.length === 0) return null;
+  if (guidesWithKeys.length === 0) return null;
 
   return (
     <div className="mt-12 mb-8">
@@ -224,46 +283,53 @@ export default function RelatedGuides({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {guides.map((guide) => (
-          <Link
-            key={guide.slug}
-            href={`/${locale}${guide.slug}`}
-            className="group relative flex flex-col rounded-xl border p-4 transition-all duration-200 hover:-translate-y-0.5"
-            style={{
-              background: "white",
-              borderColor: "#d8dff0",
-              boxShadow: "0 2px 8px rgba(0,20,60,0.04)",
-            }}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <span
-                className="font-mono text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-md text-white"
-                style={{ background: guide.accent }}
-              >
-                {guide.short}
-              </span>
-              {guide.badge && (
-                <span
-                  className="text-[9px] px-1.5 py-0.5 rounded font-bold text-white"
-                  style={{ background: guide.badgeColor }}
-                >
-                  {guide.badge}
-                </span>
-              )}
-            </div>
-
-            <span className="text-[13px] font-semibold text-[#1a2238] group-hover:text-[#0A2540] leading-snug">
-              {guide.title}
-            </span>
-
-            <span
-              className="mt-2 text-[11px] font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              style={{ color: guide.accent }}
+        {guidesWithKeys.map(({ key, guide }) => {
+          const badge = resolveBadge(key, guide, countryData);
+          return (
+            <Link
+              key={guide.slug}
+              href={`/${locale}${guide.slug}`}
+              className="group relative flex flex-col rounded-xl border p-4 transition-all duration-200 hover:-translate-y-0.5"
+              style={{
+                background: "white",
+                borderColor: "#d8dff0",
+                boxShadow: "0 2px 8px rgba(0,20,60,0.04)",
+              }}
             >
-              Guide lesen →
-            </span>
-          </Link>
-        ))}
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <span
+                  className="font-mono text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-md text-white"
+                  style={{ background: guide.accent }}
+                >
+                  {guide.short}
+                </span>
+                {badge && (
+                  <span
+                    className="inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded font-bold text-white"
+                    style={{ background: badge.color }}
+                    title={badge.isCountrySpecific && countryMeta ? `Status: ${countryMeta.nameDE}` : undefined}
+                  >
+                    {badge.isCountrySpecific && countryMeta && (
+                      <span className="text-[8px] leading-none">{countryMeta.flag}</span>
+                    )}
+                    {badge.text}
+                  </span>
+                )}
+              </div>
+
+              <span className="text-[13px] font-semibold text-[#1a2238] group-hover:text-[#0A2540] leading-snug">
+                {guide.title}
+              </span>
+
+              <span
+                className="mt-2 text-[11px] font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                style={{ color: guide.accent }}
+              >
+                Guide lesen →
+              </span>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

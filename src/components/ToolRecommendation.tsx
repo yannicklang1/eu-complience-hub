@@ -2,6 +2,18 @@
 
 import Link from "next/link";
 import { useTranslations } from "@/i18n/use-translations";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
+import type { RegulationKey } from "@/i18n/country/types";
+
+/* Regulation key for tool sets → used for country authority display */
+const TOOLSET_REG_KEY: Partial<Record<string, RegulationKey>> = {
+  nis2: "nis2", dora: "dora", "ai-act": "ai-act", cra: "cra",
+  dsgvo: "dsgvo", csrd: "csrd", bafg: "bafg", hschg: "hschg",
+  dpp: "dpp", mica: "mica", "green-claims": "green-claims",
+  pld: "produkthaftung", dsa: "dsa", ehds: "ehds",
+  "data-act": "data-act", eprivacy: "eprivacy", eidas: "eidas",
+};
 
 export interface RecommendedTool {
   name: string;
@@ -238,8 +250,19 @@ export default function ToolRecommendation({
   accent?: string;
 }) {
   const { locale } = useTranslations();
+  const { countryCode, countryData } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
   const set = toolSets[regulationKey];
   if (!set) return null;
+
+  /* Resolve country-specific authority for this regulation */
+  const regKey = TOOLSET_REG_KEY[regulationKey];
+  const countryReg = regKey && countryData?.regulations?.[regKey];
+  const authorityInfo = countryReg ? {
+    name: countryReg.authority,
+    url: countryReg.authorityUrl,
+    status: countryReg.implementationStatus,
+  } : null;
 
   return (
     <div
@@ -272,7 +295,27 @@ export default function ToolRecommendation({
           Anzeige
         </span>
       </div>
-      <p className="text-[#7a8db0] text-xs mb-5">{set.subtitle}</p>
+      <p className="text-[#7a8db0] text-xs mb-3">{set.subtitle}</p>
+
+      {/* Country-specific authority info */}
+      {authorityInfo && countryMeta && (
+        <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-lg border" style={{ background: `${accent}04`, borderColor: `${accent}10` }}>
+          <span className="text-sm leading-none">{countryMeta.flag}</span>
+          <span className="text-[11px] text-[#4a5f80]">
+            <span className="font-semibold">{countryMeta.nameDE}:</span>{" "}
+            Zuständige Behörde –{" "}
+            <a
+              href={authorityInfo.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium underline decoration-dotted hover:text-[#0A2540] transition-colors"
+              style={{ color: accent }}
+            >
+              {authorityInfo.name}
+            </a>
+          </span>
+        </div>
+      )}
 
       <div className={`grid gap-3 mb-4 ${set.tools.length <= 3 ? "sm:grid-cols-2 lg:grid-cols-3" : "sm:grid-cols-2 lg:grid-cols-3"}`}>
         {set.tools.slice(0, 6).map((tool) => (

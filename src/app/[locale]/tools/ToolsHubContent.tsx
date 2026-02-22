@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useTranslations } from "@/i18n/use-translations";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
 
 /* ══════════════════════════════════════════════════════════════
    Tools Hub — Central landing page for all interactive tools
@@ -171,6 +173,8 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
 
 export default function ToolsHubContent() {
   const { locale } = useTranslations();
+  const { countryCode } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
   const [category, setCategory] = useState<ToolCategory>("all");
 
   const filtered =
@@ -190,10 +194,18 @@ export default function ToolsHubContent() {
             }}
           />
           <div className="relative max-w-4xl mx-auto px-6 text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-yellow-400/10 border border-yellow-400/20 mb-6">
-              <span className="text-yellow-400 text-xs font-semibold">
-                {TOOLS.length} kostenlose Tools
-              </span>
+            <div className="flex items-center gap-2 justify-center flex-wrap mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-yellow-400/10 border border-yellow-400/20">
+                <span className="text-yellow-400 text-xs font-semibold">
+                  {TOOLS.length} kostenlose Tools
+                </span>
+              </div>
+              {countryMeta && (
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] border border-white/[0.1] px-2.5 py-1">
+                  <span className="text-sm leading-none">{countryMeta.flag}</span>
+                  <span className="font-mono text-[10px] text-white/60 font-medium">{countryMeta.nameDE}</span>
+                </div>
+              )}
             </div>
             <h1 className="font-[Syne] font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.1] mb-5">
               Compliance-
