@@ -111,14 +111,6 @@ export default function Header() {
           <RegionSwitcher currentLocale={locale} scrolled={scrolled} />
           <CommandPalette scrolled={scrolled} />
           <Link
-            href={`/${locale}/fristen-radar`}
-            className={`px-4 py-2 rounded-xl text-[13px] font-[Syne] font-semibold tracking-[-0.01em] transition-all duration-200 ${
-              scrolled ? "text-[#3a4a6b] hover:text-[#0A2540] hover:bg-[#0A2540]/[0.04]" : "text-white/80 hover:text-white hover:bg-white/[0.08]"
-            }`}
-          >
-            {t("nav.briefing")}
-          </Link>
-          <Link
             href={`/${locale}/kontakt`}
             className="px-5 py-2.5 rounded-xl text-sm font-[Syne] font-bold transition-all duration-300 hover:-translate-y-0.5"
             style={{
@@ -201,15 +193,6 @@ export default function Header() {
             onClick={closeMobileMenu}
           >
             <span className="text-sm font-medium">{t("nav.allTools")}</span>
-          </Link>
-
-          {/* Compliance-Briefing (direct link) */}
-          <Link
-            href={`/${locale}/fristen-radar`}
-            className="flex items-center justify-between py-3 border-b border-[#0A2540]/[0.04] text-[#3a4a6b]"
-            onClick={closeMobileMenu}
-          >
-            <span className="text-sm font-medium">{t("nav.briefing")}</span>
           </Link>
 
           {/* Accordion sections */}

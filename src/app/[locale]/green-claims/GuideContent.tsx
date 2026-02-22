@@ -34,7 +34,7 @@ const sources: Source[] = [
   {
     id: 4,
     title: "BEUC — Green Claims: What Consumers Need",
-    url: "https://www.beuc.eu/sites/default/files/publications/beuc-x-2023-046_green_claims_directive.pdf",
+    url: "https://www.beuc.eu",
     desc: "Europäischer Verbraucherverband zur Green Claims Directive",
     type: "Studie",
   },

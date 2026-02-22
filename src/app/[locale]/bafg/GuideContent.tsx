@@ -43,14 +43,14 @@ const sources: Source[] = [
   {
     id: 5,
     title: "Sozialministeriumservice — Barrierefreiheit",
-    url: "https://www.sozialministeriumservice.at/Ueber_uns/Barrierefreiheit/Barrierefreiheit.de.html",
+    url: "https://www.sozialministeriumservice.at",
     desc: "Aufsichtsbehörde für die Umsetzung des BaFG in Österreich",
     type: "Aufsicht AT",
   },
   {
     id: 6,
     title: "WKO — Barrierefreiheitsstärkungsgesetz",
-    url: "https://www.wko.at/service/wirtschaftsrecht-gewerberecht/barrierefreiheitsstaerkungsgesetz",
+    url: "https://www.wko.at/barrierefreiheitsgesetz",
     desc: "Praxisleitfaden der Wirtschaftskammer Österreich zum BaFG",
     type: "Praxisleitfaden",
   },

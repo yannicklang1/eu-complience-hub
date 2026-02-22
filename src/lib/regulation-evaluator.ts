@@ -2,6 +2,7 @@
    Regulation Evaluator — Shared Logic
    Extracted from RegulierungFinderTool.tsx for reuse in
    Report Engine + API routes
+   Dynamic reason texts reference actual company answers
    ══════════════════════════════════════════════════════════════ */
 
 export interface Answer {
@@ -26,6 +27,36 @@ export interface Question {
   type: "single" | "multi";
   options: { value: string; label: string; description?: string }[];
 }
+
+/* ── Label Lookups ── */
+const SIZE_LABELS: Record<string, string> = {
+  micro: "Kleinstunternehmen (< 10 MA)",
+  small: "Kleinunternehmen (10–49 MA)",
+  medium: "Mittleres Unternehmen (50–249 MA)",
+  large: "Grossunternehmen (250+ MA)",
+};
+
+const SECTOR_LABELS: Record<string, string> = {
+  it: "IT/Software",
+  finance: "Finanzwesen",
+  health: "Gesundheitswesen",
+  energy: "Energie",
+  manufacturing: "Produktion/Industrie",
+  transport: "Transport/Logistik",
+  retail: "Handel/E-Commerce",
+  telecom: "Telekommunikation",
+  public: "Oeffentlicher Sektor",
+  other: "Andere",
+};
+
+const DATA_LABELS: Record<string, string> = {
+  personal: "personenbezogene Daten",
+  sensitive: "besondere Datenkategorien (Gesundheit, Biometrie)",
+  children: "Daten von Minderjaehrigen",
+  financial: "Finanzdaten",
+  b2b: "B2B-Geschaeftsdaten",
+  iot: "IoT-/Sensordaten",
+};
 
 /* ── Questions ── */
 export const QUESTIONS: Question[] = [
@@ -104,6 +135,18 @@ export const QUESTIONS: Question[] = [
   },
 ];
 
+/* ── Helper: format sector list ── */
+function formatSectors(sectors: string[], max = 3): string {
+  const labels = sectors.map((s) => SECTOR_LABELS[s] ?? s).slice(0, max);
+  return labels.join(", ") + (sectors.length > max ? ` (+${sectors.length - max})` : "");
+}
+
+/* ── Helper: format data types ── */
+function formatDataTypes(data: string[], max = 3): string {
+  const labels = data.map((d) => DATA_LABELS[d] ?? d).slice(0, max);
+  return labels.join(", ");
+}
+
 /* ── Evaluation Logic ── */
 export function evaluateRegulations(answers: Answer[]): EvaluatedRegulation[] {
   const get = (id: string): string[] =>
@@ -118,9 +161,18 @@ export function evaluateRegulations(answers: Answer[]): EvaluatedRegulation[] {
   const results: EvaluatedRegulation[] = [];
   const isEU = locations.some((l) => ["at", "de", "eu"].includes(l));
   const hasEUCustomers = locations.includes("non-eu") || isEU;
+  const sizeLabel = SIZE_LABELS[size] ?? size;
 
   /* ── DSGVO ── */
   if (data.some((d) => ["personal", "sensitive", "children", "financial"].includes(d)) && hasEUCustomers) {
+    const relevantData = data.filter((d) => ["personal", "sensitive", "children", "financial"].includes(d));
+    const hasSensitive = data.includes("sensitive") || data.includes("children");
+    let reason = `Als ${sizeLabel} verarbeiten Sie ${formatDataTypes(relevantData)} mit EU-Bezug.`;
+    if (hasSensitive) {
+      reason += ` Durch die Verarbeitung besonderer Datenkategorien gelten verschaerfte Pflichten (Art. 9 DSGVO), insbesondere Datenschutz-Folgenabschaetzungen.`;
+    } else {
+      reason += ` Dies umfasst Pflichten zu Verarbeitungsverzeichnis (Art. 30), Betroffenenrechte (Art. 15–22) und Datenschutz-Folgenabschaetzungen bei Hochrisiko-Verarbeitungen.`;
+    }
     results.push({
       key: "dsgvo",
       name: "DSGVO",
@@ -128,7 +180,7 @@ export function evaluateRegulations(answers: Answer[]): EvaluatedRegulation[] {
       href: "/dsgvo",
       relevance: "hoch",
       color: "#2563eb",
-      reason: "Sie verarbeiten personenbezogene Daten mit EU-Bezug.",
+      reason,
     });
   }
 
@@ -137,8 +189,17 @@ export function evaluateRegulations(answers: Answer[]): EvaluatedRegulation[] {
   const isNis2Sector = sectors.some((s) => nis2Sectors.includes(s));
   const isNis2Size = ["medium", "large"].includes(size);
   const isCriticalInfra = activities.includes("critical-infra");
+  const matchedNis2Sectors = sectors.filter((s) => nis2Sectors.includes(s));
 
   if ((isNis2Sector && isNis2Size) || isCriticalInfra) {
+    let reason: string;
+    if (isCriticalInfra) {
+      reason = `Als Betreiber kritischer Infrastruktur fallen Sie als "wesentliche Einrichtung" gemaess NIS2 Art. 3 unter die strengsten Pflichten.`;
+    } else {
+      const category = size === "large" ? "wesentliche Einrichtung" : "wichtige Einrichtung";
+      reason = `Als ${sizeLabel} im Sektor ${formatSectors(matchedNis2Sectors)} fallen Sie als "${category}" unter NIS2 Art. 3.`;
+    }
+    reason += ` Dies umfasst Risikomanagement (Art. 21), Meldepflichten innerhalb 24h/72h (Art. 23) und persoenliche Verantwortung der Geschaeftsleitung (Art. 20).`;
     results.push({
       key: "nis2",
       name: "NIS2 / NISG 2026",
@@ -146,9 +207,7 @@ export function evaluateRegulations(answers: Answer[]): EvaluatedRegulation[] {
       href: "/nisg-2026",
       relevance: "hoch",
       color: "#dc2626",
-      reason: isNis2Size
-        ? "Ihr Unternehmen fällt aufgrund von Branche und Größe unter NIS2."
-        : "Sie betreiben kritische Infrastruktur.",
+      reason,
     });
   } else if (isNis2Sector && !isNis2Size) {
     results.push({
@@ -158,12 +217,18 @@ export function evaluateRegulations(answers: Answer[]): EvaluatedRegulation[] {
       href: "/nisg-2026",
       relevance: "niedrig",
       color: "#dc2626",
-      reason: "Ihre Branche fällt unter NIS2, aber Ihr Unternehmen liegt unter den Schwellenwerten.",
+      reason: `Ihr Sektor ${formatSectors(matchedNis2Sectors)} faellt unter NIS2, aber als ${sizeLabel} liegen Sie unter den Groessenschwellenwerten (50 MA / 10 Mio. EUR Umsatz). Beobachten Sie nationale Umsetzungsgesetze — einige Mitgliedstaaten koennen niedrigere Schwellenwerte festlegen.`,
     });
   }
 
   /* ── AI Act ── */
   if (activities.includes("ai")) {
+    const hasSensitiveAI = data.includes("sensitive") || data.includes("children");
+    let reason = `Als ${sizeLabel} setzen Sie KI-Systeme ein oder entwickeln solche. Die EU-KI-Verordnung verlangt eine Risikoklassifizierung aller KI-Systeme und stuft bestimmte Anwendungen als hochriskant ein.`;
+    if (hasSensitiveAI) {
+      reason += ` Durch die Verarbeitung sensibler Daten sind erhoehte Transparenz- und Dokumentationspflichten wahrscheinlich.`;
+    }
+    reason += ` Verbotene KI-Praktiken (Art. 5) gelten bereits seit Februar 2025.`;
     results.push({
       key: "ai-act",
       name: "EU AI Act",
@@ -171,50 +236,64 @@ export function evaluateRegulations(answers: Answer[]): EvaluatedRegulation[] {
       href: "/eu-ai-act",
       relevance: "hoch",
       color: "#7c3aed",
-      reason: "Sie setzen KI-Systeme ein oder entwickeln solche.",
+      reason,
     });
   }
 
   /* ── DORA ── */
   if (sectors.includes("finance") || (sectors.includes("it") && data.includes("financial"))) {
+    const isDirect = sectors.includes("finance");
+    let reason: string;
+    if (isDirect) {
+      reason = `Als ${sizeLabel} im Finanzsektor fallen Sie direkt unter DORA. Sie muessen ein IKT-Risikomanagement-Framework (Art. 6–16) aufbauen, Vorfaelle an die Aufsichtsbehoerde melden (Art. 17–23) und Threat-Led Penetration Tests durchfuehren.`;
+    } else {
+      reason = `Als IT-Dienstleister mit Zugang zu Finanzdaten koennten Sie als "kritischer IKT-Drittanbieter" gemaess Art. 31 DORA gelten. Dies umfasst direkte Aufsicht durch europaeische Finanzbehoerden und strenge vertragliche Anforderungen.`;
+    }
     results.push({
       key: "dora",
       name: "DORA",
       subtitle: "Digital Operational Resilience Act",
       href: "/dora",
-      relevance: sectors.includes("finance") ? "hoch" : "mittel",
+      relevance: isDirect ? "hoch" : "mittel",
       color: "#0891b2",
-      reason: sectors.includes("finance")
-        ? "Als Finanzunternehmen fallen Sie direkt unter DORA."
-        : "Als IT-Dienstleister für Finanzunternehmen könnten Sie als kritischer IKT-Drittanbieter gelten.",
+      reason,
     });
   }
 
   /* ── CRA ── */
   if (activities.includes("software") || (sectors.includes("manufacturing") && activities.includes("ai"))) {
+    let reason = `Als Hersteller von Produkten mit digitalen Elementen fallen Sie unter den Cyber Resilience Act. Sie muessen Security-by-Design (Art. 10) implementieren, eine SBOM (Software Bill of Materials) fuehren und Sicherheitsupdates waehrend des gesamten Supportzeitraums bereitstellen.`;
+    if (sectors.includes("manufacturing")) {
+      reason += ` Als Industrieunternehmen sind zusaetzlich die Anforderungen an vernetzte Produktionssysteme relevant.`;
+    }
     results.push({
       key: "cra",
       name: "Cyber Resilience Act",
-      subtitle: "Cybersicherheit für Produkte",
+      subtitle: "Cybersicherheit fuer Produkte",
       href: "/cra",
       relevance: "hoch",
       color: "#ea580c",
-      reason: "Sie stellen Produkte mit digitalen Elementen her oder vertreiben diese.",
+      reason,
     });
   }
 
   /* ── CSRD / ESG ── */
   if (activities.includes("esg") || (size === "large" && isEU)) {
+    const isDirectCSRD = size === "large";
+    let reason: string;
+    if (isDirectCSRD) {
+      reason = `Als ${sizeLabel} in der EU sind Sie gemaess CSRD zur Nachhaltigkeitsberichterstattung nach ESRS verpflichtet. Dies umfasst eine doppelte Wesentlichkeitsanalyse, Scope-1/2/3-Emissionen und eine externe Pruefung durch Wirtschaftspruefer.`;
+    } else {
+      reason = `Durch Ihre ESG-/Nachhaltigkeitsaktivitaeten als ${sizeLabel} koennte die CSRD-Berichterstattung ueber die Lieferkette oder freiwillig relevant werden. Ab 2026 sind auch boersennotierte KMU betroffen.`;
+    }
     results.push({
       key: "csrd",
       name: "CSRD / ESG",
       subtitle: "Nachhaltigkeitsberichterstattung",
       href: "/csrd-esg",
-      relevance: size === "large" ? "hoch" : "mittel",
+      relevance: isDirectCSRD ? "hoch" : "mittel",
       color: "#16a34a",
-      reason: size === "large"
-        ? "Als großes EU-Unternehmen sind Sie zur Nachhaltigkeitsberichterstattung verpflichtet."
-        : "Nachhaltigkeitsberichterstattung könnte für Sie relevant werden.",
+      reason,
     });
   }
 
@@ -227,7 +306,7 @@ export function evaluateRegulations(answers: Answer[]): EvaluatedRegulation[] {
       href: "/dsa",
       relevance: "hoch",
       color: "#6366f1",
-      reason: "Als Online-Plattform oder Marktplatz fallen Sie unter den DSA.",
+      reason: `Als Betreiber einer Online-Plattform bzw. eines Marktplatzes fallen Sie unter den DSA. Pflichten umfassen Transparenzberichte (Art. 15), ein Notice-and-Action-System fuer rechtswidrige Inhalte (Art. 16), Beschwerdeverfahren (Art. 20) und ein Verbot von Dark Patterns (Art. 25).`,
     });
   }
 
@@ -240,22 +319,27 @@ export function evaluateRegulations(answers: Answer[]): EvaluatedRegulation[] {
       href: "/mica",
       relevance: "hoch",
       color: "#f59e0b",
-      reason: "Sie sind im Bereich Krypto-Assets / Blockchain tätig.",
+      reason: `Als ${sizeLabel} im Bereich Krypto-Assets/Blockchain muessen Sie gemaess MiCA eine Zulassung als CASP (Crypto-Asset Service Provider) beantragen, AML/KYC-Anforderungen erfuellen und die Travel Rule umsetzen. Whitepapers fuer Token-Emissionen sind genehmigungspflichtig.`,
     });
   }
 
   /* ── Data Act ── */
   if (data.includes("iot") || (sectors.includes("manufacturing") && hasEUCustomers)) {
+    const isIoT = data.includes("iot");
+    let reason: string;
+    if (isIoT) {
+      reason = `Sie verarbeiten IoT-/Sensordaten und muessen gemaess Data Act (Art. 3–7) Nutzern Zugang zu den generierten Daten gewaehren. Dies umfasst standardisierte Datenformate, faire Vertragsbedingungen und ein Recht auf Datenweitergabe an Dritte.`;
+    } else {
+      reason = `Als Produkthersteller im Sektor ${formatSectors(sectors)} koennten Datenzugangspflichten gemaess dem Data Act auf Sie zukommen, insbesondere wenn Ihre Produkte Nutzungsdaten generieren.`;
+    }
     results.push({
       key: "data-act",
       name: "Data Act",
       subtitle: "Datenzugangsverordnung",
       href: "/data-act",
-      relevance: data.includes("iot") ? "hoch" : "mittel",
+      relevance: isIoT ? "hoch" : "mittel",
       color: "#0d9488",
-      reason: data.includes("iot")
-        ? "Sie verarbeiten IoT-/Sensordaten und müssen Datenzugang gewähren."
-        : "Als Produkthersteller könnten Datenzugangspflichten auf Sie zukommen.",
+      reason,
     });
   }
 
@@ -270,23 +354,24 @@ export function evaluateRegulations(answers: Answer[]): EvaluatedRegulation[] {
       relevance: isDirectlyAffected ? "mittel" : "niedrig",
       color: "#8b5cf6",
       reason: isDirectlyAffected
-        ? "Für elektronischen Geschäftsverkehr gelten ePrivacy-Pflichten (Cookies, Tracking)."
-        : "Cookie-/Tracking-Regelungen betreffen auch Ihre Website.",
+        ? `Als E-Commerce-Unternehmen gelten fuer Sie ePrivacy-Pflichten zu Cookies, Tracking und elektronischer Direktwerbung. Ein rechtskonformes Consent-Management (Cookie-Banner mit Opt-In) ist zwingend erforderlich.`
+        : `Die ePrivacy-Regelungen zu Cookies und Tracking betreffen auch Ihre Website. Ein DSGVO-konformes Cookie-Banner mit echtem Opt-In ist Pflicht.`,
     });
   }
 
   /* ── eIDAS ── */
   if (activities.includes("eid") || sectors.includes("public")) {
+    const isEid = activities.includes("eid");
     results.push({
       key: "eidas",
       name: "eIDAS 2.0",
       subtitle: "Elektronische Identifizierung",
       href: "/eidas",
-      relevance: activities.includes("eid") ? "hoch" : "mittel",
+      relevance: isEid ? "hoch" : "mittel",
       color: "#059669",
-      reason: activities.includes("eid")
-        ? "Sie bieten elektronische Identifizierung oder Vertrauensdienste an."
-        : "Im öffentlichen Sektor sind eIDAS-konforme Identifizierungen relevant.",
+      reason: isEid
+        ? `Als Anbieter elektronischer Identifizierung oder Vertrauensdienste muessen Sie die eIDAS-2.0-Anforderungen erfuellen, einschliesslich der EU Digital Identity Wallet-Kompatibilitaet und qualifizierter elektronischer Signaturen.`
+        : `Im oeffentlichen Sektor wird die EU Digital Identity Wallet ab 2026 verpflichtend akzeptiert. Bereiten Sie Ihre Systeme auf eIDAS-2.0-konforme Identifizierung vor.`,
     });
   }
 
@@ -299,7 +384,7 @@ export function evaluateRegulations(answers: Answer[]): EvaluatedRegulation[] {
       href: "/produkthaftung",
       relevance: "mittel",
       color: "#b91c1c",
-      reason: "Die neue Produkthaftungsrichtlinie erstreckt sich auch auf Software und digitale Produkte.",
+      reason: `Die novellierte EU-Produkthaftungsrichtlinie erstreckt sich erstmals auch auf Software und KI-Systeme als eigenstaendige Produkte. Als ${sizeLabel} im Bereich ${formatSectors(sectors)} tragen Sie eine verschuldensunabhaengige Haftung fuer fehlerhafte Produkte — Beweislasterleichterungen staerken die Position geschaedigter Verbraucher.`,
     });
   }
 
@@ -312,7 +397,7 @@ export function evaluateRegulations(answers: Answer[]): EvaluatedRegulation[] {
       href: "/ehds",
       relevance: "mittel",
       color: "#0ea5e9",
-      reason: "Im Gesundheitswesen wird der EU-Gesundheitsdatenraum relevant.",
+      reason: `Als ${sizeLabel} im Gesundheitswesen wird der Europaeische Gesundheitsdatenraum (EHDS) relevant. Primaere Nutzung (Patientenportabilitaet) und sekundaere Nutzung (Forschungszugang) erfordern interoperable Systeme und FHIR-kompatible Datenformate.`,
     });
   }
 

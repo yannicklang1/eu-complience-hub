@@ -41,7 +41,7 @@ const sources: Source[] = [
   {
     id: 5,
     title: "ETSI — Qualified Trust Services Standards",
-    url: "https://www.etsi.org/technologies/electronic-signatures",
+    url: "https://www.etsi.org",
     desc: "Europäische Standards für elektronische Signaturen und Vertrauensdienste",
     type: "Norm",
   },

@@ -1,3 +1,4 @@
+import { createElement } from "react";
 import type { Metadata } from "next";
 import { LOCALES, LOCALE_OG, type Locale } from "@/i18n/config";
 import dynamic from "next/dynamic";
@@ -10,10 +11,6 @@ const AktuellesContentEN = dynamic(() => import("./AktuellesContent.en"), { ssr:
 const CONTENT_MAP: Record<string, React.ComponentType<{ newsItems: NewsItem[] }>> = {
   en: AktuellesContentEN as React.ComponentType<{ newsItems: NewsItem[] }>,
 };
-
-function getContent(locale: string): React.ComponentType<{ newsItems: NewsItem[] }> {
-  return CONTENT_MAP[locale] ?? AktuellesContent;
-}
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
@@ -436,7 +433,6 @@ export default async function AktuellesPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const Content = getContent(locale);
   const { breadcrumbJsonLd, itemListJsonLd } = buildJsonLd(locale);
 
   return (
@@ -449,7 +445,7 @@ export default async function AktuellesPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
-      <Content newsItems={newsItems} />
+      {createElement(CONTENT_MAP[locale] ?? AktuellesContent, { newsItems })}
     </>
   );
 }

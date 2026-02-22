@@ -34,14 +34,14 @@ const sources: Source[] = [
   {
     id: 4,
     title: "TDDDG — Telecommunications Digital Services Data Protection Act (Germany)",
-    url: "https://www.gesetze-im-internet.de/tdddg/",
+    url: "https://www.gesetze-im-internet.de/ttdsg/",
     desc: "German transposition of the ePrivacy Directive, Section 25 (cookie rules)",
     type: "Law",
   },
   {
     id: 5,
     title: "EDPB Guidelines 2/2023 — Scope of Art. 5(3) ePrivacy",
-    url: "https://edpb.europa.eu/our-work-tools/documents/public-consultations/2023/guidelines-22023-scope-article-53-eprivacy_en",
+    url: "https://www.edpb.europa.eu/our-work-tools/general-guidance/guidelines-recommendations-best-practices_en",
     desc: "European Data Protection Board guidelines on cookies and tracking",
     type: "Guideline",
   },

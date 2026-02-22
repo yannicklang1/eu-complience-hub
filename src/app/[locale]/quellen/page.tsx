@@ -214,7 +214,7 @@ const SOURCE_GROUPS: SourceGroup[] = [
       { title: "Verordnung (EU) 2022/2554 -- DORA (Volltext DE)", url: "https://eur-lex.europa.eu/eli/reg/2022/2554/oj/deu", desc: "Offizielle deutsche Fassung im EUR-Lex Portal", type: "Verordnung" },
       { title: "DORA -- englische Fassung", url: "https://eur-lex.europa.eu/eli/reg/2022/2554/oj/eng", desc: "Offizielle englische Fassung im EUR-Lex Portal", type: "Verordnung" },
       { title: "FMA -- DORA-Informationsseite", url: "https://www.fma.gv.at/querschnittsthemen/dora/", desc: "Finanzmarktaufsicht Oesterreich -- Leitfaeden und FAQs", type: "Aufsicht AT" },
-      { title: "EBA -- DORA Regulierungsstandards", url: "https://www.eba.europa.eu/activities/direct-supervisory-powers/digital-operational-resilience-act", desc: "Regulierungs- und Durchfuehrungsstandards zu DORA", type: "Behoerde" },
+      { title: "EBA -- DORA Regulierungsstandards", url: "https://www.eba.europa.eu/activities/single-rulebook/regulatory-activities/information-and-communication-technology-risk", desc: "Regulierungs- und Durchfuehrungsstandards zu DORA", type: "Behoerde" },
       { title: "OeNB -- TIBER-AT Framework", url: "https://www.oenb.at", desc: "Oesterreichische Nationalbank -- TIBER-Penetrationstests", type: "Aufsicht AT" },
     ],
   },
@@ -258,7 +258,7 @@ const SOURCE_GROUPS: SourceGroup[] = [
       { title: "Richtlinie (EU) 2024/825 -- Green Claims Directive (Volltext)", url: "https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX%3A52023PC0166", desc: "Vorschlag fuer eine Richtlinie ueber Umweltaussagen -- Volltext", type: "EU-Richtlinie" },
       { title: "Richtlinie (EU) 2024/825 -- Empowering Consumers", url: "https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32024L0825", desc: "Verbraucherstaerkung fuer den gruenen Uebergang -- offizielle Fassung", type: "EU-Richtlinie" },
       { title: "EU-Kommission -- Green Claims Initiative", url: "https://environment.ec.europa.eu/topics/circular-economy/green-claims_en", desc: "Hintergruende, Factsheets und FAQ zur Green Claims Initiative", type: "Behoerde" },
-      { title: "BEUC -- Green Claims: What Consumers Need", url: "https://www.beuc.eu/sites/default/files/publications/beuc-x-2023-046_green_claims_directive.pdf", desc: "Verbraucherverband-Position zur Green Claims Directive", type: "Studie" },
+      { title: "BEUC -- Green Claims: What Consumers Need", url: "https://www.beuc.eu", desc: "Verbraucherverband-Position zur Green Claims Directive", type: "Studie" },
       { title: "ISO 14021 -- Umweltbezogene Kennzeichnung", url: "https://www.iso.org/standard/66652.html", desc: "Selbstdeklarierte umweltbezogene Angaben -- Typ-II-Umweltkennzeichnung", type: "Norm" },
       { title: "ISO 14044 -- Lebenszyklusanalyse (LCA)", url: "https://www.iso.org/standard/38498.html", desc: "Anforderungen und Anleitungen zur Oekobilanzierung", type: "Norm" },
     ],
@@ -270,9 +270,9 @@ const SOURCE_GROUPS: SourceGroup[] = [
     sources: [
       { title: "Verordnung (EU) 2023/1114 -- MiCA (Volltext DE)", url: "https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX%3A32023R1114", desc: "Markets in Crypto-Assets Regulation -- offizielle deutsche Fassung", type: "Verordnung" },
       { title: "ESMA -- MiCA Level-2 Massnahmen und Q&A", url: "https://www.esma.europa.eu/esmas-activities/digital-finance-and-innovation/markets-crypto-assets-regulation-mica", desc: "Europaeische Wertpapieraufsicht: Durchfuehrungsstandards zu MiCA", type: "Behoerde" },
-      { title: "EBA -- MiCA fuer E-Geld-Token", url: "https://www.eba.europa.eu/regulation-and-policy/crypto-assets", desc: "Europaeische Bankenaufsicht: Regulierung von Krypto-Assets", type: "Behoerde" },
-      { title: "BaFin -- MiCA in Deutschland", url: "https://www.bafin.de/DE/RechtUndGrundsaetze/RechtlicheGrundlagen/Gesetze_Verordnungen/MiCA/mica_node.html", desc: "Deutsche Finanzaufsicht: Umsetzung und Lizenzverfahren", type: "Behoerde" },
-      { title: "EU-Kommission -- Digital Finance Package", url: "https://finance.ec.europa.eu/digital-finance/digital-finance-package_en", desc: "Gesamtstrategie: MiCA, DORA und Pilotregime fuer DLT", type: "Behoerde" },
+      { title: "EBA -- MiCA fuer E-Geld-Token", url: "https://www.eba.europa.eu/activities/single-rulebook/regulatory-activities/markets-crypto-assets", desc: "Europaeische Bankenaufsicht: Regulierung von Krypto-Assets", type: "Behoerde" },
+      { title: "BaFin -- MiCA in Deutschland", url: "https://www.bafin.de/DE/Aufsicht/MiCA/mica_node.html", desc: "Deutsche Finanzaufsicht: Umsetzung und Lizenzverfahren", type: "Behoerde" },
+      { title: "EU-Kommission -- Digital Finance Package", url: "https://finance.ec.europa.eu/regulation-and-supervision/financial-services-legislation/implementing-and-delegated-acts/digital-operational-resilience-act_en", desc: "Gesamtstrategie: MiCA, DORA und Pilotregime fuer DLT", type: "Behoerde" },
       { title: "FATF -- Crypto-Asset Guidance", url: "https://www.fatf-gafi.org/en/publications/Fatfrecommendations/guidance-rba-virtual-assets-2021.html", desc: "Internationale Geldwaesche-Leitlinien fuer virtuelle Assets", type: "Leitfaden" },
     ],
   },
@@ -282,11 +282,11 @@ const SOURCE_GROUPS: SourceGroup[] = [
     guideUrl: "/digitaler-produktpass",
     sources: [
       { title: "Verordnung (EU) 2024/1781 -- ESPR (Volltext DE)", url: "https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX%3A32024R1781", desc: "Oekodesign fuer nachhaltige Produkte -- offizielle deutsche Fassung", type: "Verordnung" },
-      { title: "EU-Kommission -- Digital Product Passport", url: "https://environment.ec.europa.eu/topics/circular-economy/digital-product-passport_en", desc: "Hintergruende und Roadmap zum Digitalen Produktpass", type: "Behoerde" },
+      { title: "EU-Kommission -- Digital Product Passport", url: "https://commission.europa.eu/energy-climate-change-environment/standards-tools-and-labels/products-labelling-rules-and-requirements/digital-product-passport_en", desc: "Hintergruende und Roadmap zum Digitalen Produktpass", type: "Behoerde" },
       { title: "Verordnung (EU) 2023/1542 -- Batterien-Verordnung", url: "https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX%3A32023R1542", desc: "DPP-Pflicht fuer Batterien ab Februar 2027", type: "Verordnung" },
-      { title: "ECOS -- Digital Product Passport Position Paper", url: "https://ecostandard.org/wp-content/uploads/2023/03/ECOS-DPP-Position-Paper.pdf", desc: "Umweltstandardisierungs-Organisation: Empfehlungen zum DPP", type: "Studie" },
+      { title: "ECOS -- Digital Product Passport Position Paper", url: "https://ecostandard.org", desc: "Umweltstandardisierungs-Organisation: Empfehlungen zum DPP", type: "Studie" },
       { title: "GS1 -- Digital Product Passport Standards", url: "https://www.gs1.org/standards/digital-product-passport", desc: "Internationale Datenstandards fuer den Produktpass", type: "Norm" },
-      { title: "EU-Kommission -- Textilstrategie", url: "https://environment.ec.europa.eu/topics/circular-economy/textiles_en", desc: "DPP fuer Textilien und Kreislaufwirtschaftsstrategie", type: "Behoerde" },
+      { title: "EU-Kommission -- Textilstrategie", url: "https://commission.europa.eu/energy-climate-change-environment/standards-tools-and-labels/products-labelling-rules-and-requirements/sustainable-textiles_en", desc: "DPP fuer Textilien und Kreislaufwirtschaftsstrategie", type: "Behoerde" },
     ],
   },
   {
@@ -295,11 +295,11 @@ const SOURCE_GROUPS: SourceGroup[] = [
     guideUrl: "/produkthaftung",
     sources: [
       { title: "Richtlinie (EU) 2024/2853 -- Produkthaftung (Volltext DE)", url: "https://eur-lex.europa.eu/eli/dir/2024/2853/oj/deu", desc: "Neue Produkthaftungsrichtlinie -- Software als Produkt", type: "EU-Richtlinie" },
-      { title: "EU-Kommission -- Neue Produkthaftungsrichtlinie", url: "https://commission.europa.eu/business-economy-euro/product-safety-and-requirements/product-liability_de", desc: "Hintergruende und FAQ zur ueberarbeiteten PLD", type: "Behoerde" },
+      { title: "EU-Kommission -- Neue Produkthaftungsrichtlinie", url: "https://commission.europa.eu/law/law-topic/consumer-protection-law/product-liability_en", desc: "Hintergruende und FAQ zur ueberarbeiteten PLD", type: "Behoerde" },
       { title: "BMJ -- Umsetzung PLD in Deutschland", url: "https://www.bmj.de/DE/Themen/GerichteUndRechtsstaat/Produkthaftung/produkthaftung_node.html", desc: "Bundesministerium der Justiz: Umsetzungsstand in Deutschland", type: "Behoerde" },
       { title: "Verordnung (EU) 2024/1689 -- EU AI Act", url: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj/deu", desc: "KI-Verordnung -- Haftungskomponente ergaenzt die PLD", type: "Verordnung" },
       { title: "Verordnung (EU) 2024/2847 -- Cyber Resilience Act", url: "https://eur-lex.europa.eu/eli/reg/2024/2847/oj/deu", desc: "CRA definiert Cybersicherheitspflichten fuer Softwareprodukte", type: "Verordnung" },
-      { title: "GDV -- Cyber-Versicherung und neue Produkthaftung", url: "https://www.gdv.de/de/themen/news/was-unternehmen-zur-neuen-eu-produkthaftung-wissen-muessen-126864", desc: "Gesamtverband der Deutschen Versicherungswirtschaft: Analyse", type: "Studie" },
+      { title: "GDV -- Cyber-Versicherung und neue Produkthaftung", url: "https://www.gdv.de", desc: "Gesamtverband der Deutschen Versicherungswirtschaft: Analyse", type: "Studie" },
     ],
   },
   {
@@ -308,7 +308,7 @@ const SOURCE_GROUPS: SourceGroup[] = [
     guideUrl: "/csrd-esg",
     sources: [
       { title: "Richtlinie (EU) 2022/2464 -- CSRD (Volltext DE)", url: "https://eur-lex.europa.eu/eli/dir/2022/2464/oj/deu", desc: "Corporate Sustainability Reporting Directive -- EU-weite Nachhaltigkeitsberichterstattung", type: "EU-Richtlinie" },
-      { title: "EFRAG -- European Sustainability Reporting Standards (ESRS)", url: "https://www.efrag.org/lab6", desc: "Technische Berichtsstandards der European Financial Reporting Advisory Group", type: "Norm" },
+      { title: "EFRAG -- European Sustainability Reporting Standards (ESRS)", url: "https://www.efrag.org", desc: "Technische Berichtsstandards der European Financial Reporting Advisory Group", type: "Norm" },
       { title: "EU-Kommission -- Omnibus I Vorschlag", url: "https://ec.europa.eu/commission/presscorner/detail/de/ip_25_614", desc: "Vereinfachungsvorschlag vom Februar 2025: Schwellenwerte und Erleichterungen", type: "Behoerde" },
     ],
   },
@@ -319,7 +319,7 @@ const SOURCE_GROUPS: SourceGroup[] = [
     sources: [
       { title: "Richtlinie (EU) 2019/882 -- European Accessibility Act (Volltext DE)", url: "https://eur-lex.europa.eu/eli/dir/2019/882/oj/deu", desc: "EU-Barrierefreiheitsrichtlinie fuer Produkte und Dienstleistungen", type: "EU-Richtlinie" },
       { title: "BaFG -- Barrierefreiheitsstaerkungsgesetz (RIS)", url: "https://www.ris.bka.gv.at/GeltendeFassung.wxe?Abfrage=Bundesnormen&Gesetzesnummer=20012451", desc: "Oesterreichische Umsetzung des European Accessibility Act", type: "Gesetz AT" },
-      { title: "W3C -- WCAG 2.1 (Deutsch)", url: "https://www.w3.org/Translations/WCAG21-de/", desc: "Web Content Accessibility Guidelines 2.1 Level AA -- technischer Standard", type: "Norm" },
+      { title: "W3C -- WCAG 2.1 (Deutsch)", url: "https://www.w3.org/WAI/standards-guidelines/wcag/translations/", desc: "Web Content Accessibility Guidelines 2.1 Level AA -- technischer Standard", type: "Norm" },
     ],
   },
   {

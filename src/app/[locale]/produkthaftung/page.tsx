@@ -1,13 +1,12 @@
 import dynamic from "next/dynamic";
 import { LOCALES, type Locale } from "@/i18n/config";
 import type { Metadata } from "next";
+import { createElement } from "react";
 import {
   buildGuideMetadata,
   buildArticleJsonLd,
   buildBreadcrumbJsonLd,
-  buildFaqJsonLd,
   type GuideMetaStrings,
-  type FaqItem,
 } from "@/lib/guide-metadata";
 import GuideContent from "./GuideContent";
 
@@ -20,10 +19,6 @@ const CONTENT_MAP: Record<string, React.ComponentType> = {
   es: GuideContentEN,
   it: GuideContentEN,
 };
-
-function getGuideContent(locale: string) {
-  return CONTENT_MAP[locale] ?? GuideContent;
-}
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
@@ -74,7 +69,6 @@ function buildJsonLd(locale: string) {
 
 export default async function ProduktHaftungPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const Content = getGuideContent(locale);
   const { jsonLd, breadcrumbJsonLd } = buildJsonLd(locale);
   return (
     <>
@@ -86,7 +80,7 @@ export default async function ProduktHaftungPage({ params }: { params: Promise<{
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <Content />
+      {createElement(CONTENT_MAP[locale] ?? GuideContent)}
     </>
   );
 }

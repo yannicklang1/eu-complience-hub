@@ -5,10 +5,9 @@ import {
   buildGuideMetadata,
   buildArticleJsonLd,
   buildBreadcrumbJsonLd,
-  buildFaqJsonLd,
   type GuideMetaStrings,
-  type FaqItem,
 } from "@/lib/guide-metadata";
+import { createElement } from "react";
 import GuideContent from "./GuideContent";
 
 const GuideContentEN = dynamic(() => import("./GuideContent.en"), { ssr: true });
@@ -20,10 +19,6 @@ const CONTENT_MAP: Record<string, React.ComponentType> = {
   es: GuideContentEN,
   it: GuideContentEN,
 };
-
-function getGuideContent(locale: string) {
-  return CONTENT_MAP[locale] ?? GuideContent;
-}
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
@@ -74,7 +69,6 @@ function buildJsonLd(locale: string) {
 
 export default async function EPrivacyPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const Content = getGuideContent(locale);
   const { jsonLd, breadcrumbJsonLd } = buildJsonLd(locale);
   return (
     <>
@@ -86,7 +80,7 @@ export default async function EPrivacyPage({ params }: { params: Promise<{ local
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <Content />
+      {createElement(CONTENT_MAP[locale] ?? GuideContent)}
     </>
   );
 }

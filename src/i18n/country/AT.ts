@@ -73,7 +73,7 @@ const AT: CountryData = {
     },
     dsa: {
       authority: "Kommunikationsbehörde Austria (KommAustria)",
-      authorityUrl: "https://www.rtr.at/kommausstria",
+      authorityUrl: "https://www.rtr.at/TKP/was_wir_tun/telekommunikation/spectrum/KommAustria/KommAustria.de.html",
       implementationStatus: "implemented",
       nationalNotes: "Der DSA ist seit Februar 2024 vollständig anwendbar. KommAustria ist nationale Koordinierungsbehörde für digitale Dienste.",
     },

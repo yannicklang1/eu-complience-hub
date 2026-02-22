@@ -10,7 +10,8 @@ import { sendReportEmail } from "@/lib/resend";
 import ReportDocument from "@/lib/pdf/ReportDocument";
 import type { QuickMaturityAnswer } from "@/lib/maturity-scorer";
 import { getCountryData } from "@/i18n/country";
-import type { EUCountryCode } from "@/i18n/config";
+import { COUNTRY_TO_LOCALE, type EUCountryCode, type Locale, isValidLocale } from "@/i18n/config";
+import { getPDFMessages } from "@/i18n/pdf";
 
 /* ══════════════════════════════════════════════════════════════
    POST /api/report — Generate personalized compliance report
@@ -80,8 +81,19 @@ export async function POST(request: NextRequest) {
       countryName,
     };
 
+    /* ── Resolve locale: explicit param > country mapping > "de" fallback ── */
+    const rawLocale = sanitize(body.locale, 5);
+    const locale: Locale = rawLocale && isValidLocale(rawLocale)
+      ? rawLocale
+      : country && country in COUNTRY_TO_LOCALE
+        ? COUNTRY_TO_LOCALE[country]!
+        : "de";
+
+    /* ── Load PDF translations ── */
+    const t = await getPDFMessages(locale);
+
     /* ── Generate report data ── */
-    const reportData = generateReportData(input);
+    const reportData = generateReportData(input, t);
 
     /* ── Populate country-specific regulation data (async) ── */
     if (reportData.countryContext && country) {
@@ -106,6 +118,7 @@ export async function POST(request: NextRequest) {
       regulations: reportData.regulations.length,
       grade: reportData.maturityGrade.letter,
       country: country ?? "none",
+      locale,
     });
 
     /* ── Generate PDF ── */
@@ -114,7 +127,7 @@ export async function POST(request: NextRequest) {
       /* @react-pdf/renderer types expect Document element directly;
          our wrapper component returns <Document> internally, so we cast. */
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const pdfElement = React.createElement(ReportDocument, { data: reportData }) as any;
+      const pdfElement = React.createElement(ReportDocument, { data: reportData, t }) as any;
       const pdfStream = await pdf(pdfElement).toBuffer();
 
       // toBuffer() may return Buffer or ReadableStream depending on version
@@ -193,7 +206,7 @@ export async function POST(request: NextRequest) {
     /* ── Send email with PDF attachment ── */
     let emailSent = false;
     if (pdfBuffer) {
-      const emailResult = await sendReportEmail(email, contactName, companyName, reportData, pdfBuffer);
+      const emailResult = await sendReportEmail(email, contactName, companyName, reportData, pdfBuffer, locale);
       emailSent = emailResult.success;
       if (!emailResult.success) {
         log.error("[report]", "Email send failed", { error: emailResult.error });

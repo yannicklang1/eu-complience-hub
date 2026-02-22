@@ -4,6 +4,7 @@
    ══════════════════════════════════════════════════════════════ */
 
 import { Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { tReplace, type PDFMessages } from "@/i18n/pdf";
 import { COLORS, styles } from "./shared/styles";
 import PageFooter from "./shared/PageFooter";
 import type { Deadline } from "@/data/deadlines";
@@ -11,6 +12,7 @@ import type { Deadline } from "@/data/deadlines";
 interface DeadlineTimelineProps {
   deadlines: (Deadline & { daysLeft: number })[];
   generatedAt: string;
+  t: PDFMessages;
 }
 
 const tlStyles = StyleSheet.create({
@@ -152,29 +154,30 @@ function getDaysStyle(daysLeft: number) {
   return tlStyles.daysOk;
 }
 
-function getDaysLabel(daysLeft: number): string {
-  if (daysLeft < 0) return `${Math.abs(daysLeft)} Tage vergangen`;
-  if (daysLeft === 0) return "Heute";
-  return `in ${daysLeft} Tagen`;
+function getDaysLabel(daysLeft: number, t: PDFMessages): string {
+  if (daysLeft < 0) return tReplace(t.deadlines.daysPassed, { days: Math.abs(daysLeft) });
+  if (daysLeft === 0) return t.deadlines.todayLabel;
+  return tReplace(t.deadlines.inDays, { days: daysLeft });
 }
 
 export default function DeadlineTimeline({
   deadlines,
   generatedAt,
+  t,
 }: DeadlineTimelineProps) {
   if (deadlines.length === 0) {
     return (
       <Page size="A4" style={styles.page}>
         <View style={styles.goldBar} />
         <Text style={[styles.h2, { color: COLORS.navy }]}>
-          Ihre Fristen-Uebersicht
+          {t.deadlines.title}
         </Text>
         <View style={tlStyles.emptyState}>
           <Text style={tlStyles.emptyText}>
-            Keine relevanten Fristen identifiziert.
+            {t.deadlines.noDeadlines}
           </Text>
         </View>
-        <PageFooter generatedAt={generatedAt} />
+        <PageFooter generatedAt={generatedAt} t={t} />
       </Page>
     );
   }
@@ -186,10 +189,10 @@ export default function DeadlineTimeline({
     <Page size="A4" style={styles.page}>
       <View style={styles.goldBar} />
       <Text style={[styles.h2, { color: COLORS.navy, marginBottom: 2 }]}>
-        Ihre Fristen-Uebersicht
+        {t.deadlines.title}
       </Text>
       <Text style={[styles.bodySmall, styles.mb16]}>
-        Relevante EU-Regulierungsfristen fuer Ihr Unternehmen
+        {t.deadlines.subtitle}
       </Text>
 
       {deadlines.map((deadline, i) => {
@@ -203,7 +206,7 @@ export default function DeadlineTimeline({
             {todayIndex === i && todayIndex > 0 && (
               <View style={tlStyles.todayMarker}>
                 <View style={tlStyles.todayLine} />
-                <Text style={tlStyles.todayLabel}>HEUTE</Text>
+                <Text style={tlStyles.todayLabel}>{t.deadlines.today}</Text>
                 <View style={tlStyles.todayLine} />
               </View>
             )}
@@ -255,7 +258,7 @@ export default function DeadlineTimeline({
                 </Text>
                 <Text style={tlStyles.description}>{deadline.desc}</Text>
                 <Text style={[tlStyles.daysLeft, getDaysStyle(deadline.daysLeft)]}>
-                  {getDaysLabel(deadline.daysLeft)}
+                  {getDaysLabel(deadline.daysLeft, t)}
                 </Text>
               </View>
             </View>
@@ -263,7 +266,7 @@ export default function DeadlineTimeline({
         );
       })}
 
-      <PageFooter generatedAt={generatedAt} />
+      <PageFooter generatedAt={generatedAt} t={t} />
     </Page>
   );
 }

@@ -1,3 +1,4 @@
+import { createElement } from "react";
 import type { Metadata } from "next";
 import { LOCALES, LOCALE_OG, type Locale } from "@/i18n/config";
 import dynamic from "next/dynamic";
@@ -10,10 +11,6 @@ const KontaktContentEN = dynamic(() => import("./KontaktContent.en"), { ssr: tru
 const CONTENT_MAP: Record<string, React.ComponentType> = {
   en: KontaktContentEN,
 };
-
-function getContent(locale: string) {
-  return CONTENT_MAP[locale] ?? KontaktContent;
-}
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
@@ -136,7 +133,6 @@ export default async function KontaktPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const Content = getContent(locale);
   const { breadcrumbJsonLd, contactJsonLd } = buildJsonLd(locale);
 
   return (
@@ -149,7 +145,7 @@ export default async function KontaktPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(contactJsonLd) }}
       />
-      <Content />
+      {createElement(CONTENT_MAP[locale] ?? KontaktContent)}
     </>
   );
 }

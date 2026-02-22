@@ -1,3 +1,4 @@
+import { createElement } from "react";
 import type { Metadata } from "next";
 import { LOCALES, LOCALE_OG, type Locale } from "@/i18n/config";
 import dynamic from "next/dynamic";
@@ -10,10 +11,6 @@ const FAQContentEN = dynamic(() => import("./FAQContent.en"), { ssr: true });
 const CONTENT_MAP: Record<string, React.ComponentType<{ faqData: FAQItem[] }>> = {
   en: FAQContentEN as React.ComponentType<{ faqData: FAQItem[] }>,
 };
-
-function getFAQContent(locale: string): React.ComponentType<{ faqData: FAQItem[] }> {
-  return CONTENT_MAP[locale] ?? FAQContent;
-}
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
@@ -363,7 +360,6 @@ export default async function FAQPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const Content = getFAQContent(locale);
   const { breadcrumbJsonLd, faqJsonLd } = buildJsonLd(locale);
 
   return (
@@ -376,7 +372,7 @@ export default async function FAQPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <Content faqData={faqData} />
+      {createElement(CONTENT_MAP[locale] ?? FAQContent, { faqData })}
     </>
   );
 }

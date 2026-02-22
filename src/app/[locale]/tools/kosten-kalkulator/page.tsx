@@ -1,3 +1,4 @@
+import { createElement } from "react";
 import type { Metadata } from "next";
 import { LOCALES, LOCALE_OG, type Locale } from "@/i18n/config";
 import dynamic from "next/dynamic";
@@ -10,10 +11,6 @@ const KostenKalkulatorToolEN = dynamic(() => import("./KostenKalkulatorTool.en")
 const CONTENT_MAP: Record<string, React.ComponentType> = {
   en: KostenKalkulatorToolEN,
 };
-
-function getToolContent(locale: string) {
-  return CONTENT_MAP[locale] ?? KostenKalkulatorTool;
-}
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
@@ -137,7 +134,6 @@ export default async function KostenKalkulatorPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const Content = getToolContent(locale);
   const { jsonLd, breadcrumbJsonLd } = buildJsonLd(locale);
 
   return (
@@ -150,7 +146,7 @@ export default async function KostenKalkulatorPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <Content />
+      {createElement(CONTENT_MAP[locale] ?? KostenKalkulatorTool)}
     </>
   );
 }

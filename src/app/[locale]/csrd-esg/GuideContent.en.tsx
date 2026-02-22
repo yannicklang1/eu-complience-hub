@@ -43,14 +43,14 @@ const sources: Source[] = [
   {
     id: 5,
     title: "EFRAG — ESRS Guidance",
-    url: "https://www.efrag.org/lab6",
+    url: "https://www.efrag.org",
     desc: "European Financial Reporting Advisory Group — implementation guidance on the ESRS",
     type: "Guidance",
   },
   {
     id: 6,
     title: "WKO — Nachhaltigkeitsberichterstattung",
-    url: "https://www.wko.at/nachhaltigkeit/nachhaltigkeitsberichterstattung",
+    url: "https://www.wko.at/nachhaltigkeit",
     desc: "Austrian Federal Economic Chamber — practical guide for Austrian companies",
     type: "Practical Guide",
   },

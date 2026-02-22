@@ -22,7 +22,7 @@ const sources: Source[] = [
   {
     id: 2,
     title: "EU-Kommission — Neue Produkthaftungsrichtlinie",
-    url: "https://commission.europa.eu/business-economy-euro/product-safety-and-requirements/product-liability_de",
+    url: "https://commission.europa.eu/law/law-topic/consumer-protection-law/product-liability_en",
     desc: "Offizielle Informationsseite der Kommission mit FAQ",
     type: "Behörde",
   },
@@ -50,7 +50,7 @@ const sources: Source[] = [
   {
     id: 6,
     title: "GDV — Cyber-Versicherung und neue Produkthaftung",
-    url: "https://www.gdv.de/de/themen/news/was-unternehmen-zur-neuen-eu-produkthaftung-wissen-muessen-126864",
+    url: "https://www.gdv.de",
     desc: "Gesamtverband der Deutschen Versicherungswirtschaft: Auswirkungen auf Versicherungspflicht",
     type: "Behörde",
   },

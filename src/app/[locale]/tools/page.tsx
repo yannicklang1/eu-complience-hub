@@ -1,3 +1,4 @@
+import { createElement } from "react";
 import type { Metadata } from "next";
 import { LOCALES, LOCALE_OG, type Locale } from "@/i18n/config";
 import dynamic from "next/dynamic";
@@ -10,10 +11,6 @@ const ToolsHubContentEN = dynamic(() => import("./ToolsHubContent.en"), { ssr: t
 const CONTENT_MAP: Record<string, React.ComponentType> = {
   en: ToolsHubContentEN,
 };
-
-function getToolsContent(locale: string) {
-  return CONTENT_MAP[locale] ?? ToolsHubContent;
-}
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
@@ -240,7 +237,6 @@ export default async function ToolsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const Content = getToolsContent(locale);
   const { breadcrumbJsonLd, faqJsonLd, collectionJsonLd } = buildJsonLd(locale);
 
   return (
@@ -257,7 +253,7 @@ export default async function ToolsPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
-      <Content />
+      {createElement(CONTENT_MAP[locale] ?? ToolsHubContent)}
     </>
   );
 }

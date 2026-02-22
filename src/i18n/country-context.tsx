@@ -65,7 +65,6 @@ export function CountryProvider({ children, initialCountry = "AT" }: CountryProv
   // Load full country data whenever countryCode changes
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     getCountryData(countryCode).then((data) => {
       if (!cancelled) {
         setCountryData(data);
@@ -78,6 +77,7 @@ export function CountryProvider({ children, initialCountry = "AT" }: CountryProv
   const setCountry = useCallback((code: EUCountryCode) => {
     setCookieCountry(code);
     setCountryCode(code);
+    setLoading(true);
   }, []);
 
   return (

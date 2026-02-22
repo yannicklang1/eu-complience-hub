@@ -1,9 +1,10 @@
 /* ══════════════════════════════════════════════════════════════
-   CoverPage — Dark navy cover with gold accent branding
-   First page of the compliance report PDF
+   CoverPage — Enhanced dark navy cover with gold accent branding
+   Report-Nr, VERTRAULICH stamp, country flag, professional layout
    ══════════════════════════════════════════════════════════════ */
 
 import { Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import type { PDFMessages } from "@/i18n/pdf";
 import { COLORS } from "./shared/styles";
 
 interface CoverPageProps {
@@ -11,6 +12,10 @@ interface CoverPageProps {
   contactName: string;
   generatedAt: string;
   countryName?: string;
+  /* New premium props */
+  reportId?: string;
+  countryFlag?: string;
+  t: PDFMessages;
 }
 
 const coverStyles = StyleSheet.create({
@@ -29,10 +34,39 @@ const coverStyles = StyleSheet.create({
     height: 6,
     backgroundColor: COLORS.gold,
   },
+  /* Report ID + VERTRAULICH header row */
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 30,
+  },
+  reportIdText: {
+    fontFamily: "DMSans",
+    fontSize: 7.5,
+    color: COLORS.textLight,
+    letterSpacing: 1,
+  },
+  vertraulichBadge: {
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+    borderRadius: 3,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  vertraulichText: {
+    fontFamily: "DMSans",
+    fontWeight: 700,
+    fontSize: 7,
+    color: COLORS.gold,
+    letterSpacing: 2,
+    textTransform: "uppercase",
+  },
+  /* Main content */
   content: {
     flex: 1,
     justifyContent: "center",
-    paddingTop: 60,
+    paddingTop: 40,
   },
   label: {
     fontFamily: "DMSans",
@@ -84,22 +118,28 @@ const coverStyles = StyleSheet.create({
     color: COLORS.textLight,
     marginBottom: 20,
   },
-  dateRow: {
+  metaRow: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 6,
   },
-  dateLabel: {
+  metaLabel: {
     fontFamily: "DMSans",
     fontSize: 9,
     color: COLORS.textLight,
   },
-  dateValue: {
+  metaValue: {
     fontFamily: "DMSans",
     fontSize: 9,
     fontWeight: 700,
     color: COLORS.white,
   },
+  countryFlag: {
+    fontFamily: "DMSans",
+    fontSize: 11,
+    marginRight: 4,
+  },
+  /* Footer */
   footer: {
     position: "absolute",
     bottom: 40,
@@ -119,11 +159,21 @@ const coverStyles = StyleSheet.create({
     lineHeight: 1.6,
     marginBottom: 10,
   },
+  footerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   branding: {
     fontFamily: "DMSans",
     fontSize: 7,
     color: COLORS.textLight,
     letterSpacing: 1,
+  },
+  pageCount: {
+    fontFamily: "DMSans",
+    fontSize: 7,
+    color: COLORS.textLight,
   },
 });
 
@@ -132,44 +182,71 @@ export default function CoverPage({
   contactName,
   generatedAt,
   countryName,
+  reportId,
+  countryFlag,
+  t,
 }: CoverPageProps) {
   return (
     <Page size="A4" style={coverStyles.page}>
       <View style={coverStyles.goldBar} />
 
+      {/* ── Header: Report ID + VERTRAULICH ── */}
+      <View style={coverStyles.headerRow}>
+        {reportId ? (
+          <Text style={coverStyles.reportIdText}>
+            {t.toc.reportNr}: {reportId}
+          </Text>
+        ) : (
+          <Text style={coverStyles.reportIdText} />
+        )}
+        <View style={coverStyles.vertraulichBadge}>
+          <Text style={coverStyles.vertraulichText}>{t.cover.confidential}</Text>
+        </View>
+      </View>
+
+      {/* ── Main Content ── */}
       <View style={coverStyles.content}>
-        <Text style={coverStyles.label}>EU Compliance Hub</Text>
-        <Text style={coverStyles.title}>Ihr persoenlicher</Text>
-        <Text style={coverStyles.titleAccent}>Compliance-Report</Text>
+        <Text style={coverStyles.label}>{t.cover.label}</Text>
+        <Text style={coverStyles.title}>{t.cover.title}</Text>
+        <Text style={coverStyles.titleAccent}>{t.cover.titleAccent}</Text>
 
         <View style={coverStyles.divider} />
 
-        <Text style={coverStyles.preparedFor}>Erstellt fuer</Text>
+        <Text style={coverStyles.preparedFor}>{t.cover.preparedFor}</Text>
         <Text style={coverStyles.companyName}>{companyName}</Text>
         <Text style={coverStyles.contactName}>{contactName}</Text>
 
-        <View style={coverStyles.dateRow}>
-          <Text style={coverStyles.dateLabel}>Erstellungsdatum: </Text>
-          <Text style={coverStyles.dateValue}>{generatedAt}</Text>
+        <View style={coverStyles.metaRow}>
+          <Text style={coverStyles.metaLabel}>{t.cover.dateLabel}</Text>
+          <Text style={coverStyles.metaValue}>{generatedAt}</Text>
         </View>
         {countryName && (
-          <View style={coverStyles.dateRow}>
-            <Text style={coverStyles.dateLabel}>Land: </Text>
-            <Text style={coverStyles.dateValue}>{countryName}</Text>
+          <View style={coverStyles.metaRow}>
+            <Text style={coverStyles.metaLabel}>{t.cover.countryLabel}</Text>
+            {countryFlag && (
+              <Text style={coverStyles.countryFlag}>{countryFlag}</Text>
+            )}
+            <Text style={coverStyles.metaValue}>{countryName}</Text>
+          </View>
+        )}
+        {reportId && (
+          <View style={coverStyles.metaRow}>
+            <Text style={coverStyles.metaLabel}>{t.cover.referenceLabel}</Text>
+            <Text style={coverStyles.metaValue}>{reportId}</Text>
           </View>
         )}
       </View>
 
+      {/* ── Footer ── */}
       <View style={coverStyles.footer}>
         <View style={coverStyles.footerDivider} />
         <Text style={coverStyles.disclaimer}>
-          Dieser Report dient der Orientierung und ersetzt keine
-          Rechtsberatung. Die enthaltenen Informationen basieren auf Ihren
-          Angaben und den zum Erstellungszeitpunkt geltenden Regelungen.
+          {t.cover.disclaimer}
         </Text>
-        <Text style={coverStyles.branding}>
-          eu-compliance-hub.eu
-        </Text>
+        <View style={coverStyles.footerRow}>
+          <Text style={coverStyles.branding}>{t.cover.branding}</Text>
+          <Text style={coverStyles.pageCount}>{t.cover.page}</Text>
+        </View>
       </View>
     </Page>
   );

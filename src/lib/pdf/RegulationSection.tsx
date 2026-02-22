@@ -1,28 +1,48 @@
 /* ══════════════════════════════════════════════════════════════
-   RegulationSection — Detail section for a single regulation
-   Rendered once per hoch/mittel regulation in the report
+   RegulationSection — Enhanced detail section for a regulation
+   Maturity-aware checklists, per-reg fine exposure, priority badge
    ══════════════════════════════════════════════════════════════ */
 
 import { Text, View, StyleSheet } from "@react-pdf/renderer";
 import { COLORS } from "./shared/styles";
+import { tReplace, type PDFMessages } from "@/i18n/pdf";
 import type { EvaluatedRegulation } from "@/lib/regulation-evaluator";
 import type { RegulationChecklist } from "@/data/checklist-data";
 import type { CountryRegulationData } from "@/i18n/country/types";
+import type { ChecklistItemStatus } from "@/lib/report-engine";
+import type { FineExposureResult } from "@/data/fine-data";
 
 interface RegulationSectionProps {
   regulation: EvaluatedRegulation;
   checklist?: RegulationChecklist;
   countryRegData?: CountryRegulationData;
   countryName?: string;
+  /* New premium props */
+  checklistStatuses?: ChecklistItemStatus[];
+  fineExposure?: FineExposureResult;
+  priority?: "sofort" | "kurzfristig" | "mittelfristig";
+  t: PDFMessages;
 }
 
-const RELEVANCE_STYLES: Record<
+const RELEVANCE_COLORS: Record<
   "hoch" | "mittel" | "niedrig",
-  { bg: string; text: string; label: string }
+  { bg: string; text: string }
 > = {
-  hoch: { bg: "#dcfce7", text: "#166534", label: "Hohe Relevanz" },
-  mittel: { bg: "#fef9c3", text: "#854d0e", label: "Mittlere Relevanz" },
-  niedrig: { bg: "#f1f5f9", text: "#64748b", label: "Niedrige Relevanz" },
+  hoch: { bg: "#fef2f2", text: "#dc2626" },
+  mittel: { bg: "#fefce8", text: "#854d0e" },
+  niedrig: { bg: "#f1f5f9", text: "#64748b" },
+};
+
+const PRIORITY_COLORS: Record<string, { bg: string; text: string }> = {
+  sofort: { bg: "#fef2f2", text: "#dc2626" },
+  kurzfristig: { bg: "#fff7ed", text: "#ea580c" },
+  mittelfristig: { bg: "#f0fdf4", text: "#16a34a" },
+};
+
+const STATUS_SYMBOLS: Record<string, { char: string; color: string }> = {
+  compliant: { char: "\u2611", color: "#16a34a" },
+  partial: { char: "\u25D0", color: "#f59e0b" },
+  unchecked: { char: "\u2610", color: COLORS.textLight },
 };
 
 const secStyles = StyleSheet.create({
@@ -65,6 +85,11 @@ const secStyles = StyleSheet.create({
     fontSize: 9,
     color: COLORS.textSecondary,
   },
+  badgeRow: {
+    flexDirection: "row",
+    gap: 4,
+    alignItems: "flex-start",
+  },
   badge: {
     paddingHorizontal: 8,
     paddingVertical: 3,
@@ -89,6 +114,36 @@ const secStyles = StyleSheet.create({
     color: COLORS.textPrimary,
     lineHeight: 1.6,
   },
+  /* Fine exposure inline */
+  fineRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+    backgroundColor: "#fef2f2",
+    borderRadius: 4,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: "#fecaca",
+  },
+  fineIcon: {
+    fontFamily: "DMSans",
+    fontSize: 10,
+    marginRight: 6,
+  },
+  fineText: {
+    fontFamily: "DMSans",
+    fontSize: 8.5,
+    color: "#dc2626",
+    fontWeight: 700,
+    flex: 1,
+  },
+  fineArticle: {
+    fontFamily: "DMSans",
+    fontSize: 7,
+    color: COLORS.textSecondary,
+    marginLeft: 6,
+  },
+  /* Checklist */
   checklistContainer: {
     marginTop: 10,
     backgroundColor: COLORS.offWhite,
@@ -102,10 +157,9 @@ const secStyles = StyleSheet.create({
   },
   checkBullet: {
     fontFamily: "DMSans",
-    fontSize: 9,
-    color: COLORS.textLight,
-    width: 14,
-    marginTop: 1,
+    fontSize: 10,
+    width: 16,
+    marginTop: 0,
   },
   checkText: {
     fontFamily: "DMSans",
@@ -114,6 +168,21 @@ const secStyles = StyleSheet.create({
     lineHeight: 1.5,
     flex: 1,
   },
+  checkTextCompliant: {
+    fontFamily: "DMSans",
+    fontSize: 9,
+    color: "#16a34a",
+    lineHeight: 1.5,
+    flex: 1,
+  },
+  checkTextPartial: {
+    fontFamily: "DMSans",
+    fontSize: 9,
+    color: "#92400e",
+    lineHeight: 1.5,
+    flex: 1,
+  },
+  /* Deadline fact */
   factRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -136,12 +205,7 @@ const secStyles = StyleSheet.create({
     flex: 1,
     lineHeight: 1.5,
   },
-  guideLink: {
-    fontFamily: "DMSans",
-    fontSize: 8,
-    color: COLORS.info,
-    marginTop: 8,
-  },
+  /* Country info */
   countryRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -166,6 +230,32 @@ const secStyles = StyleSheet.create({
     flex: 1,
     lineHeight: 1.5,
   },
+  /* Guide link */
+  guideLink: {
+    fontFamily: "DMSans",
+    fontSize: 8,
+    color: COLORS.info,
+    marginTop: 8,
+  },
+  /* Maturity legend inline */
+  maturityLegend: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 6,
+    paddingTop: 6,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.borderLight,
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+  },
+  legendText: {
+    fontFamily: "DMSans",
+    fontSize: 7,
+    color: COLORS.textLight,
+  },
 });
 
 export default function RegulationSection({
@@ -173,84 +263,179 @@ export default function RegulationSection({
   checklist,
   countryRegData,
   countryName,
+  checklistStatuses,
+  fineExposure,
+  priority,
+  t,
 }: RegulationSectionProps) {
-  const relevanceStyle = RELEVANCE_STYLES[regulation.relevance];
+  const relevanceColors = RELEVANCE_COLORS[regulation.relevance];
+  const priorityColors = priority ? PRIORITY_COLORS[priority] : null;
+
+  const RELEVANCE_LABELS: Record<"hoch" | "mittel" | "niedrig", string> = {
+    hoch: t.regulation.relevanceHighLabel,
+    mittel: t.regulation.relevanceMediumLabel,
+    niedrig: t.regulation.relevanceLowLabel,
+  };
+
+  const PRIORITY_LABELS: Record<string, string> = {
+    sofort: t.regulation.priorityImmediate,
+    kurzfristig: t.regulation.priorityShortTerm,
+    mittelfristig: t.regulation.priorityMediumTerm,
+  };
+
+  // Use maturity-aware statuses if available, otherwise fall back to plain checklist
+  const items = checklistStatuses ?? checklist?.items.map((item) => ({
+    id: item.id,
+    text: item.text,
+    status: "unchecked" as const,
+  })) ?? [];
+
+  const compliantCount = items.filter((i) => i.status === "compliant").length;
+  const partialCount = items.filter((i) => i.status === "partial").length;
+  const hasMaturityData = compliantCount > 0 || partialCount > 0;
 
   return (
     <View style={secStyles.container} wrap={false}>
       <View style={secStyles.innerWrapper}>
-        {/* Colored left border bar */}
         <View
           style={[secStyles.leftBar, { backgroundColor: regulation.color }]}
         />
 
         <View style={secStyles.content}>
-          {/* Header with name and relevance badge */}
+          {/* Header: Name + Badges */}
           <View style={secStyles.header}>
             <View style={secStyles.titleGroup}>
               <Text style={secStyles.regName}>{regulation.name}</Text>
               <Text style={secStyles.regSubtitle}>{regulation.subtitle}</Text>
             </View>
-            <Text
-              style={[
-                secStyles.badge,
-                {
-                  backgroundColor: relevanceStyle.bg,
-                  color: relevanceStyle.text,
-                },
-              ]}
-            >
-              {relevanceStyle.label}
-            </Text>
+            <View style={secStyles.badgeRow}>
+              {priorityColors && priority && (
+                <Text
+                  style={[
+                    secStyles.badge,
+                    {
+                      backgroundColor: priorityColors.bg,
+                      color: priorityColors.text,
+                    },
+                  ]}
+                >
+                  {PRIORITY_LABELS[priority]}
+                </Text>
+              )}
+              <Text
+                style={[
+                  secStyles.badge,
+                  {
+                    backgroundColor: relevanceColors.bg,
+                    color: relevanceColors.text,
+                  },
+                ]}
+              >
+                {RELEVANCE_LABELS[regulation.relevance]}
+              </Text>
+            </View>
           </View>
 
-          {/* Reason */}
-          <Text style={secStyles.sectionLabel}>Warum relevant</Text>
+          {/* Why relevant */}
+          <Text style={secStyles.sectionLabel}>{t.regulation.whyRelevant}</Text>
           <Text style={secStyles.reasonText}>{regulation.reason}</Text>
 
-          {/* Checklist items */}
-          {checklist && checklist.items.length > 0 && (
-            <View style={secStyles.checklistContainer}>
-              <Text style={secStyles.sectionLabel}>Checkliste</Text>
-              {checklist.items.map((item) => (
-                <View key={item.id} style={secStyles.checkItem}>
-                  <Text style={secStyles.checkBullet}>{"\u2610"}</Text>
-                  <Text style={secStyles.checkText}>{item.text}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-
-          {/* Key fact: deadline */}
-          {checklist?.deadline && (
-            <View style={secStyles.factRow}>
-              <Text style={secStyles.factIcon}>{"\u23F0"}</Text>
-              <Text style={secStyles.factText}>
-                Frist: {checklist.deadline}
+          {/* Fine exposure */}
+          {fineExposure && (
+            <View style={secStyles.fineRow}>
+              <Text style={secStyles.fineIcon}>{"\u26A0"}</Text>
+              <Text style={secStyles.fineText}>
+                {t.regulation.fineLabel}{fineExposure.calculation}
+              </Text>
+              <Text style={secStyles.fineArticle}>
+                {fineExposure.article}
               </Text>
             </View>
           )}
 
-          {/* Country-specific authority info */}
+          {/* Maturity-aware checklist */}
+          {items.length > 0 && (
+            <View style={secStyles.checklistContainer}>
+              <Text style={secStyles.sectionLabel}>
+                {t.regulation.checklistTitle}
+                {hasMaturityData
+                  ? ` ${tReplace(t.regulation.checklistStatus, { compliant: compliantCount, partial: partialCount })}`
+                  : ""}
+              </Text>
+              {items.map((item) => {
+                const status = STATUS_SYMBOLS[item.status] ?? STATUS_SYMBOLS.unchecked;
+                const textStyle =
+                  item.status === "compliant"
+                    ? secStyles.checkTextCompliant
+                    : item.status === "partial"
+                      ? secStyles.checkTextPartial
+                      : secStyles.checkText;
+                return (
+                  <View key={item.id} style={secStyles.checkItem}>
+                    <Text
+                      style={[secStyles.checkBullet, { color: status.color }]}
+                    >
+                      {status.char}
+                    </Text>
+                    <Text style={textStyle}>{item.text}</Text>
+                  </View>
+                );
+              })}
+
+              {/* Mini legend */}
+              {hasMaturityData && (
+                <View style={secStyles.maturityLegend}>
+                  <View style={secStyles.legendItem}>
+                    <Text style={{ color: "#16a34a", fontSize: 9 }}>
+                      {"\u2611"}
+                    </Text>
+                    <Text style={secStyles.legendText}>{t.regulation.legendCompliant}</Text>
+                  </View>
+                  <View style={secStyles.legendItem}>
+                    <Text style={{ color: "#f59e0b", fontSize: 9 }}>
+                      {"\u25D0"}
+                    </Text>
+                    <Text style={secStyles.legendText}>{t.regulation.legendPartial}</Text>
+                  </View>
+                  <View style={secStyles.legendItem}>
+                    <Text style={{ color: COLORS.textLight, fontSize: 9 }}>
+                      {"\u2610"}
+                    </Text>
+                    <Text style={secStyles.legendText}>{t.regulation.legendOpen}</Text>
+                  </View>
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* Deadline */}
+          {checklist?.deadline && (
+            <View style={secStyles.factRow}>
+              <Text style={secStyles.factIcon}>{"\u23F0"}</Text>
+              <Text style={secStyles.factText}>
+                {t.regulation.deadlineLabel}{checklist.deadline}
+              </Text>
+            </View>
+          )}
+
+          {/* Country-specific info */}
           {countryRegData && countryName && (
             <View style={secStyles.countryRow}>
               <View style={{ flex: 1 }}>
-                <Text style={secStyles.countryLabel}>
-                  {countryName}:
-                </Text>
+                <Text style={secStyles.countryLabel}>{countryName}:</Text>
                 {countryRegData.authority && (
                   <Text style={secStyles.countryValue}>
-                    Behoerde: {countryRegData.authority}
+                    {t.regulation.authorityLabel}{countryRegData.authority}
                   </Text>
                 )}
                 {countryRegData.nationalLawName && (
                   <Text style={secStyles.countryValue}>
-                    Nationales Gesetz: {countryRegData.nationalLawName}
+                    {t.regulation.nationalLawLabel}{countryRegData.nationalLawName}
                   </Text>
                 )}
                 {countryRegData.nationalFines && (
                   <Text style={secStyles.countryValue}>
-                    Bussgelder: {countryRegData.nationalFines}
+                    {t.regulation.nationalFinesLabel}{countryRegData.nationalFines}
                   </Text>
                 )}
               </View>
@@ -259,7 +444,7 @@ export default function RegulationSection({
 
           {/* Guide reference */}
           <Text style={secStyles.guideLink}>
-            Ausfuehrlicher Guide: eu-compliance-hub.eu{regulation.href}
+            {t.regulation.guideLabel}eu-compliance-hub.eu{regulation.href}
           </Text>
         </View>
       </View>

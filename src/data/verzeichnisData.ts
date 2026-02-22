@@ -126,7 +126,7 @@ const softwareEntries: VerzeichnisEntry[] = [
     targetSize: "Mittelstand",
     website: "https://www.dataguard.de",
     ctaLabel: "Demo buchen",
-    ctaUrl: "https://www.dataguard.de/demo",
+    ctaUrl: "https://www.dataguard.de",
     featured: true,
     priceInfo: "ab 450 \u20ac/Monat",
     highlights: [
@@ -174,7 +174,7 @@ const softwareEntries: VerzeichnisEntry[] = [
     targetSize: "Mittelstand",
     website: "https://www.secjur.com",
     ctaLabel: "Kostenlos testen",
-    ctaUrl: "https://www.secjur.com/kontakt",
+    ctaUrl: "https://www.secjur.com",
     featured: false,
     priceInfo: "ab 390 \u20ac/Monat",
     highlights: [
@@ -197,7 +197,7 @@ const softwareEntries: VerzeichnisEntry[] = [
     targetSize: "KMU",
     website: "https://www.heydata.eu",
     ctaLabel: "Jetzt starten",
-    ctaUrl: "https://www.heydata.eu/anfrage",
+    ctaUrl: "https://www.heydata.eu",
     featured: false,
     priceInfo: "ab 169 \u20ac/Monat",
     highlights: [
@@ -220,7 +220,7 @@ const softwareEntries: VerzeichnisEntry[] = [
     targetSize: "Mittelstand",
     website: "https://www.vanta.com",
     ctaLabel: "Demo buchen",
-    ctaUrl: "https://www.vanta.com/contact",
+    ctaUrl: "https://www.vanta.com",
     featured: false,
     priceInfo: "ab 500 \u20ac/Monat",
     highlights: [
@@ -370,7 +370,7 @@ const kanzleiEntries: VerzeichnisEntry[] = [
     targetSize: "Enterprise",
     website: "https://www.freshfields.com",
     ctaLabel: "Kontakt aufnehmen",
-    ctaUrl: "https://www.freshfields.com/de/kontakt/",
+    ctaUrl: "https://www.freshfields.com",
     featured: true,
     priceInfo: "Auf Anfrage",
     highlights: [
@@ -469,7 +469,7 @@ const beraterEntries: VerzeichnisEntry[] = [
     targetSize: "Enterprise",
     website: "https://kpmg.com/at",
     ctaLabel: "Erstgespr\u00e4ch vereinbaren",
-    ctaUrl: "https://kpmg.com/at/de/home/kontakt.html",
+    ctaUrl: "https://kpmg.com/at",
     featured: true,
     priceInfo: "Auf Anfrage",
     highlights: [
@@ -493,7 +493,7 @@ const beraterEntries: VerzeichnisEntry[] = [
     targetSize: "Enterprise",
     website: "https://www2.deloitte.com/at",
     ctaLabel: "Beratung anfragen",
-    ctaUrl: "https://www2.deloitte.com/at/de/footerlinks/kontakt.html",
+    ctaUrl: "https://www2.deloitte.com/at",
     featured: false,
     priceInfo: "Auf Anfrage",
     highlights: [

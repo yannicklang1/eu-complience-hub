@@ -1,5 +1,4 @@
 import { BASE_URL } from "@/lib/constants";
-import { LOCALES, LOCALE_OG, type Locale } from "@/i18n/config";
 
 /* ── Per-locale metadata for layout JSON-LD ── */
 const META = {

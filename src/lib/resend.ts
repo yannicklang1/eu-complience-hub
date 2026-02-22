@@ -313,15 +313,126 @@ interface ReportEmailData {
   totalCostMax: number;
 }
 
+/** Locale-aware report email strings */
+const REPORT_EMAIL_STRINGS: Record<string, {
+  subject: string;
+  subheading: string;
+  greeting: string; // {{name}}, ...
+  intro: string; // ... für {{company}} ...
+  regsAnalyzed: string;
+  highRelevance: string;
+  maturityGrade: string;
+  estimatedCosts: string;
+  fullReportNote: string;
+  detailedAnalysis: string;
+  costBreakdown: string;
+  maturityAndActions: string;
+  deadlinesAndSoftware: string;
+  ctaButton: string;
+  disclaimer: string;
+}> = {
+  de: {
+    subject: "Ihr persönlicher Compliance-Report",
+    subheading: "Persönlicher Compliance-Report",
+    greeting: "{{name}}, Ihr Compliance-Report ist fertig!",
+    intro: "Basierend auf den Angaben für <strong style=\"color:#f8fafc\">{{company}}</strong> haben wir Ihren individuellen Report erstellt.",
+    regsAnalyzed: "Regulierungen analysiert",
+    highRelevance: "mit hoher Relevanz",
+    maturityGrade: "Reifegrad",
+    estimatedCosts: "Geschätzte Kosten:",
+    fullReportNote: "Ihren vollständigen Report finden Sie im PDF-Anhang dieser E-Mail. Er enthält:",
+    detailedAnalysis: "Detaillierte Regulierungs-Analyse",
+    costBreakdown: "Kostenaufschlüsselung pro Regulierung",
+    maturityAndActions: "Compliance-Reifegrad & Handlungsempfehlungen",
+    deadlinesAndSoftware: "Fristen-Übersicht & Software-Empfehlungen",
+    ctaButton: "Interaktive Tools entdecken",
+    disclaimer: "Dieser Report dient der Orientierung und ersetzt keine Rechtsberatung.",
+  },
+  en: {
+    subject: "Your Personal Compliance Report",
+    subheading: "Personal Compliance Report",
+    greeting: "{{name}}, your compliance report is ready!",
+    intro: "Based on the information for <strong style=\"color:#f8fafc\">{{company}}</strong>, we have created your individual report.",
+    regsAnalyzed: "Regulations analyzed",
+    highRelevance: "with high relevance",
+    maturityGrade: "Maturity Grade",
+    estimatedCosts: "Estimated costs:",
+    fullReportNote: "You can find your complete report in the PDF attachment of this email. It includes:",
+    detailedAnalysis: "Detailed regulatory analysis",
+    costBreakdown: "Cost breakdown per regulation",
+    maturityAndActions: "Compliance maturity grade & recommendations",
+    deadlinesAndSoftware: "Deadline overview & software recommendations",
+    ctaButton: "Discover interactive tools",
+    disclaimer: "This report is for informational purposes and does not constitute legal advice.",
+  },
+  fr: {
+    subject: "Votre rapport de conformité personnalisé",
+    subheading: "Rapport de conformité personnalisé",
+    greeting: "{{name}}, votre rapport de conformité est prêt !",
+    intro: "Sur la base des informations pour <strong style=\"color:#f8fafc\">{{company}}</strong>, nous avons créé votre rapport individuel.",
+    regsAnalyzed: "Réglementations analysées",
+    highRelevance: "à haute pertinence",
+    maturityGrade: "Niveau de maturité",
+    estimatedCosts: "Coûts estimés :",
+    fullReportNote: "Vous trouverez votre rapport complet en pièce jointe PDF de cet e-mail. Il comprend :",
+    detailedAnalysis: "Analyse réglementaire détaillée",
+    costBreakdown: "Ventilation des coûts par réglementation",
+    maturityAndActions: "Niveau de maturité & recommandations",
+    deadlinesAndSoftware: "Aperçu des délais & recommandations logicielles",
+    ctaButton: "Découvrir les outils interactifs",
+    disclaimer: "Ce rapport est fourni à titre indicatif et ne constitue pas un conseil juridique.",
+  },
+  es: {
+    subject: "Su informe de cumplimiento personalizado",
+    subheading: "Informe de cumplimiento personalizado",
+    greeting: "{{name}}, ¡su informe de cumplimiento está listo!",
+    intro: "Basándonos en la información de <strong style=\"color:#f8fafc\">{{company}}</strong>, hemos creado su informe individual.",
+    regsAnalyzed: "Regulaciones analizadas",
+    highRelevance: "con alta relevancia",
+    maturityGrade: "Grado de madurez",
+    estimatedCosts: "Costes estimados:",
+    fullReportNote: "Encontrará su informe completo en el archivo PDF adjunto a este correo. Incluye:",
+    detailedAnalysis: "Análisis regulatorio detallado",
+    costBreakdown: "Desglose de costes por regulación",
+    maturityAndActions: "Grado de madurez y recomendaciones",
+    deadlinesAndSoftware: "Resumen de plazos y recomendaciones de software",
+    ctaButton: "Descubrir herramientas interactivas",
+    disclaimer: "Este informe es orientativo y no constituye asesoramiento jurídico.",
+  },
+  it: {
+    subject: "Il tuo report di conformità personalizzato",
+    subheading: "Report di conformità personalizzato",
+    greeting: "{{name}}, il tuo report di conformità è pronto!",
+    intro: "Sulla base delle informazioni per <strong style=\"color:#f8fafc\">{{company}}</strong>, abbiamo creato il tuo report individuale.",
+    regsAnalyzed: "Regolamenti analizzati",
+    highRelevance: "ad alta rilevanza",
+    maturityGrade: "Grado di maturità",
+    estimatedCosts: "Costi stimati:",
+    fullReportNote: "Trovi il tuo report completo nell'allegato PDF di questa e-mail. Include:",
+    detailedAnalysis: "Analisi normativa dettagliata",
+    costBreakdown: "Ripartizione dei costi per regolamento",
+    maturityAndActions: "Grado di maturità e raccomandazioni",
+    deadlinesAndSoftware: "Panoramica delle scadenze e raccomandazioni software",
+    ctaButton: "Scopri gli strumenti interattivi",
+    disclaimer: "Questo report è a scopo informativo e non costituisce consulenza legale.",
+  },
+};
+
+function getReportEmailStrings(locale: string) {
+  return REPORT_EMAIL_STRINGS[locale] ?? REPORT_EMAIL_STRINGS.de;
+}
+
 export async function sendReportEmail(
   email: string,
   contactName: string,
   companyName: string,
   reportData: ReportEmailData,
   pdfBuffer: Buffer,
+  locale: string = "de",
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const resend = getResend();
+    const s = getReportEmailStrings(locale);
 
     const hochCount = reportData.regulations.filter((r) => r.relevance === "hoch").length;
     const totalCount = reportData.regulations.length;
@@ -329,12 +440,12 @@ export async function sendReportEmail(
     const { error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: email,
-      subject: `${SITE_NAME} – Ihr persönlicher Compliance-Report`,
-      html: buildReportHtml(contactName, companyName, hochCount, totalCount, reportData),
-      text: buildReportText(contactName, companyName, hochCount, totalCount, reportData),
+      subject: `${SITE_NAME} \u2013 ${s.subject}`,
+      html: buildReportHtml(contactName, companyName, hochCount, totalCount, reportData, s),
+      text: buildReportText(contactName, companyName, hochCount, totalCount, reportData, s),
       attachments: [
         {
-          filename: `Compliance-Report-${companyName.replace(/[^a-zA-Z0-9äöüÄÖÜß -]/g, "")}.pdf`,
+          filename: `Compliance-Report-${companyName.replace(/[^a-zA-Z0-9\u00e4\u00f6\u00fc\u00c4\u00d6\u00dc\u00df -]/g, "")}.pdf`,
           content: pdfBuffer.toString("base64"),
         },
       ],
@@ -354,6 +465,7 @@ export async function sendReportEmail(
 
     log.info("[resend]", "Report email sent", {
       email: email.replace(/(.{2}).*(@.*)/, "$1***$2"),
+      locale,
     });
     return { success: true };
   } catch (err) {
@@ -375,11 +487,15 @@ function buildReportHtml(
   hochCount: number,
   totalCount: number,
   data: ReportEmailData,
+  s: ReturnType<typeof getReportEmailStrings>,
 ): string {
+  const greeting = s.greeting.replace("{{name}}", contactName);
+  const intro = s.intro.replace("{{company}}", companyName);
+
   return `<!DOCTYPE html>
 <html lang="de" dir="ltr">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Ihr Compliance-Report</title></head>
+<title>${s.subject}</title></head>
 <body style="margin:0;padding:0;background-color:#060c1a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#060c1a;padding:40px 20px">
 <tr><td align="center">
@@ -388,16 +504,16 @@ function buildReportHtml(
     <!-- Header -->
     <tr><td style="padding:32px 40px 24px;border-bottom:1px solid rgba(250,204,21,0.1)">
       <div style="font-size:20px;font-weight:700;color:#FACC15;letter-spacing:-0.5px">${SITE_NAME}</div>
-      <div style="font-size:12px;color:#94a3b8;margin-top:4px">Persönlicher Compliance-Report</div>
+      <div style="font-size:12px;color:#94a3b8;margin-top:4px">${s.subheading}</div>
     </td></tr>
 
     <!-- Body -->
     <tr><td style="padding:32px 40px">
       <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;color:#f8fafc;line-height:1.3">
-        ${contactName}, Ihr Compliance-Report ist fertig!
+        ${greeting}
       </h1>
       <p style="margin:0 0 24px;font-size:15px;color:#cbd5e1;line-height:1.6">
-        Basierend auf den Angaben für <strong style="color:#f8fafc">${companyName}</strong> haben wir Ihren individuellen Report erstellt.
+        ${intro}
       </p>
 
       <!-- Stats -->
@@ -405,43 +521,43 @@ function buildReportHtml(
         <tr>
           <td style="padding:12px;background:#0A2540;border-radius:8px;text-align:center;width:33%">
             <div style="font-size:24px;font-weight:800;color:#FACC15">${totalCount}</div>
-            <div style="font-size:11px;color:#94a3b8;margin-top:2px">Regulierungen analysiert</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:2px">${s.regsAnalyzed}</div>
           </td>
           <td style="width:8px"></td>
           <td style="padding:12px;background:#0A2540;border-radius:8px;text-align:center;width:33%">
             <div style="font-size:24px;font-weight:800;color:${hochCount > 3 ? "#ef4444" : "#FACC15"}">${hochCount}</div>
-            <div style="font-size:11px;color:#94a3b8;margin-top:2px">mit hoher Relevanz</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:2px">${s.highRelevance}</div>
           </td>
           <td style="width:8px"></td>
           <td style="padding:12px;background:#0A2540;border-radius:8px;text-align:center;width:33%">
             <div style="font-size:24px;font-weight:800;color:#FACC15">${data.maturityGrade.letter}</div>
-            <div style="font-size:11px;color:#94a3b8;margin-top:2px">Reifegrad</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:2px">${s.maturityGrade}</div>
           </td>
         </tr>
       </table>
 
       ${data.totalCostMin > 0 ? `
       <p style="margin:0 0 24px;font-size:14px;color:#cbd5e1;line-height:1.6">
-        <span style="color:#94a3b8">Geschätzte Kosten:</span> <strong style="color:#FACC15">${formatCostRange(data.totalCostMin, data.totalCostMax)}</strong>
+        <span style="color:#94a3b8">${s.estimatedCosts}</span> <strong style="color:#FACC15">${formatCostRange(data.totalCostMin, data.totalCostMax)}</strong>
       </p>
       ` : ""}
 
       <p style="margin:0 0 24px;font-size:14px;color:#cbd5e1;line-height:1.6">
-        Ihren vollständigen Report finden Sie im PDF-Anhang dieser E-Mail. Er enthält:
+        ${s.fullReportNote}
       </p>
 
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px">
-        <tr><td style="padding:5px 0;font-size:13px;color:#cbd5e1"><span style="color:#FACC15;margin-right:8px">&#9679;</span> Detaillierte Regulierungs-Analyse</td></tr>
-        <tr><td style="padding:5px 0;font-size:13px;color:#cbd5e1"><span style="color:#FACC15;margin-right:8px">&#9679;</span> Kostenaufschlüsselung pro Regulierung</td></tr>
-        <tr><td style="padding:5px 0;font-size:13px;color:#cbd5e1"><span style="color:#FACC15;margin-right:8px">&#9679;</span> Compliance-Reifegrad & Handlungsempfehlungen</td></tr>
-        <tr><td style="padding:5px 0;font-size:13px;color:#cbd5e1"><span style="color:#FACC15;margin-right:8px">&#9679;</span> Fristen-Übersicht & Software-Empfehlungen</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#cbd5e1"><span style="color:#FACC15;margin-right:8px">&#9679;</span> ${s.detailedAnalysis}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#cbd5e1"><span style="color:#FACC15;margin-right:8px">&#9679;</span> ${s.costBreakdown}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#cbd5e1"><span style="color:#FACC15;margin-right:8px">&#9679;</span> ${s.maturityAndActions}</td></tr>
+        <tr><td style="padding:5px 0;font-size:13px;color:#cbd5e1"><span style="color:#FACC15;margin-right:8px">&#9679;</span> ${s.deadlinesAndSoftware}</td></tr>
       </table>
 
       <!-- CTA -->
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 24px">
       <tr><td style="border-radius:8px;background:linear-gradient(135deg,#FACC15,#EAB308);padding:1px">
         <a href="${BASE_URL}/tools" target="_blank" style="display:inline-block;padding:14px 32px;font-size:15px;font-weight:700;color:#0f172a;text-decoration:none;border-radius:7px;background:linear-gradient(135deg,#FACC15,#EAB308)">
-          Interaktive Tools entdecken &rarr;
+          ${s.ctaButton} &rarr;
         </a>
       </td></tr></table>
     </td></tr>
@@ -449,8 +565,8 @@ function buildReportHtml(
     <!-- Footer -->
     <tr><td style="padding:20px 40px 24px;background-color:rgba(0,0,0,0.2);border-top:1px solid rgba(250,204,21,0.05)">
       <p style="margin:0;font-size:11px;color:#475569;line-height:1.5;text-align:center">
-        ${SITE_NAME} &mdash; Europäische Regulierungen. Klar erklärt.<br>
-        Dieser Report dient der Orientierung und ersetzt keine Rechtsberatung.
+        ${SITE_NAME} &mdash; eu-compliance-hub.eu<br>
+        ${s.disclaimer}
       </p>
     </td></tr>
 
@@ -465,23 +581,31 @@ function buildReportText(
   hochCount: number,
   totalCount: number,
   data: ReportEmailData,
+  s: ReturnType<typeof getReportEmailStrings>,
 ): string {
-  return `${SITE_NAME} – Persönlicher Compliance-Report
+  const greeting = s.greeting.replace("{{name}}", contactName);
 
-${contactName}, Ihr Compliance-Report ist fertig!
-===================================================
+  return `${SITE_NAME} – ${s.subject}
 
-Basierend auf den Angaben für ${companyName} haben wir Ihren individuellen Report erstellt.
+${greeting}
+${"=".repeat(greeting.length)}
 
-- ${totalCount} Regulierungen analysiert
-- ${hochCount} mit hoher Relevanz
-- Reifegrad: ${data.maturityGrade.label}${data.totalCostMin > 0 ? `\n- Geschätzte Kosten: ${formatCostRange(data.totalCostMin, data.totalCostMax)}` : ""}
+${s.intro.replace(/<[^>]*>/g, "").replace("{{company}}", companyName)}
 
-Ihren vollständigen Report finden Sie im PDF-Anhang dieser E-Mail.
+- ${totalCount} ${s.regsAnalyzed}
+- ${hochCount} ${s.highRelevance}
+- ${s.maturityGrade}: ${data.maturityGrade.label}${data.totalCostMin > 0 ? `\n- ${s.estimatedCosts} ${formatCostRange(data.totalCostMin, data.totalCostMax)}` : ""}
 
-Entdecken Sie unsere interaktiven Tools: ${BASE_URL}/tools
+${s.fullReportNote}
+
+- ${s.detailedAnalysis}
+- ${s.costBreakdown}
+- ${s.maturityAndActions}
+- ${s.deadlinesAndSoftware}
+
+${s.ctaButton}: ${BASE_URL}/tools
 
 ---
-${SITE_NAME} — Europäische Regulierungen. Klar erklärt.
-Dieser Report dient der Orientierung und ersetzt keine Rechtsberatung.`;
+${SITE_NAME} — eu-compliance-hub.eu
+${s.disclaimer}`;
 }

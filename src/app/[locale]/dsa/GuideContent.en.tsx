@@ -34,7 +34,7 @@ const sources: Source[] = [
   {
     id: 4,
     title: "KommAustria — Digital Services Coordinator Austria",
-    url: "https://www.rtr.at/medien/aktuelles/entscheidungen/dsc.de.html",
+    url: "https://www.rtr.at",
     desc: "RTR/KommAustria as the Austrian Coordinator for Digital Services",
     type: "Authority",
   },

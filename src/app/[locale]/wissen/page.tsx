@@ -1,7 +1,7 @@
+import { createElement, Suspense } from "react";
 import type { Metadata } from "next";
 import { LOCALES, LOCALE_OG, type Locale } from "@/i18n/config";
 import dynamic from "next/dynamic";
-import { Suspense } from "react";
 import { BASE_URL, SITE_NAME } from "@/lib/constants";
 import WissenContent from "./WissenContent";
 
@@ -11,10 +11,6 @@ const WissenContentEN = dynamic(() => import("./WissenContent.en"), { ssr: true 
 const CONTENT_MAP: Record<string, React.ComponentType> = {
   en: WissenContentEN,
 };
-
-function getContent(locale: string) {
-  return CONTENT_MAP[locale] ?? WissenContent;
-}
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
@@ -130,7 +126,6 @@ export default async function WissenPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const Content = getContent(locale);
   const { jsonLd, breadcrumbJsonLd } = buildJsonLd(locale);
 
   return (
@@ -144,7 +139,7 @@ export default async function WissenPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <Suspense>
-        <Content />
+        {createElement(CONTENT_MAP[locale] ?? WissenContent)}
       </Suspense>
     </>
   );

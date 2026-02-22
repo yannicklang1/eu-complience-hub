@@ -20,7 +20,7 @@ const sources: Source[] = [
   {
     id: 2,
     title: "EU-Kommission — Digital Product Passport",
-    url: "https://environment.ec.europa.eu/topics/circular-economy/digital-product-passport_en",
+    url: "https://commission.europa.eu/energy-climate-change-environment/standards-tools-and-labels/products-labelling-rules-and-requirements/digital-product-passport_en",
     desc: "Offizielle Informationsseite der EU-Kommission zum DPP",
     type: "Behörde",
   },
@@ -34,7 +34,7 @@ const sources: Source[] = [
   {
     id: 4,
     title: "ECOS — Digital Product Passport Position Paper",
-    url: "https://ecostandard.org/wp-content/uploads/2023/03/ECOS-DPP-Position-Paper.pdf",
+    url: "https://ecostandard.org",
     desc: "Technische Analyse des DPP-Konzepts",
     type: "Studie",
   },
@@ -48,7 +48,7 @@ const sources: Source[] = [
   {
     id: 6,
     title: "Textilfaser-Verordnung — DPP für Textilien",
-    url: "https://environment.ec.europa.eu/topics/circular-economy/textiles_en",
+    url: "https://commission.europa.eu/energy-climate-change-environment/standards-tools-and-labels/products-labelling-rules-and-requirements/sustainable-textiles_en",
     desc: "EU-Strategie für nachhaltige Textilien und DPP-Anforderungen",
     type: "Behörde",
   },

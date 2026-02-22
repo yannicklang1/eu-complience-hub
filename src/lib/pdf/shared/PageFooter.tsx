@@ -4,10 +4,12 @@
    ══════════════════════════════════════════════════════════════ */
 
 import { Text, View, StyleSheet } from "@react-pdf/renderer";
+import { tReplace, type PDFMessages } from "@/i18n/pdf";
 import { COLORS } from "./styles";
 
 interface PageFooterProps {
   generatedAt: string;
+  t: PDFMessages;
 }
 
 const footerStyles = StyleSheet.create({
@@ -43,22 +45,22 @@ const footerStyles = StyleSheet.create({
   },
 });
 
-export default function PageFooter({ generatedAt }: PageFooterProps) {
+export default function PageFooter({ generatedAt, t }: PageFooterProps) {
   return (
     <View style={footerStyles.footer} fixed>
       <View style={footerStyles.row}>
         <Text style={footerStyles.siteName}>
-          EU Compliance Hub | eu-compliance-hub.eu
+          {t.footer.siteName}
         </Text>
         <Text
           style={footerStyles.pageNumber}
           render={({ pageNumber, totalPages }) =>
-            `Seite ${pageNumber} von ${totalPages}`
+            tReplace(t.footer.pageOf, { page: pageNumber, total: totalPages })
           }
         />
       </View>
       <Text style={footerStyles.disclaimer}>
-        Erstellt am {generatedAt} — Keine Rechtsberatung
+        {tReplace(t.footer.generatedAt, { date: generatedAt })}
       </Text>
     </View>
   );

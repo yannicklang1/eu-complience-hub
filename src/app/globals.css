@@ -33,6 +33,13 @@
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
+    overflow-wrap: break-word;       /* prevent any text from overflowing containers */
+  }
+
+  /* Smart hyphenation for long compound words (especially German) */
+  h1, h2, h3, h4, h5, h6, p, li {
+    hyphens: auto;
+    -webkit-hyphens: auto;
   }
 
   ::-webkit-scrollbar { width: 6px; }

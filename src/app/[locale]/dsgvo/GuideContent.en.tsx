@@ -50,7 +50,7 @@ const sources: Source[] = [
   {
     id: 6,
     title: "EDPB Guidelines on Data Protection Impact Assessment",
-    url: "https://edpb.europa.eu/our-work-tools/general-guidance/guidelines_en",
+    url: "https://www.edpb.europa.eu/our-work-tools/general-guidance/guidelines-recommendations-best-practices_en",
     desc: "Guidelines on Data Protection Impact Assessments under Art. 35 GDPR",
     type: "Guideline",
   },

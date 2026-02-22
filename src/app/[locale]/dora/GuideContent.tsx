@@ -36,7 +36,7 @@ const sources: Source[] = [
   {
     id: 4,
     title: "EBA — DORA Regulierungsstandards",
-    url: "https://www.eba.europa.eu/activities/direct-supervisory-powers/digital-operational-resilience-act",
+    url: "https://www.eba.europa.eu/activities/single-rulebook/regulatory-activities/information-and-communication-technology-risk",
     desc: "EBA: Regulierungsstandards und Durchführungsstandards zu DORA",
     type: "Behörde",
   },

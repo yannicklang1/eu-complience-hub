@@ -4,6 +4,7 @@ import AdBlockOverlay from "@/components/AdBlockOverlay";
 import { AdSenseScript } from "@/components/AdSense";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import BackToTop from "@/components/BackToTop";
+import HtmlLangSetter from "@/components/HtmlLangSetter";
 import { I18nProvider } from "@/i18n/provider";
 import { getMessages } from "@/i18n/get-messages";
 import { LOCALES, isValidLocale } from "@/i18n/config";
@@ -51,6 +52,7 @@ export default async function LocaleLayout({
   return (
     <I18nProvider locale={locale as Locale} messages={messages}>
       <CountryProvider initialCountry={initialCountry}>
+        <HtmlLangSetter locale={locale} />
         <a href="#main-content" className="skip-link">
           {messages.a11y.skipToContent}
         </a>
