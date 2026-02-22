@@ -4,6 +4,9 @@ import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "@/i18n/use-translations";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
+import type { RegulationKey, ImplementationStatus } from "@/i18n/country/types";
 
 /* ══════════════════════════════════════════════════════════════
    CommandPalette — Cmd+K global search overlay
@@ -69,6 +72,34 @@ const SEARCH_INDEX: SearchItem[] = [
 
 const CATEGORY_ORDER = ["Regulierungen", "Tools", "Wissen", "Branchen", "Info"];
 
+/** Map search item hrefs to regulation keys for country-aware status badges */
+const HREF_TO_REG_KEY: Partial<Record<string, RegulationKey>> = {
+  "/nisg-2026": "nis2",
+  "/eu-ai-act": "ai-act",
+  "/dora": "dora",
+  "/cra": "cra",
+  "/dsgvo": "dsgvo",
+  "/csrd-esg": "csrd",
+  "/bafg": "bafg",
+  "/hschg": "hschg",
+  "/green-claims": "green-claims",
+  "/mica": "mica",
+  "/produkthaftung": "produkthaftung",
+  "/digitaler-produktpass": "dpp",
+  "/dsa": "dsa",
+  "/data-act": "data-act",
+  "/eprivacy": "eprivacy",
+  "/eidas": "eidas",
+  "/ehds": "ehds",
+};
+
+const STATUS_COLORS: Record<ImplementationStatus, { bg: string; text: string; label: string }> = {
+  implemented: { bg: "rgba(5,150,105,0.15)", text: "#34d399", label: "✓" },
+  pending: { bg: "rgba(217,119,6,0.15)", text: "#fbbf24", label: "⏳" },
+  overdue: { bg: "rgba(220,38,38,0.15)", text: "#f87171", label: "!" },
+  not_applicable: { bg: "rgba(107,114,128,0.15)", text: "#9ca3af", label: "–" },
+};
+
 export default function CommandPalette({ scrolled = false }: { scrolled?: boolean }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -77,6 +108,8 @@ export default function CommandPalette({ scrolled = false }: { scrolled?: boolea
   const listRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { t, locale } = useTranslations();
+  const { countryCode, countryData } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
 
   const openPalette = useCallback(() => {
     setQuery("");
@@ -291,6 +324,11 @@ export default function CommandPalette({ scrolled = false }: { scrolled?: boolea
                         {group.items.map((item) => {
                           const globalIndex = flatResults.indexOf(item);
                           const isActive = globalIndex === activeIndex;
+                          // Country-specific status for regulation items
+                          const regKey = HREF_TO_REG_KEY[item.href];
+                          const regStatus = regKey && countryData?.regulations?.[regKey]?.implementationStatus;
+                          const statusCfg = regStatus ? STATUS_COLORS[regStatus] : null;
+
                           return (
                             <button
                               key={item.href}
@@ -304,13 +342,25 @@ export default function CommandPalette({ scrolled = false }: { scrolled?: boolea
                               }`}
                             >
                               <div className="flex-1 min-w-0">
-                                <p
-                                  className={`text-sm font-semibold truncate ${
-                                    isActive ? "text-yellow-400" : "text-slate-200"
-                                  }`}
-                                >
-                                  {item.label}
-                                </p>
+                                <div className="flex items-center gap-2">
+                                  <p
+                                    className={`text-sm font-semibold truncate ${
+                                      isActive ? "text-yellow-400" : "text-slate-200"
+                                    }`}
+                                  >
+                                    {item.label}
+                                  </p>
+                                  {statusCfg && countryMeta && (
+                                    <span
+                                      className="flex items-center gap-1 text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-md flex-shrink-0"
+                                      style={{ background: statusCfg.bg, color: statusCfg.text }}
+                                      title={`${countryMeta.nameDE}: ${regStatus}`}
+                                    >
+                                      <span className="text-[8px] leading-none">{countryMeta.flag}</span>
+                                      {statusCfg.label}
+                                    </span>
+                                  )}
+                                </div>
                                 <p className="text-xs text-slate-500 truncate">
                                   {item.description}
                                 </p>

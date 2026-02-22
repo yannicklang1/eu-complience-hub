@@ -61,6 +61,67 @@ export interface QuickFact {
   icon?: ReactNode;
 }
 
+/**
+ * Dynamically process QuickFacts to replace Austria-specific "(AT)" data
+ * with the user's selected country. Matches on common label patterns:
+ * - "Aufsicht (AT)" / "Authority (AT)" / "Supervisor (AT)" → country authority
+ * - "Max. Strafe (AT)" / "Max. Penalty (AT)" → country fines
+ * - "Betroffene (AT)" / "Affected (AT)" → label country swap only
+ * - "CSIRT (AT)" → country CSIRT name
+ * - "AT-Umsetzung" → country national law name
+ * - Any other "(AT)" → label country swap
+ */
+function processQuickFacts(
+  facts: QuickFact[],
+  countryCode: string,
+  countryName: string,
+  countryRegData: import("@/i18n/country/types").CountryRegulationData | undefined | null,
+): QuickFact[] {
+  if (!countryRegData || countryCode === "AT") return facts;
+
+  return facts.map((fact) => {
+    let { label, value } = fact;
+
+    // Replace "(AT)" in label with country code
+    if (label.includes("(AT)")) {
+      label = label.replace("(AT)", `(${countryCode})`);
+    }
+
+    // Replace "AT-" prefix with country code
+    if (label.startsWith("AT-")) {
+      label = label.replace(/^AT-/, `${countryCode}-`);
+    }
+
+    // Pattern match for authority values
+    const isAuthorityLabel = /Aufsicht|Authority|Supervisor|Behörde/i.test(fact.label);
+    if (isAuthorityLabel && countryRegData.authority) {
+      value = countryRegData.authority;
+    }
+
+    // Pattern match for CSIRT values
+    const isCsirtLabel = /CSIRT/i.test(fact.label);
+    if (isCsirtLabel && countryRegData.authority) {
+      // CSIRT info typically comes from the authority field or csirtName
+      value = countryRegData.authority;
+    }
+
+    // Pattern match for fine/penalty values
+    const isFineLabel = /Strafe|Penalty|Fine|Bußgeld/i.test(fact.label);
+    if (isFineLabel && countryRegData.nationalFines) {
+      value = countryRegData.nationalFines;
+    }
+
+    // Pattern match for national implementation law
+    const isLawLabel = /Umsetzung|Implementation/i.test(fact.label);
+    if (isLawLabel && countryRegData.nationalLawName) {
+      value = countryRegData.nationalLawName;
+    }
+
+    if (label === fact.label && value === fact.value) return fact;
+    return { ...fact, label, value };
+  });
+}
+
 export interface TrustBadgeProps {
   /** Date of last editorial review, e.g. "18.02.2026" */
   lastReview: string;
@@ -103,6 +164,11 @@ export default function GuidePageLayout({
   const resolvedKey = resolveRegulationKey(regulationKey);
   const countryRegData = countryData?.regulations?.[resolvedKey];
   const countryMeta = COUNTRY_META[countryCode];
+
+  // Dynamically replace "(AT)" QuickFacts with selected country data
+  const processedQuickFacts = quickFacts
+    ? processQuickFacts(quickFacts, countryCode, countryMeta?.nameDE ?? countryCode, countryRegData)
+    : undefined;
 
   return (
     <>
@@ -346,7 +412,7 @@ export default function GuidePageLayout({
               </div>
 
               {/* Right: Quick Facts Sidebar (Desktop) */}
-              {quickFacts && quickFacts.length > 0 && (
+              {processedQuickFacts && processedQuickFacts.length > 0 && (
                 <aside className="hidden xl:block sticky top-28 w-64 flex-shrink-0 self-start">
                   <div
                     className="rounded-2xl border p-6"
@@ -360,7 +426,7 @@ export default function GuidePageLayout({
                       {t("guide.quickFacts")}
                     </div>
                     <div className="space-y-4">
-                      {quickFacts.map((fact, i) => (
+                      {processedQuickFacts.map((fact, i) => (
                         <div key={i}>
                           <div className="font-mono text-[10px] text-[#7a8db0] uppercase tracking-wider mb-1">
                             {fact.label}
@@ -375,7 +441,7 @@ export default function GuidePageLayout({
                           >
                             {fact.value}
                           </div>
-                          {i < quickFacts.length - 1 && (
+                          {i < processedQuickFacts.length - 1 && (
                             <div className="mt-4 h-px bg-[#e8ecf4]" />
                           )}
                         </div>

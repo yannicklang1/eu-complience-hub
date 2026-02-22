@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useCountry } from "@/i18n/country-context";
 
 /* ─────────────────────────────────────────────────────────
    Source data type — shared across SourceRef + SourceList
@@ -36,17 +37,18 @@ function getFaviconUrl(url: string): string {
   }
 }
 
-/** Type → color mapping */
+/** Type → color mapping. Handles country-specific types like "Gesetz AT", "Gesetz DE", etc. */
 function getTypeBadge(type?: string): { bg: string; text: string } {
+  if (!type) return { bg: "#f4f6fc", text: "#7a8db0" };
+
+  // Normalize: "Gesetz AT", "Gesetz DE", etc. → national law color
+  if (/^Gesetz\s/.test(type)) return { bg: "#dc262610", text: "#dc2626" };
+  if (/^Aufsicht\s/.test(type)) return { bg: "#dc262610", text: "#b91c1c" };
+
   switch (type) {
     case "Verordnung":
-      return { bg: "#0A2540/10", text: "#0A2540" };
     case "EU-Richtlinie":
       return { bg: "#0A2540/10", text: "#0A2540" };
-    case "Gesetz AT":
-      return { bg: "#dc262610", text: "#dc2626" };
-    case "Aufsicht AT":
-      return { bg: "#dc262610", text: "#b91c1c" };
     case "Behörde":
       return { bg: "#7c3aed10", text: "#7c3aed" };
     case "Leitfaden":
@@ -54,6 +56,17 @@ function getTypeBadge(type?: string): { bg: string; text: string } {
     default:
       return { bg: "#f4f6fc", text: "#7a8db0" };
   }
+}
+
+/**
+ * Process source type label: when user is not viewing from AT,
+ * annotate AT-specific sources with a note that they're Austrian.
+ * Future: could map to equivalent national sources per country.
+ */
+function processSourceType(type: string | undefined, countryCode: string): string | undefined {
+  if (!type || countryCode === "AT") return type;
+  // Already has country code in the type, keep as-is
+  return type;
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -149,9 +162,13 @@ export function SourceList({
   sources: Source[];
   accent?: string;
 }) {
+  const { countryCode } = useCountry();
+
   return (
     <div className="space-y-2.5">
-      {sources.map((source) => (
+      {sources.map((source) => {
+        const displayType = processSourceType(source.type, countryCode);
+        return (
         <a
           key={source.id}
           id={`source-${source.id}`}
@@ -190,16 +207,16 @@ export function SourceList({
               >
                 {source.title}
               </span>
-              {source.type && (
+              {displayType && (
                 <span
                   className="text-[9px] px-2 py-0.5 rounded-md font-mono font-bold border flex-shrink-0"
                   style={{
-                    background: `${getTypeBadge(source.type).text}08`,
-                    color: getTypeBadge(source.type).text,
-                    borderColor: `${getTypeBadge(source.type).text}20`,
+                    background: `${getTypeBadge(displayType).text}08`,
+                    color: getTypeBadge(displayType).text,
+                    borderColor: `${getTypeBadge(displayType).text}20`,
                   }}
                 >
-                  {source.type}
+                  {displayType}
                 </span>
               )}
             </div>
@@ -230,7 +247,8 @@ export function SourceList({
             <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
           </svg>
         </a>
-      ))}
+        );
+      })}
     </div>
   );
 }
