@@ -8,8 +8,7 @@ import MobileNavAccordion from "./MobileNavAccordion";
 import { BrandLogo } from "./BrandLogo";
 import CommandPalette from "./CommandPalette";
 import { useTranslations } from "@/i18n/use-translations";
-import { LocaleSwitcher } from "./LocaleSwitcher";
-import { CountryPicker } from "./CountryPicker";
+import { RegionSwitcher } from "./RegionSwitcher";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -109,8 +108,7 @@ export default function Header() {
 
         {/* CTA */}
         <div className="hidden md:flex items-center gap-3">
-          <LocaleSwitcher currentLocale={locale} scrolled={scrolled} />
-          <CountryPicker locale={locale} />
+          <RegionSwitcher currentLocale={locale} scrolled={scrolled} />
           <CommandPalette scrolled={scrolled} />
           <Link
             href={`/${locale}/fristen-radar`}
@@ -217,6 +215,11 @@ export default function Header() {
           {/* Accordion sections */}
           <MobileNavAccordion dropdown={regulierungenDropdown} onNavigate={closeMobileMenu} />
           <MobileNavAccordion dropdown={toolsDropdown} onNavigate={closeMobileMenu} />
+
+          {/* Region (Country + Language) */}
+          <div className="py-3 border-b border-[#0A2540]/[0.04]">
+            <RegionSwitcher currentLocale={locale} scrolled={true} />
+          </div>
 
           <Link
             href={`/${locale}/kontakt`}

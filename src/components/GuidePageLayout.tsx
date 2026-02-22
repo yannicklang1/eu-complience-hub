@@ -12,6 +12,7 @@ import { useTranslations } from "@/i18n/use-translations";
 import { useCountry } from "@/i18n/country-context";
 import { COUNTRY_META } from "@/i18n/country/index";
 import type { RegulationKey } from "@/i18n/country/types";
+import { ApplicableLawInfo } from "@/components/ApplicableLawInfo";
 
 /**
  * Map display regulation labels (full EU legislation names) to country data keys.
@@ -19,15 +20,35 @@ import type { RegulationKey } from "@/i18n/country/types";
  * while country data uses short keys like "nis2".
  */
 const REG_KEY_MAP: Record<string, RegulationKey> = {
+  /* ── Directives (Richtlinien) ── */
   "NIS2-Richtlinie (EU) 2022/2555": "nis2",
-  "Verordnung (EU) 2024/1689": "ai-act",
-  "Verordnung (EU) 2022/2554": "dora",
-  "Verordnung (EU) 2024/2847": "cra",
-  "DSGVO & KI 2026": "dsgvo",
   "Richtlinie (EU) 2022/2464": "csrd",
   "Richtlinie (EU) 2019/882": "bafg",
   "Richtlinie (EU) 2019/1937": "hschg",
   "Richtlinie (EU) 2024/2853": "produkthaftung",
+  "Richtlinie 2002/58/EG": "eprivacy",
+  "Richtlinie (EU) 2022/2557": "hschg",
+  /* ── Regulations (Verordnungen) ── */
+  "Verordnung (EU) 2024/1689": "ai-act",
+  "Verordnung (EU) 2022/2554": "dora",
+  "Verordnung (EU) 2024/2847": "cra",
+  "Verordnung (EU) 2016/679": "dsgvo",
+  "Verordnung (EU) 2023/2854": "data-act",
+  "Verordnung (EU) 2022/868": "data-act",
+  "Verordnung (EU) 2023/1114": "mica",
+  "Verordnung (EU) 2022/2065": "dsa",
+  "Verordnung (EU) 910/2014": "eidas",
+  /* ── Short key fallbacks ── */
+  "DSGVO & KI 2026": "dsgvo",
+  "EU AI Act": "ai-act",
+  "Digital Services Act": "dsa",
+  "Data Act": "data-act",
+  "MiCA": "mica",
+  "eIDAS 2.0": "eidas",
+  "EHDS": "ehds",
+  "ePrivacy": "eprivacy",
+  "Green Claims": "green-claims",
+  "Digitaler Produktpass": "dpp",
 };
 
 function resolveRegulationKey(key: string): RegulationKey {
@@ -219,6 +240,92 @@ export default function GuidePageLayout({
               <div className="flex-1 min-w-0 max-w-3xl">
                 {children}
 
+                {/* Country Info (Mobile / Tablet — hidden on desktop where sidebar shows it) */}
+                {countryRegData && (
+                  <div className="xl:hidden mb-8 rounded-xl bg-[#f0f4ff] border border-[#c8d4f0] p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-lg leading-none">{countryMeta?.flag ?? "🇪🇺"}</span>
+                      <span className="font-[Syne] font-bold text-sm text-[#0A2540]">
+                        {locale === "de" ? (countryMeta?.nameDE ?? countryCode) : (countryMeta?.nameEN ?? countryCode)}
+                      </span>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      {countryRegData.nationalLawName && (
+                        <div>
+                          <div className="font-mono text-[9px] text-[#7a8db0] uppercase tracking-wider mb-0.5">
+                            {locale === "de" ? "Nationales Gesetz" : "National law"}
+                          </div>
+                          <div className="text-[12px] font-semibold text-[#0A2540] leading-snug">
+                            {countryRegData.nationalLawName}
+                          </div>
+                        </div>
+                      )}
+                      {countryRegData.authority && (
+                        <div>
+                          <div className="font-mono text-[9px] text-[#7a8db0] uppercase tracking-wider mb-0.5">
+                            {locale === "de" ? "Behörde" : "Authority"}
+                          </div>
+                          <a
+                            href={countryRegData.authorityUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[12px] text-[#1a5fb4] hover:underline leading-snug block"
+                          >
+                            {countryRegData.authority}
+                          </a>
+                        </div>
+                      )}
+                      {countryRegData.implementationStatus && (
+                        <div>
+                          <div className="font-mono text-[9px] text-[#7a8db0] uppercase tracking-wider mb-0.5">
+                            {locale === "de" ? "Status" : "Status"}
+                          </div>
+                          <span
+                            className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                              countryRegData.implementationStatus === "implemented"
+                                ? "bg-emerald-100 text-emerald-700"
+                                : countryRegData.implementationStatus === "pending"
+                                ? "bg-amber-100 text-amber-700"
+                                : countryRegData.implementationStatus === "overdue"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-gray-100 text-gray-500"
+                            }`}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-current" aria-hidden="true" />
+                            {countryRegData.implementationStatus === "implemented"
+                              ? (locale === "de" ? "Umgesetzt" : "Implemented")
+                              : countryRegData.implementationStatus === "pending"
+                              ? (locale === "de" ? "In Umsetzung" : "Pending")
+                              : countryRegData.implementationStatus === "overdue"
+                              ? (locale === "de" ? "Überfällig" : "Overdue")
+                              : (locale === "de" ? "Nicht anwendbar" : "N/A")}
+                          </span>
+                        </div>
+                      )}
+                      {countryRegData.nationalFines && (
+                        <div>
+                          <div className="font-mono text-[9px] text-[#7a8db0] uppercase tracking-wider mb-0.5">
+                            {locale === "de" ? "Bußgelder" : "Fines"}
+                          </div>
+                          <div className="text-[12px] font-semibold text-[#0A2540] leading-snug">
+                            {countryRegData.nationalFines}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {countryRegData.nationalNotes && (
+                      <p className="text-[11px] text-[#4a5a80] leading-relaxed mt-3 pt-3 border-t border-[#c8d4f0]">
+                        {countryRegData.nationalNotes}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Applicable Law (Mobile / Tablet) */}
+                <div className="xl:hidden mb-8">
+                  <ApplicableLawInfo regulationKey={resolvedKey} locale={locale} />
+                </div>
+
                 {/* Social Sharing */}
                 {href && (
                   <div data-social-share="">
@@ -340,6 +447,11 @@ export default function GuidePageLayout({
                       </div>
                     </div>
                   )}
+
+                  {/* Applicable Law Info */}
+                  <div className="mt-4">
+                    <ApplicableLawInfo regulationKey={resolvedKey} locale={locale} />
+                  </div>
 
                   {/* Disclaimer notice */}
                   <div className="mt-4 rounded-xl bg-[#fff8e1] border border-[#f0e6c0] p-4">
