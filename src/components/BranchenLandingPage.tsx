@@ -43,13 +43,17 @@ export default function BranchenLandingPage({
   otherBranchen: Branche[];
 }) {
   const { locale } = useTranslations();
-  const { countryCode } = useCountry();
+  const { countryCode, countryData } = useCountry();
   const countryMeta = COUNTRY_META[countryCode];
   const accent = regulation.accent;
   const maxFine =
     branche.typicalRevenue > 0
       ? calculateMaxFine(branche.typicalRevenue, regulation.slug)
       : 0;
+
+  /* Country-specific regulation data */
+  const regKey = regulation.slug as import("@/i18n/country/types").RegulationKey;
+  const countryReg = countryData?.regulations?.[regKey];
 
   return (
     <>
@@ -123,8 +127,8 @@ export default function BranchenLandingPage({
             {/* Quick stats */}
             <div className="flex flex-wrap gap-4 mt-8">
               {[
-                { label: "Deadline", value: regulation.deadline },
-                { label: "Max. Strafe", value: regulation.maxFine },
+                { label: "Deadline", value: countryReg?.nationalDeadline ?? regulation.deadline },
+                { label: "Max. Strafe", value: countryReg?.nationalFines ?? regulation.maxFine },
                 ...(branche.nis2Sector && regulation.slug === "nis2"
                   ? [
                       {
@@ -135,6 +139,9 @@ export default function BranchenLandingPage({
                             : "Wichtige Einrichtung",
                       },
                     ]
+                  : []),
+                ...(countryReg?.authority
+                  ? [{ label: `Behörde (${countryMeta?.nameDE ?? countryCode})`, value: countryReg.authority }]
                   : []),
               ].map((stat, i) => (
                 <div
