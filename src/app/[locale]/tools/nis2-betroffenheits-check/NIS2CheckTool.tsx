@@ -7,6 +7,9 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country/index";
+import { useTranslations } from "@/i18n/use-translations";
 
 const LeadCaptureForm = dynamic(() => import("@/components/LeadCaptureForm"), {
   ssr: false,
@@ -95,7 +98,14 @@ function assessNIS2(
   size: CompanySize | null,
   isKritis: boolean,
   isDigitalService: boolean,
+  countryName?: string,
+  countryNis2Law?: string,
+  countryAuthority?: string,
+  countryMaxFine?: string,
 ): Assessment {
+  const lawLabel = countryNis2Law ?? "NIS2-Richtlinie";
+  const authorityLabel = countryAuthority ?? "nationale Cybersicherheitsbehörde";
+  const countryLabel = countryName ?? "Ihrem Land";
   const sector = ALL_SECTORS.find((s) => s.id === sectorId);
 
   // Not in any NIS2 sector
@@ -141,13 +151,13 @@ function assessNIS2(
         "Meldepflicht bei Sicherheitsvorfällen — 24h Frühwarnung, 72h Erstmeldung (Art. 23)",
         "Persönliche Haftung der Geschäftsführung (Art. 20)",
         "Verpflichtende Cybersecurity-Schulungen für das Management",
-        "Registrierung beim BMI (Österreich)",
+        `Registrierung bei ${authorityLabel} (${countryLabel})`,
         "Business Continuity / Backup-Management",
         "Lieferkettensicherheit & Dienstleister-Überwachung",
         "Proaktive Überwachung durch Behörden (ex-ante Aufsicht)",
       ],
-      deadline: "Seit 18. Oktober 2024 (EU) / NISG 2026 (AT)",
-      maxFine: "Bis zu 10 Mio. EUR oder 2% des weltweiten Jahresumsatzes",
+      deadline: `Seit 18. Oktober 2024 (EU) / ${lawLabel} (${countryLabel})`,
+      maxFine: countryMaxFine ?? "Bis zu 10 Mio. EUR oder 2% des weltweiten Jahresumsatzes",
       recommendation: "Sofortiges Handeln ist erforderlich. Beginnen Sie mit einer Gap-Analyse Ihrer aktuellen Cybersecurity-Maßnahmen und setzen Sie eine Projektgruppe ein.",
     };
   }
@@ -166,13 +176,13 @@ function assessNIS2(
         "Meldepflicht bei Sicherheitsvorfällen — 24h Frühwarnung, 72h Erstmeldung (Art. 23)",
         "Persönliche Haftung der Geschäftsführung (Art. 20)",
         "Verpflichtende Cybersecurity-Schulungen für das Management",
-        "Registrierung beim BMI (Österreich)",
+        `Registrierung bei ${authorityLabel} (${countryLabel})`,
         "Business Continuity / Backup-Management",
         "Lieferkettensicherheit & Dienstleister-Überwachung",
         "Proaktive Überwachung durch Behörden (ex-ante Aufsicht)",
       ],
-      deadline: "Seit 18. Oktober 2024 (EU) / NISG 2026 (AT)",
-      maxFine: "Bis zu 10 Mio. EUR oder 2% des weltweiten Jahresumsatzes",
+      deadline: `Seit 18. Oktober 2024 (EU) / ${lawLabel} (${countryLabel})`,
+      maxFine: countryMaxFine ?? "Bis zu 10 Mio. EUR oder 2% des weltweiten Jahresumsatzes",
       recommendation: "Sofortiges Handeln ist erforderlich. Beginnen Sie mit einer Gap-Analyse Ihrer aktuellen Cybersecurity-Maßnahmen.",
     };
   }
@@ -191,11 +201,11 @@ function assessNIS2(
         "Meldepflicht bei Sicherheitsvorfällen — 24h/72h (Art. 23)",
         "Verantwortung der Geschäftsführung (Art. 20)",
         "Cybersecurity-Schulungen für Management",
-        "Registrierung beim BMI (Österreich)",
+        `Registrierung bei ${authorityLabel} (${countryLabel})`,
         "Business Continuity Planung",
         "Reaktive Aufsicht (ex-post, nach Vorfällen)",
       ],
-      deadline: "Seit 18. Oktober 2024 (EU) / NISG 2026 (AT)",
+      deadline: `Seit 18. Oktober 2024 (EU) / ${lawLabel} (${countryLabel})`,
       maxFine: "Bis zu 7 Mio. EUR oder 1,4% des weltweiten Jahresumsatzes",
       recommendation: "Handlungsbedarf besteht. Starten Sie mit der Bestandsaufnahme Ihrer Informationssicherheit und planen Sie die NIS2-Compliance ein.",
     };
@@ -215,7 +225,7 @@ function assessNIS2(
         "Meldepflicht bei Sicherheitsvorfällen (Art. 23)",
         "Verantwortung der Geschäftsführung (Art. 20)",
       ],
-      deadline: "Seit 18. Oktober 2024 (EU) / NISG 2026 (AT)",
+      deadline: `Seit 18. Oktober 2024 (EU) / ${lawLabel} (${countryLabel})`,
       maxFine: "Bis zu 7 Mio. EUR oder 1,4% des weltweiten Jahresumsatzes",
       recommendation: "Lassen Sie Ihre Betroffenheit von einem spezialisierten Berater prüfen. Bestimmte Ausnahmeregeln für kleine Unternehmen können greifen, aber nicht in jedem Fall.",
     };
@@ -268,6 +278,11 @@ export default function NIS2CheckTool() {
   const [sectorSearch, setSectorSearch] = useState("");
   const [showResult, setShowResult] = useState(false);
 
+  const { countryCode, countryData } = useCountry();
+  const { locale } = useTranslations();
+  const countryMeta = COUNTRY_META[countryCode];
+  const nis2Data = countryData?.regulations?.nis2;
+
   const next = useCallback(() => {
     if (step < TOTAL_STEPS - 1) setStep((s) => s + 1);
     else setShowResult(true);
@@ -298,7 +313,13 @@ export default function NIS2CheckTool() {
       ? selectedSize !== null
       : true; // steps 2 & 3 have defaults (checkboxes)
 
-  const assessment = assessNIS2(selectedSector, selectedSize, isKritis, isDigitalService);
+  const assessment = assessNIS2(
+    selectedSector, selectedSize, isKritis, isDigitalService,
+    countryMeta?.nameDE,
+    nis2Data?.nationalLawName,
+    nis2Data?.authority,
+    nis2Data?.nationalFines,
+  );
   const progressPercent = showResult ? 100 : ((step + 1) / TOTAL_STEPS) * 100;
 
   const filteredSectors = ALL_SECTORS.filter(
@@ -324,12 +345,12 @@ export default function NIS2CheckTool() {
 
           <div className="relative max-w-3xl mx-auto px-6 text-center">
             <nav className="flex items-center justify-center gap-2 mb-8">
-              <Link href="/" className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">
+              <Link href={`/${locale}`} className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">
                 Startseite
               </Link>
               <span className="font-mono text-[11px] text-white/35">/</span>
-              <Link href="/nisg-2026" className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">
-                NISG 2026
+              <Link href={`/${locale}/nisg-2026`} className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">
+                {nis2Data?.nationalLawName ? nis2Data.nationalLawName.split("–")[0].trim().split("(")[0].trim() : "NIS2"}
               </Link>
               <span className="font-mono text-[11px] text-white/35">/</span>
               <span className="font-mono text-[11px] text-white/60">Betroffenheits-Check</span>
@@ -346,8 +367,16 @@ export default function NIS2CheckTool() {
               NIS2 Betroffenheits-Check
             </h1>
             <p className="text-white/45 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
-              Finden Sie heraus, ob Ihr Unternehmen unter die NIS2-Richtlinie bzw. das NISG 2026 fällt — und was das konkret bedeutet.
+              Finden Sie heraus, ob Ihr Unternehmen unter die NIS2-Richtlinie{nis2Data?.nationalLawName ? ` bzw. ${nis2Data.nationalLawName.split("–")[0].trim()}` : ""} fällt — und was das konkret bedeutet.
             </p>
+            {countryMeta && (
+              <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+                <span className="text-base leading-none">{countryMeta.flag}</span>
+                <span className="text-white/60 text-xs font-medium">
+                  Ergebnisse für {countryMeta.nameDE}
+                </span>
+              </div>
+            )}
           </div>
         </section>
 
@@ -817,7 +846,7 @@ export default function NIS2CheckTool() {
 
                     <div className="grid gap-3">
                       <Link
-                        href="/nisg-2026"
+                        href={`/${locale}/nisg-2026`}
                         className="flex items-center gap-4 p-4 rounded-xl border border-[#d8dff0] hover:border-sky-300 hover:shadow-sm transition-all group"
                       >
                         <div className="w-10 h-10 rounded-lg bg-sky-50 flex items-center justify-center flex-shrink-0">
@@ -839,7 +868,7 @@ export default function NIS2CheckTool() {
                       </Link>
 
                       <Link
-                        href="/haftungs-check"
+                        href={`/${locale}/haftungs-check`}
                         className="flex items-center gap-4 p-4 rounded-xl border border-[#d8dff0] hover:border-red-300 hover:shadow-sm transition-all group"
                       >
                         <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">

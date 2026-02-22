@@ -7,6 +7,9 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country/index";
+import { useTranslations } from "@/i18n/use-translations";
 
 const LeadCaptureForm = dynamic(() => import("@/components/LeadCaptureForm"), {
   ssr: false,
@@ -153,6 +156,10 @@ export default function BussgeldRechnerTool() {
   const [showResults, setShowResults] = useState(false);
   const [selectedRegs, setSelectedRegs] = useState<string[]>(FINE_RULES.map((r) => r.id));
 
+  const { countryCode, countryData } = useCountry();
+  const { locale } = useTranslations();
+  const countryMeta = COUNTRY_META[countryCode];
+
   const handleRevenueSubmit = () => {
     if (revenue && revenue > 0) {
       setShowResults(true);
@@ -182,6 +189,7 @@ export default function BussgeldRechnerTool() {
 
   const activeFines = FINE_RULES.filter((r) => selectedRegs.includes(r.id)).map((rule) => ({
     ...rule,
+    guideUrl: `/${locale}${rule.guideUrl}`,
     fine: revenue ? calculateFine(rule, revenue) : 0,
   }));
 
@@ -197,7 +205,7 @@ export default function BussgeldRechnerTool() {
           <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#f4f6fc] to-transparent" />
           <div className="relative max-w-3xl mx-auto px-6 text-center">
             <nav className="flex items-center justify-center gap-2 mb-8">
-              <Link href="/" className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">Startseite</Link>
+              <Link href={`/${locale}`} className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">Startseite</Link>
               <span className="font-mono text-[11px] text-white/35">/</span>
               <span className="font-mono text-[11px] text-white/60">Bußgeld-Rechner</span>
             </nav>
@@ -213,6 +221,14 @@ export default function BussgeldRechnerTool() {
             <p className="text-white/45 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
               Was kostet Nicht-Compliance? Geben Sie Ihren Jahresumsatz ein und sehen Sie das maximale Bußgeldrisiko pro EU-Regulierung.
             </p>
+            {countryMeta && (
+              <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+                <span className="text-base leading-none">{countryMeta.flag}</span>
+                <span className="text-white/60 text-xs font-medium">
+                  Ergebnisse für {countryMeta.nameDE}
+                </span>
+              </div>
+            )}
           </div>
         </section>
 
