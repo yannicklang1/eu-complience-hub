@@ -9,6 +9,8 @@ import { generateReportData, type ReportInput } from "@/lib/report-engine";
 import { sendReportEmail } from "@/lib/resend";
 import ReportDocument from "@/lib/pdf/ReportDocument";
 import type { QuickMaturityAnswer } from "@/lib/maturity-scorer";
+import { getCountryData } from "@/i18n/country";
+import type { EUCountryCode } from "@/i18n/config";
 
 /* ══════════════════════════════════════════════════════════════
    POST /api/report — Generate personalized compliance report
@@ -81,10 +83,29 @@ export async function POST(request: NextRequest) {
     /* ── Generate report data ── */
     const reportData = generateReportData(input);
 
+    /* ── Populate country-specific regulation data (async) ── */
+    if (reportData.countryContext && country) {
+      try {
+        const countryDataFull = await getCountryData(country as EUCountryCode);
+        if (countryDataFull?.regulations) {
+          reportData.countryContext.regulationData = {};
+          for (const reg of reportData.regulations) {
+            const regData = countryDataFull.regulations[reg.key as import("@/i18n/country/types").RegulationKey];
+            if (regData) {
+              reportData.countryContext.regulationData[reg.key] = regData;
+            }
+          }
+        }
+      } catch {
+        // Country data loading failed — continue with basic context
+      }
+    }
+
     log.info("[report]", "Report data generated", {
       email: email.replace(/(.{2}).*(@.*)/, "$1***$2"),
       regulations: reportData.regulations.length,
       grade: reportData.maturityGrade.letter,
+      country: country ?? "none",
     });
 
     /* ── Generate PDF ── */

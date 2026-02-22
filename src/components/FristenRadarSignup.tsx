@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useTranslations } from "@/i18n/use-translations";
 import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
 
 /**
  * Compliance-Briefing Signup — compact email form with API integration.
@@ -24,6 +25,7 @@ export default function FristenRadarSignup({
   const [message, setMessage] = useState("");
   const { t } = useTranslations();
   const { countryCode } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -135,7 +137,14 @@ export default function FristenRadarSignup({
         <p className="text-sm text-red-400 mt-3" role="alert">{message}</p>
       )}
 
-      <p className={`font-mono text-[11px] mt-5 tracking-wide ${isHero ? "text-white/20" : "text-[#7a8db0]/60"}`}>
+      {countryMeta && (
+        <p className={`flex items-center justify-center gap-1.5 text-[12px] mt-4 ${isHero ? "text-white/35" : "text-[#7a8db0]/80"}`}>
+          <span>{countryMeta.flag}</span>
+          <span>Inhalte zugeschnitten auf {countryMeta.nameDE}</span>
+        </p>
+      )}
+
+      <p className={`font-mono text-[11px] mt-3 tracking-wide ${isHero ? "text-white/20" : "text-[#7a8db0]/60"}`}>
         {t("form.disclaimer")}
       </p>
     </div>

@@ -7,10 +7,13 @@ import { Text, View, StyleSheet } from "@react-pdf/renderer";
 import { COLORS } from "./shared/styles";
 import type { EvaluatedRegulation } from "@/lib/regulation-evaluator";
 import type { RegulationChecklist } from "@/data/checklist-data";
+import type { CountryRegulationData } from "@/i18n/country/types";
 
 interface RegulationSectionProps {
   regulation: EvaluatedRegulation;
   checklist?: RegulationChecklist;
+  countryRegData?: CountryRegulationData;
+  countryName?: string;
 }
 
 const RELEVANCE_STYLES: Record<
@@ -139,11 +142,37 @@ const secStyles = StyleSheet.create({
     color: COLORS.info,
     marginTop: 8,
   },
+  countryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+    backgroundColor: "#eff6ff",
+    borderRadius: 4,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: "#bfdbfe",
+  },
+  countryLabel: {
+    fontFamily: "DMSans",
+    fontSize: 8,
+    fontWeight: 700,
+    color: "#1e40af",
+    marginRight: 4,
+  },
+  countryValue: {
+    fontFamily: "DMSans",
+    fontSize: 8,
+    color: COLORS.textPrimary,
+    flex: 1,
+    lineHeight: 1.5,
+  },
 });
 
 export default function RegulationSection({
   regulation,
   checklist,
+  countryRegData,
+  countryName,
 }: RegulationSectionProps) {
   const relevanceStyle = RELEVANCE_STYLES[regulation.relevance];
 
@@ -199,6 +228,32 @@ export default function RegulationSection({
               <Text style={secStyles.factText}>
                 Frist: {checklist.deadline}
               </Text>
+            </View>
+          )}
+
+          {/* Country-specific authority info */}
+          {countryRegData && countryName && (
+            <View style={secStyles.countryRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={secStyles.countryLabel}>
+                  {countryName}:
+                </Text>
+                {countryRegData.authority && (
+                  <Text style={secStyles.countryValue}>
+                    Behoerde: {countryRegData.authority}
+                  </Text>
+                )}
+                {countryRegData.nationalLawName && (
+                  <Text style={secStyles.countryValue}>
+                    Nationales Gesetz: {countryRegData.nationalLawName}
+                  </Text>
+                )}
+                {countryRegData.nationalFines && (
+                  <Text style={secStyles.countryValue}>
+                    Bussgelder: {countryRegData.nationalFines}
+                  </Text>
+                )}
+              </View>
             </View>
           )}
 

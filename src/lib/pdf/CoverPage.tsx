@@ -10,6 +10,7 @@ interface CoverPageProps {
   companyName: string;
   contactName: string;
   generatedAt: string;
+  countryName?: string;
 }
 
 const coverStyles = StyleSheet.create({
@@ -130,6 +131,7 @@ export default function CoverPage({
   companyName,
   contactName,
   generatedAt,
+  countryName,
 }: CoverPageProps) {
   return (
     <Page size="A4" style={coverStyles.page}>
@@ -150,6 +152,12 @@ export default function CoverPage({
           <Text style={coverStyles.dateLabel}>Erstellungsdatum: </Text>
           <Text style={coverStyles.dateValue}>{generatedAt}</Text>
         </View>
+        {countryName && (
+          <View style={coverStyles.dateRow}>
+            <Text style={coverStyles.dateLabel}>Land: </Text>
+            <Text style={coverStyles.dateValue}>{countryName}</Text>
+          </View>
+        )}
       </View>
 
       <View style={coverStyles.footer}>

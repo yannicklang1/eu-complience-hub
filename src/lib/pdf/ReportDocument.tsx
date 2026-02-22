@@ -37,6 +37,7 @@ export default function ReportDocument({ data }: ReportDocumentProps) {
     nextCriticalDeadline,
     relevantChecklists,
     topActions,
+    countryContext,
   } = data;
 
   // Filter regulations shown in detail: hoch and mittel
@@ -56,6 +57,7 @@ export default function ReportDocument({ data }: ReportDocumentProps) {
         companyName={input.companyName}
         contactName={input.contactName}
         generatedAt={generatedAt}
+        countryName={countryContext?.nameDE}
       />
 
       {/* 2. Executive Summary */}
@@ -86,17 +88,21 @@ export default function ReportDocument({ data }: ReportDocumentProps) {
           </Text>
           <Text style={[styles.bodySmall, styles.mb16]}>
             Detailauswertung der fuer Sie relevanten EU-Regulierungen
+            {countryContext ? ` — Laenderfokus: ${countryContext.nameDE}` : ""}
           </Text>
 
           {detailRegulations.map((reg) => {
             const checklist = relevantChecklists.find(
               (c) => c.key === reg.key,
             );
+            const countryRegData = countryContext?.regulationData?.[reg.key];
             return (
               <RegulationSection
                 key={reg.key}
                 regulation={reg}
                 checklist={checklist}
+                countryRegData={countryRegData}
+                countryName={countryContext?.nameDE}
               />
             );
           })}

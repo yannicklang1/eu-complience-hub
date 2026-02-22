@@ -8,6 +8,9 @@ import { estimateCosts, type CompanySize, type MaturityLevel, type RegulationCos
 import { calculateQuickMaturity, type QuickMaturityAnswer, type MaturityGrade, type CategoryResult } from "@/lib/maturity-scorer";
 import { CHECKLIST_REGULATIONS, type RegulationChecklist } from "@/data/checklist-data";
 import { DEADLINES, daysUntil, type Deadline } from "@/data/deadlines";
+import { COUNTRY_META } from "@/i18n/country";
+import type { EUCountryCode } from "@/i18n/config";
+import type { CountryRegulationData } from "@/i18n/country/types";
 
 /* ── Types ── */
 export interface ReportInput {
@@ -46,6 +49,15 @@ export interface SoftwareRecommendation {
   regulationKeys: string[];
 }
 
+/** Country context resolved for PDF report personalization */
+export interface ReportCountryContext {
+  code: string;
+  nameDE: string;
+  flag: string;
+  /** Per-regulation country-specific data (authority, law name, fines, status) */
+  regulationData: Partial<Record<string, CountryRegulationData>>;
+}
+
 export interface ReportData {
   /* Input echo */
   input: ReportInput;
@@ -70,6 +82,8 @@ export interface ReportData {
   relevantChecklists: RegulationChecklist[];
   /* Top actions */
   topActions: string[];
+  /* Country context (EU-27) */
+  countryContext: ReportCountryContext | null;
 }
 
 /* ── Maturity level inference ── */
@@ -80,6 +94,23 @@ function inferMaturityLevel(answers: QuickMaturityAnswer[]): MaturityLevel {
   if (avgLevel >= 2.5) return "advanced";
   if (avgLevel >= 1.5) return "basic";
   return "none";
+}
+
+/** Resolve country context synchronously using COUNTRY_META (server-safe) */
+function resolveCountryContext(
+  countryCode: string | undefined,
+): ReportCountryContext | null {
+  if (!countryCode || !(countryCode in COUNTRY_META)) return null;
+  const meta = COUNTRY_META[countryCode as EUCountryCode];
+  // Note: Detailed country regulation data requires async loading via getCountryData().
+  // For the synchronous report engine, we provide the basic country context.
+  // Full regulation data is populated by the API route when available.
+  return {
+    code: countryCode,
+    nameDE: meta.nameDE,
+    flag: meta.flag,
+    regulationData: {},
+  };
 }
 
 /* ── Main aggregation ── */
@@ -183,6 +214,9 @@ export function generateReportData(input: ReportInput): ReportData {
     topActions.push("Regelmäßige Compliance-Reviews etablieren und Dokumentation pflegen");
   }
 
+  /* 7. Resolve country context */
+  const countryContext = resolveCountryContext(input.country);
+
   return {
     input,
     generatedAt,
@@ -200,6 +234,7 @@ export function generateReportData(input: ReportInput): ReportData {
     nextCriticalDeadline,
     relevantChecklists,
     topActions,
+    countryContext,
   };
 }
 

@@ -9,12 +9,66 @@ import FristenRadarSignup from "@/components/FristenRadarSignup";
 import { DEADLINES, isPast, daysUntil, formatDateDE, type Deadline } from "@/data/deadlines";
 import { useCountry } from "@/i18n/country-context";
 import { COUNTRY_META } from "@/i18n/country";
+import type { RegulationKey, ImplementationStatus, CountryData } from "@/i18n/country/types";
 
 /* ═══════ All unique regulation names from DEADLINES ═══════ */
 const ALL_REGULATIONS = Array.from(new Set(DEADLINES.map((d) => d.reg)));
 
 /* ═══════ Year range ═══════ */
 const ALL_YEARS = Array.from(new Set(DEADLINES.map((d) => new Date(d.iso).getFullYear()))).sort();
+
+/* ═══════ Deadline reg label → RegulationKey mapping ═══════ */
+const REG_LABEL_TO_KEY: Record<string, RegulationKey> = {
+  DORA: "dora",
+  "AI Act": "ai-act",
+  NISG: "nis2",
+  CRA: "cra",
+  CSRD: "csrd",
+  BaFG: "bafg",
+  HSchG: "hschg",
+  DSGVO: "dsgvo",
+  MiCA: "mica",
+  "Green Claims": "green-claims",
+  DPP: "dpp",
+  PLD: "produkthaftung",
+  DSA: "dsa",
+  "Data Act": "data-act",
+  eIDAS: "eidas",
+  EHDS: "ehds",
+  ePrivacy: "eprivacy",
+};
+
+const STATUS_BADGE: Record<ImplementationStatus, { bg: string; border: string; text: string; label: string }> = {
+  implemented: { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-700", label: "Umgesetzt" },
+  pending: { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-700", label: "In Umsetzung" },
+  overdue: { bg: "bg-red-50", border: "border-red-200", text: "text-red-700", label: "Überfällig" },
+  not_applicable: { bg: "bg-slate-50", border: "border-slate-200", text: "text-slate-500", label: "n.a." },
+};
+
+/* ═══════ Country Status Badge ═══════ */
+function CountryStatusBadge({
+  reg,
+  countryData,
+  countryFlag,
+}: {
+  reg: string;
+  countryData: CountryData | null;
+  countryFlag: string;
+}) {
+  if (!countryData) return null;
+  const regKey = REG_LABEL_TO_KEY[reg];
+  if (!regKey) return null;
+  const regData = countryData.regulations[regKey];
+  if (!regData) return null;
+
+  const style = STATUS_BADGE[regData.implementationStatus];
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold ${style.bg} ${style.border} ${style.text} border`}>
+      <span className="text-[10px]">{countryFlag}</span>
+      {style.label}
+    </span>
+  );
+}
 
 /* ═══════ Status filter options ═══════ */
 type StatusFilter = "all" | "upcoming" | "past";
@@ -126,7 +180,7 @@ function FilterChip({
 
 /* ═══════ MAIN COMPONENT ═══════ */
 export default function FristenRadarPage() {
-  const { countryCode } = useCountry();
+  const { countryCode, countryData } = useCountry();
   const countryMeta = COUNTRY_META[countryCode];
   const [selectedRegs, setSelectedRegs] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -396,6 +450,8 @@ export default function FristenRadarPage() {
                       deadlines={deadlines}
                       allPast={allPast}
                       guideLinks={guideLinks}
+                      countryData={countryData}
+                      countryFlag={countryMeta?.flag ?? ""}
                     />
                   );
                 })}
@@ -442,11 +498,15 @@ function YearGroup({
   deadlines,
   allPast,
   guideLinks,
+  countryData,
+  countryFlag,
 }: {
   year: number;
   deadlines: Deadline[];
   allPast: boolean;
   guideLinks: Record<string, string>;
+  countryData: CountryData | null;
+  countryFlag: string;
 }) {
   const [open, setOpen] = useState(!allPast);
 
@@ -523,10 +583,15 @@ function YearGroup({
                       <CountdownBadge iso={d.iso} />
                     </div>
                     <p className="text-[13px] text-[#5a6a8a] leading-relaxed mt-1">{d.desc}</p>
-                    <div className="flex items-center gap-3 mt-2">
+                    <div className="flex items-center gap-3 mt-2 flex-wrap">
                       <span className="text-[11px] font-mono text-[#7a8db0]">
                         {formatDateDE(d.iso)}
                       </span>
+                      <CountryStatusBadge
+                        reg={d.reg}
+                        countryData={countryData}
+                        countryFlag={countryFlag}
+                      />
                       {guideLinks[d.reg] && (
                         <Link
                           href={guideLinks[d.reg]}
