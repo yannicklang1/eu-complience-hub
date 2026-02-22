@@ -49,6 +49,9 @@ export async function POST(request: NextRequest) {
     const companySize = validSizes.includes(body.companySize) ? body.companySize : "small";
 
     /* ── Build report input ── */
+    const country = sanitize(body.country, 5) ?? undefined;
+    const countryName = sanitize(body.countryName, 100) ?? undefined;
+
     const input: ReportInput = {
       contactName,
       email,
@@ -71,6 +74,8 @@ export async function POST(request: NextRequest) {
       message: sanitize(body.message, 2000) ?? undefined,
       gdprConsent: true,
       commercialConsent: Boolean(body.commercialConsent),
+      country,
+      countryName,
     };
 
     /* ── Generate report data ── */
@@ -145,6 +150,8 @@ export async function POST(request: NextRequest) {
         company_name: companyName,
         company_size: companySize,
         branche: input.branche,
+        country: input.country ?? null,
+        country_name: input.countryName ?? null,
         evaluated_regulations: reportData.regulations,
         cost_estimate: { costs: reportData.costs, totalMin: reportData.totalCostMin, totalMax: reportData.totalCostMax },
         maturity_grade: reportData.maturityGrade.letter,

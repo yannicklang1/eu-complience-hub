@@ -32,6 +32,9 @@ export interface ReportInput {
   message?: string;
   gdprConsent: boolean;
   commercialConsent: boolean;
+  /* Country context (EU-27) */
+  country?: string;
+  countryName?: string;
 }
 
 export interface SoftwareRecommendation {
