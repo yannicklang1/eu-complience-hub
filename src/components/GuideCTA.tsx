@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useTranslations } from "@/i18n/use-translations";
+import { useCountry } from "@/i18n/country-context";
 
 /* ══════════════════════════════════════════════════════════════
    GuideCTA — Call-to-action strip for the bottom of guide pages.
@@ -14,6 +15,7 @@ export default function GuideCTA({ accent = "#0A2540" }: { accent?: string }) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const { t, locale } = useTranslations();
+  const { countryCode } = useCountry();
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -33,6 +35,7 @@ export default function GuideCTA({ accent = "#0A2540" }: { accent?: string }) {
           commercial_consent: false,
           source: "guide-cta",
           source_page: typeof window !== "undefined" ? window.location.pathname : "/",
+          country: countryCode,
         }),
       });
 

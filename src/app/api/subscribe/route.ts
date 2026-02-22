@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
             commercial_consent,
             commercial_consent_at: commercial_consent ? new Date().toISOString() : null,
             source_page: sanitize(body.source_page),
+            country: sanitize(body.country),
           })
           .eq("id", existing.id);
 
@@ -120,6 +121,7 @@ export async function POST(request: NextRequest) {
       commercial_consent_at: commercial_consent ? new Date().toISOString() : null,
       source: sanitize(body.source) ?? "fristen-radar",
       source_page: sanitize(body.source_page),
+      country: sanitize(body.country),
       utm_source: sanitize(body.utm_source),
       utm_medium: sanitize(body.utm_medium),
       utm_campaign: sanitize(body.utm_campaign),

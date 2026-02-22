@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useTranslations } from "@/i18n/use-translations";
+import { useCountry } from "@/i18n/country-context";
 
 /**
  * Compliance-Briefing Signup — compact email form with API integration.
@@ -22,6 +23,7 @@ export default function FristenRadarSignup({
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const { t } = useTranslations();
+  const { countryCode } = useCountry();
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -41,6 +43,7 @@ export default function FristenRadarSignup({
           commercial_consent: true,
           source: "fristen-radar",
           source_page: typeof window !== "undefined" ? window.location.pathname : "/",
+          country: countryCode,
         }),
       });
 
