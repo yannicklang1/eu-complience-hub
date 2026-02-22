@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AccordionSection from "@/components/AccordionSection";
+import { useTranslations } from "@/i18n/use-translations";
 import type { ComparisonCategory, SoftwareTool } from "@/data/softwareData";
 
 /* ─── Company favicon with emoji fallback ─── */
@@ -220,6 +221,7 @@ export default function SoftwareComparisonPage({
 }: {
   category: ComparisonCategory;
 }) {
+  const { locale } = useTranslations();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const accent = "#0A2540";
 
@@ -250,11 +252,11 @@ export default function SoftwareComparisonPage({
           <div className="relative max-w-5xl mx-auto px-6 lg:px-12">
             {/* Breadcrumb */}
             <nav className="flex items-center gap-2 mb-8 flex-wrap">
-              <Link href="/" className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">
+              <Link href={`/${locale}`} className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">
                 Startseite
               </Link>
               <span className="font-mono text-[11px] text-white/35">/</span>
-              <Link href="/tools/nis2-betroffenheits-check" className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">
+              <Link href={`/${locale}/tools/nis2-betroffenheits-check`} className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">
                 Tools
               </Link>
               <span className="font-mono text-[11px] text-white/35">/</span>
@@ -503,13 +505,13 @@ export default function SoftwareComparisonPage({
               </p>
               <div className="flex flex-wrap justify-center gap-3">
                 <Link
-                  href="/tools/nis2-betroffenheits-check"
+                  href={`/${locale}/tools/nis2-betroffenheits-check`}
                   className="px-5 py-2.5 rounded-xl text-sm font-[Syne] font-bold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg bg-[#0ea5e9]"
                 >
                   NIS2-Betroffenheits-Check
                 </Link>
                 <Link
-                  href="/tools/haftungs-pruefer"
+                  href={`/${locale}/tools/haftungs-pruefer`}
                   className="px-5 py-2.5 rounded-xl text-sm font-[Syne] font-bold transition-all hover:-translate-y-0.5 bg-white text-[#ef4444] border border-[#ef444440]"
                 >
                   GF-Haftungs-Prüfer

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "@/i18n/use-translations";
 
 export default function FristenRadarError({
   error,
@@ -9,6 +10,7 @@ export default function FristenRadarError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { locale } = useTranslations();
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#060c1a] px-6">
       <div className="text-center max-w-lg">
@@ -50,7 +52,7 @@ export default function FristenRadarError({
             Erneut versuchen
           </button>
           <Link
-            href="/"
+            href={`/${locale}`}
             className="px-6 py-3 rounded-xl font-[Syne] font-semibold text-sm text-white/70 border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:text-white transition-all duration-200"
           >
             Zur Startseite

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "@/i18n/use-translations";
 
 /* ── Guide Metadata ── */
 interface GuideInfo {
@@ -187,6 +188,7 @@ export default function RelatedGuides({
   currentGuide: string;
   accent?: string;
 }) {
+  const { locale } = useTranslations();
   const related = RELATIONSHIPS[currentGuide];
   if (!related || related.length === 0) return null;
 
@@ -225,7 +227,7 @@ export default function RelatedGuides({
         {guides.map((guide) => (
           <Link
             key={guide.slug}
-            href={guide.slug}
+            href={`/${locale}${guide.slug}`}
             className="group relative flex flex-col rounded-xl border p-4 transition-all duration-200 hover:-translate-y-0.5"
             style={{
               background: "white",

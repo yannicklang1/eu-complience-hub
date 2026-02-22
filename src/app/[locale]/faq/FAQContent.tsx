@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useTranslations } from "@/i18n/use-translations";
 import type { FAQItem } from "./page";
 
 /* ══════════════════════════════════════════════════════════════
@@ -55,6 +56,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function FAQContent({ faqData }: { faqData: FAQItem[] }) {
+  const { locale } = useTranslations();
   const [activeCategory, setActiveCategory] = useState<string>("Alle");
   const [search, setSearch] = useState("");
   const [openIndices, setOpenIndices] = useState<Set<number>>(new Set());
@@ -296,7 +298,7 @@ export default function FAQContent({ faqData }: { faqData: FAQItem[] }) {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
-                href="/kontakt"
+                href={`/${locale}/kontakt`}
                 className="px-6 py-3 rounded-xl font-bold text-sm text-slate-900"
                 style={{
                   background: "linear-gradient(135deg, #FACC15, #EAB308)",
@@ -306,7 +308,7 @@ export default function FAQContent({ faqData }: { faqData: FAQItem[] }) {
                 Compliance-Report erstellen
               </Link>
               <Link
-                href="/tools/regulierung-finder"
+                href={`/${locale}/tools/regulierung-finder`}
                 className="px-6 py-3 rounded-xl font-semibold text-sm text-slate-300 border border-white/10 hover:bg-white/[0.04] transition-all"
               >
                 Regulierung-Finder starten

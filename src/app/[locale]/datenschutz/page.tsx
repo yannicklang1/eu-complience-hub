@@ -84,7 +84,7 @@ export default async function DatenschutzPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <LegalPageLayout title="Datenschutzerkl\u00e4rung" subtitle="Informationen gem\u00e4\u00df DSGVO Art. 13 & 14">
+      <LegalPageLayout title="Datenschutzerkl\u00e4rung" subtitle="Informationen gem\u00e4\u00df DSGVO Art. 13 & 14" locale={locale}>
         <h2>1. Verantwortlicher</h2>
         <p>
           <strong>[Vollst\u00e4ndiger Name / Firma]</strong><br />

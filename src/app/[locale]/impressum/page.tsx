@@ -84,7 +84,7 @@ export default async function ImpressumPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <LegalPageLayout title="Impressum" subtitle="Angaben gem\u00e4\u00df \u00a7 5 ECG / \u00a7 25 MedienG">
+      <LegalPageLayout title="Impressum" subtitle="Angaben gem\u00e4\u00df \u00a7 5 ECG / \u00a7 25 MedienG" locale={locale}>
         <h2>Diensteanbieter</h2>
         <p>
           <strong>[Vollst\u00e4ndiger Name / Firma]</strong><br />

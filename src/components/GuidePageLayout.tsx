@@ -329,7 +329,7 @@ export default function GuidePageLayout({
                 {/* Social Sharing */}
                 {href && (
                   <div data-social-share="">
-                    <SocialShareBar path={href} title={title} accent={accent} />
+                    <SocialShareBar path={`/${locale}${href}`} title={title} accent={accent} />
                   </div>
                 )}
 

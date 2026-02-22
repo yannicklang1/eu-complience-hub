@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useTranslations } from "@/i18n/use-translations";
 import {
   ALL_ENTRIES,
   CATEGORIES,
@@ -548,6 +549,7 @@ function AnimatedStat({
    ═══════════════════════════════════════════════════════════ */
 
 export default function VerzeichnisContent() {
+  const { locale } = useTranslations();
   /* ── Filter state ── */
   const [categoryFilter, setCategoryFilter] = useState<
     VerzeichnisCategory | "all"
@@ -635,7 +637,7 @@ export default function VerzeichnisContent() {
             {/* Breadcrumb */}
             <nav className="flex items-center gap-2 mb-8">
               <Link
-                href="/"
+                href={`/${locale}`}
                 className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors"
               >
                 Startseite

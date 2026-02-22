@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useTranslations } from "@/i18n/use-translations";
 import { evaluateRegulations, type Answer } from "@/lib/regulation-evaluator";
 
 /* ══════════════════════════════════════════════════════════════
@@ -184,6 +185,7 @@ const stepVariants = {
 /* ══════════════════════════ Component ══════════════════════════ */
 
 export default function KontaktContent() {
+  const { locale } = useTranslations();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
@@ -521,13 +523,13 @@ export default function KontaktContent() {
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Link
-                      href="/tools"
+                      href={`/${locale}/tools`}
                       className="px-6 py-3 rounded-xl border border-white/10 text-sm font-semibold text-slate-300 hover:bg-white/[0.04] transition-all"
                     >
                       Alle Tools entdecken
                     </Link>
                     <Link
-                      href="/"
+                      href={`/${locale}`}
                       className="px-6 py-3 rounded-xl font-bold text-sm text-slate-900 text-center"
                       style={{
                         background: "linear-gradient(135deg, #FACC15, #EAB308)",
@@ -1044,7 +1046,7 @@ export default function KontaktContent() {
                           </div>
                           <span className="text-xs text-slate-400 leading-relaxed">
                             Ich stimme der Verarbeitung meiner Daten gem{"\u00E4"}{"\u00DF"} der{" "}
-                            <Link href="/datenschutz" target="_blank" rel="noopener noreferrer" className="text-yellow-400/80 underline underline-offset-2 hover:text-yellow-400">
+                            <Link href={`/${locale}/datenschutz`} target="_blank" rel="noopener noreferrer" className="text-yellow-400/80 underline underline-offset-2 hover:text-yellow-400">
                               Datenschutzerkl{"\u00E4"}rung
                             </Link>{" "}
                             zu und willige in die Erstellung eines personalisierten Compliance-Reports ein.{" "}

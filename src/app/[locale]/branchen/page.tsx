@@ -192,7 +192,7 @@ export default async function BranchenHubPage({
           <div className="relative max-w-5xl mx-auto px-6 lg:px-12">
             <nav className="flex items-center gap-2 mb-8">
               <Link
-                href="/"
+                href={`/${locale}`}
                 className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors"
               >
                 {ui.home}
@@ -369,14 +369,14 @@ export default async function BranchenHubPage({
               </p>
               <div className="flex flex-wrap justify-center gap-3">
                 <Link
-                  href="/tools/nis2-betroffenheits-check"
+                  href={`/${locale}/tools/nis2-betroffenheits-check`}
                   className="px-5 py-2.5 rounded-xl text-sm font-[Syne] font-bold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg"
                   style={{ background: "#0ea5e9" }}
                 >
                   {ui.nis2Check}
                 </Link>
                 <Link
-                  href="/tools/haftungs-pruefer"
+                  href={`/${locale}/tools/haftungs-pruefer`}
                   className="px-5 py-2.5 rounded-xl text-sm font-[Syne] font-bold transition-all hover:-translate-y-0.5 border"
                   style={{
                     background: "white",
@@ -387,7 +387,7 @@ export default async function BranchenHubPage({
                   {ui.liabilityCheck}
                 </Link>
                 <Link
-                  href="/tools/bussgeld-rechner"
+                  href={`/${locale}/tools/bussgeld-rechner`}
                   className="px-5 py-2.5 rounded-xl text-sm font-[Syne] font-bold transition-all hover:-translate-y-0.5 border"
                   style={{
                     background: "white",

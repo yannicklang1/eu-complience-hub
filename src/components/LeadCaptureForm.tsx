@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useTranslations } from "@/i18n/use-translations";
 
 /* ===============================================================
    TYPES & CONSTANTS
@@ -133,6 +134,7 @@ export default function LeadCaptureForm({
   subtitle = "Wir senden Ihnen Ihre Ergebnisse und informieren Sie bei relevanten Änderungen.",
   onSuccess,
 }: LeadCaptureFormProps): React.JSX.Element {
+  const { locale } = useTranslations();
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
   const [emailError, setEmailError] = useState("");
@@ -476,7 +478,7 @@ export default function LeadCaptureForm({
                 >
                   Ich stimme der Verarbeitung meiner Daten gemäß der{" "}
                   <Link
-                    href="/datenschutz"
+                    href={`/${locale}/datenschutz`}
                     className="underline underline-offset-2 transition-colors"
                     style={{ color: accent }}
                   >

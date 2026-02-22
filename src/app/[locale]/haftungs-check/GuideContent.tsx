@@ -10,6 +10,7 @@ import LawRef from "@/components/LawRef";
 import { SourceRef, SourceList, type Source } from "@/components/SourceRef";
 import ToolRecommendation from "@/components/ToolRecommendation";
 import RelatedGuides from "@/components/RelatedGuides";
+import { useTranslations } from "@/i18n/use-translations";
 
 /* ─────────────────── Sources ─────────────────── */
 const sources: Source[] = [
@@ -115,6 +116,7 @@ function Section({
    ══════════════════════════════════════════════════════ */
 
 export default function GuideContent() {
+  const { locale } = useTranslations();
   return (
     <GuidePageLayout
       title={"Gesch\u00E4ftsf\u00FChrer-Haftung"}
@@ -284,7 +286,7 @@ export default function GuideContent() {
             </li>
           </ul>
           <div className="mt-4">
-            <Link href="/nisg-2026#geschaeftsfuehrer" className="text-sm font-medium text-sky-500 hover:underline">
+            <Link href={`/${locale}/nisg-2026#geschaeftsfuehrer`} className="text-sm font-medium text-sky-500 hover:underline">
               Mehr im NISG 2026 Guide {"\u2192"}
             </Link>
           </div>
@@ -355,7 +357,7 @@ export default function GuideContent() {
             </span>
           </p>
           <div className="mt-3">
-            <Link href="/dora#strafen" className="text-sm font-medium text-emerald-600 hover:underline">
+            <Link href={`/${locale}/dora#strafen`} className="text-sm font-medium text-emerald-600 hover:underline">
               Mehr im DORA Guide {"\u2192"}
             </Link>
           </div>
@@ -423,7 +425,7 @@ export default function GuideContent() {
             Governance-Strukturen sorgfältig {"\u2014"} das schützt im Haftungsfall.
           </p>
           <div className="mt-3">
-            <Link href="/eu-ai-act#strafen" className="text-sm font-medium text-violet-500 hover:underline">
+            <Link href={`/${locale}/eu-ai-act#strafen`} className="text-sm font-medium text-violet-500 hover:underline">
               Mehr im AI Act Guide {"\u2192"}
             </Link>
           </div>
@@ -469,7 +471,7 @@ export default function GuideContent() {
               verursacht wurden. Die Geschäftsleitung kann im Regressweg haftbar gemacht werden.
             </p>
             <div className="mt-3">
-              <Link href="/cra#strafen" className="text-sm font-medium text-[#8b5cf6] hover:underline">
+              <Link href={`/${locale}/cra#strafen`} className="text-sm font-medium text-[#8b5cf6] hover:underline">
                 Mehr im CRA Guide {"\u2192"}
               </Link>
             </div>

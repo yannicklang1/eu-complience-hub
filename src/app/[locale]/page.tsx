@@ -285,7 +285,7 @@ function SectionLabel({ children, dark = false }: { children: ReactNode; dark?: 
    PAGE
    ══════════════════════════════════════════════════════ */
 export default function HomePage() {
-  const { messages } = useTranslations();
+  const { messages, locale } = useTranslations();
   const h = messages.home;
 
   const pillars = useMemo(() => buildPillars(h.pillarData), [h.pillarData]);
@@ -393,7 +393,7 @@ export default function HomePage() {
                 <IconArrowDown className="w-4 h-4 relative z-10 transition-transform group-hover:translate-y-0.5" />
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-300 to-[#FACC15] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </Link>
-              <Link href="/haftungs-check"
+              <Link href={`/${locale}/haftungs-check`}
                 className="group inline-flex items-center gap-3 rounded-2xl border border-white/[0.12] bg-white/[0.04] px-7 py-3.5 text-[15px] font-semibold text-white/90 backdrop-blur-md transition-all duration-300 hover:bg-white/[0.1] hover:-translate-y-0.5 hover:border-white/20">
                 {h.hero.ctaSecondary}
                 <IconArrowRight className="w-4 h-4 opacity-50 group-hover:opacity-100 transition-all group-hover:translate-x-1" />
@@ -594,7 +594,7 @@ export default function HomePage() {
             <Reveal delay={300}>
               <div className="text-center">
                 <Link
-                  href="/timeline"
+                  href={`/${locale}/timeline`}
                   className="group inline-flex items-center gap-3 rounded-2xl border border-[#FACC15]/30 bg-[#FACC15]/10 backdrop-blur-sm px-8 py-4 font-[Syne] font-bold text-[15px] text-[#FACC15] transition-all duration-300 hover:bg-[#FACC15]/20 hover:-translate-y-1 hover:border-[#FACC15]/50 hover:shadow-lg hover:shadow-[#FACC15]/10"
                 >
                   {h.timeline.ctaTimeline}
@@ -864,11 +864,11 @@ export default function HomePage() {
 
             <Reveal>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link href="/aktuelles" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-[Syne] font-bold text-sm text-white bg-[#0A2540] hover:-translate-y-0.5 transition-all">
+                <Link href={`/${locale}/aktuelles`} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-[Syne] font-bold text-sm text-white bg-[#0A2540] hover:-translate-y-0.5 transition-all">
                   {h.news.ctaNews}
                   <IconArrowRight className="w-4 h-4" />
                 </Link>
-                <Link href="/vergleich" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-[Syne] font-semibold text-sm text-[#3a4a6b] border border-[#d8dff0] hover:bg-white hover:border-[#b8c4e0] transition-all">
+                <Link href={`/${locale}/vergleich`} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-[Syne] font-semibold text-sm text-[#3a4a6b] border border-[#d8dff0] hover:bg-white hover:border-[#b8c4e0] transition-all">
                   {h.news.ctaCompare}
                   <IconArrowRight className="w-4 h-4" />
                 </Link>
@@ -929,7 +929,7 @@ export default function HomePage() {
 
                   {/* CTA */}
                   <Link
-                    href="/kontakt"
+                    href={`/${locale}/kontakt`}
                     className="group relative inline-flex items-center gap-3 rounded-2xl px-8 py-4 font-[Syne] font-bold text-[#0A2540] text-[15px] transition-all duration-300 hover:-translate-y-1 overflow-hidden"
                     style={{ background: "linear-gradient(135deg, #FACC15 0%, #EAB308 100%)", boxShadow: "0 8px 32px rgba(250,204,21,0.35), 0 2px 8px rgba(250,204,21,0.2)" }}
                   >

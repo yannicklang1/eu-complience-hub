@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "@/i18n/use-translations";
 
 export interface RecommendedTool {
   name: string;
@@ -236,6 +237,7 @@ export default function ToolRecommendation({
   regulationKey: string;
   accent?: string;
 }) {
+  const { locale } = useTranslations();
   const set = toolSets[regulationKey];
   if (!set) return null;
 
@@ -325,7 +327,7 @@ export default function ToolRecommendation({
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-3 border-t" style={{ borderColor: `${accent}10` }}>
         <Link
-          href={`/tools/${set.tools[0]?.comparisonSlug ?? "isms-software-vergleich"}`}
+          href={`/${locale}/tools/${set.tools[0]?.comparisonSlug ?? "isms-software-vergleich"}`}
           className="text-xs font-[Syne] font-semibold transition-colors hover:underline"
           style={{ color: accent }}
         >
@@ -333,7 +335,7 @@ export default function ToolRecommendation({
         </Link>
         <span className="text-[10px] text-[#7a8db0]">
           Anzeige — Affiliate-Links. Keine Mehrkosten f\u00fcr Sie.{" "}
-          <a href="/datenschutz#werbe-inhalte" className="underline hover:text-[#0A2540]">Mehr erfahren</a>
+          <a href={`/${locale}/datenschutz#werbe-inhalte`} className="underline hover:text-[#0A2540]">Mehr erfahren</a>
         </span>
       </div>
     </div>

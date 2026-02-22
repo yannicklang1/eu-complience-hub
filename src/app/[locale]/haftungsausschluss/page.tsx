@@ -84,7 +84,7 @@ export default async function HaftungsausschlussPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <LegalPageLayout title="Haftungsausschluss" subtitle="Disclaimer und Haftungsbeschr\u00e4nkung">
+      <LegalPageLayout title="Haftungsausschluss" subtitle="Disclaimer und Haftungsbeschr\u00e4nkung" locale={locale}>
         <h2>1. Keine Rechtsberatung</h2>
         <p>
           Die auf dieser Website bereitgestellten Informationen dienen

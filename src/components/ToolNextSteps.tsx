@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "@/i18n/use-translations";
 
 /* ── Tool link definitions ── */
 export interface ToolLink {
@@ -144,6 +145,7 @@ export default function ToolNextSteps({
   heading = "Nächste Schritte",
   subtext = "Vertiefen Sie Ihre Analyse mit weiteren Tools.",
 }: ToolNextStepsProps) {
+  const { locale } = useTranslations();
   const flow = TOOL_FLOWS[currentTool] ?? [];
   const links = flow
     .slice(0, maxSuggestions)
@@ -183,7 +185,7 @@ export default function ToolNextSteps({
         {links.map((link) => (
           <Link
             key={link.href}
-            href={link.href}
+            href={`/${locale}${link.href}`}
             className={`flex items-center gap-3.5 p-4 rounded-xl border transition-all duration-200 group ${
               dark
                 ? "border-white/[0.06] hover:border-white/15 hover:bg-white/[0.03]"

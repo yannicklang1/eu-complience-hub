@@ -63,6 +63,18 @@ export const COUNTRY_TO_LOCALE: Record<string, Locale> = {
   GB: "en", US: "en", NO: "en",
 };
 
+/**
+ * Read the persisted locale from the "locale" cookie (client-side).
+ * Returns DEFAULT_LOCALE when cookie is missing or invalid.
+ * Safe to call in "use client" components.
+ */
+export function getClientLocale(): Locale {
+  if (typeof document === "undefined") return DEFAULT_LOCALE;
+  const match = document.cookie.match(/(?:^|;\s*)locale=([^;]+)/);
+  const value = match?.[1];
+  return value && isValidLocale(value) ? value : DEFAULT_LOCALE;
+}
+
 /** All 27 EU member state codes */
 export const EU_COUNTRIES = [
   "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR",

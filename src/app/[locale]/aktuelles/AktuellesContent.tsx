@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SocialShareBar from "@/components/SocialShareBar";
+import { useTranslations } from "@/i18n/use-translations";
 import type { NewsItem } from "./page";
 
 /* ══════════════════════════════════════════════════════════════
@@ -67,6 +68,7 @@ export default function AktuellesContent({
 }: {
   newsItems: NewsItem[];
 }) {
+  const { locale } = useTranslations();
   const [filter, setFilter] = useState<FilterType>("all");
 
   const sorted = useMemo(() => {
@@ -304,7 +306,7 @@ export default function AktuellesContent({
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link
-                  href="/fristen-radar"
+                  href={`/${locale}/fristen-radar`}
                   className="px-6 py-3 rounded-xl font-bold text-sm text-slate-900"
                   style={{
                     background: "linear-gradient(135deg, #FACC15, #EAB308)",
@@ -314,7 +316,7 @@ export default function AktuellesContent({
                   Compliance-Briefing abonnieren
                 </Link>
                 <Link
-                  href="/timeline"
+                  href={`/${locale}/timeline`}
                   className="px-6 py-3 rounded-xl font-semibold text-sm text-slate-300 border border-white/10 hover:bg-white/[0.04] transition-all"
                 >
                   Compliance-Timeline ansehen

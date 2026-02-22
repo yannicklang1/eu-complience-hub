@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SocialShareBar from "@/components/SocialShareBar";
+import { useTranslations } from "@/i18n/use-translations";
 
 /* ══════════════════════════════════════════════════════════════
    Regulierungsvergleich — Interactive comparison matrix
@@ -196,6 +197,7 @@ const COMPARISON_FIELDS: { key: keyof Regulation; label: string; icon: string }[
 ];
 
 export default function VergleichContent() {
+  const { locale } = useTranslations();
   const [selected, setSelected] = useState<Set<string>>(
     new Set(REGULATIONS.map((r) => r.id))
   );
@@ -523,7 +525,7 @@ export default function VergleichContent() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
-                href="/tools/regulierung-finder"
+                href={`/${locale}/tools/regulierung-finder`}
                 className="px-6 py-3 rounded-xl font-bold text-sm text-slate-900"
                 style={{
                   background: "linear-gradient(135deg, #FACC15, #EAB308)",
@@ -534,7 +536,7 @@ export default function VergleichContent() {
                 Regulierung-Finder starten
               </Link>
               <Link
-                href="/kontakt"
+                href={`/${locale}/kontakt`}
                 className="px-6 py-3 rounded-xl font-semibold text-sm text-slate-300 border border-white/10 hover:bg-white/[0.04] transition-all"
               >
                 Compliance-Report erstellen

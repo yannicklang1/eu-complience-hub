@@ -366,7 +366,7 @@ export default async function UeberUnsPage({
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
-                href="/tools/compliance-checkliste"
+                href={`/${locale}/tools/compliance-checkliste`}
                 className="inline-flex items-center justify-center gap-2 px-7 py-3 rounded-xl font-bold text-sm text-slate-900"
                 style={{
                   background: "linear-gradient(135deg, #FACC15, #EAB308)",
@@ -376,7 +376,7 @@ export default async function UeberUnsPage({
                 {c.ctaButton1}
               </Link>
               <Link
-                href="/wissen"
+                href={`/${locale}/wissen`}
                 className="inline-flex items-center justify-center px-7 py-3 rounded-xl font-semibold text-sm text-slate-300 border border-slate-700 hover:border-slate-600 hover:text-slate-200 transition-colors"
               >
                 {c.ctaButton2}

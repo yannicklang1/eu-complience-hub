@@ -1,12 +1,10 @@
-import Link from "next/link";
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-  title: "404 – Seite nicht gefunden",
-  robots: { index: false, follow: false },
-};
+import Link from "next/link";
+import { useTranslations } from "@/i18n/use-translations";
 
 export default function NotFound() {
+  const { locale } = useTranslations();
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#060c1a] px-6">
       <div className="text-center max-w-lg">
@@ -34,7 +32,7 @@ export default function NotFound() {
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
-            href="/"
+            href={`/${locale}`}
             className="px-6 py-3 rounded-xl font-[Syne] font-bold text-sm text-[#0A2540] transition-all duration-300 hover:-translate-y-0.5"
             style={{
               background: "linear-gradient(135deg, #FACC15, #EAB308)",
@@ -44,7 +42,7 @@ export default function NotFound() {
             Zur Startseite
           </Link>
           <Link
-            href="/fristen-radar"
+            href={`/${locale}/fristen-radar`}
             className="px-6 py-3 rounded-xl font-[Syne] font-semibold text-sm text-white/70 border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:text-white transition-all duration-200"
           >
             Fristen-Radar
@@ -58,12 +56,12 @@ export default function NotFound() {
           </p>
           <div className="flex flex-wrap gap-2 justify-center">
             {[
-              { label: "NISG 2026", href: "/nisg-2026" },
-              { label: "AI Act", href: "/eu-ai-act" },
-              { label: "DORA", href: "/dora" },
-              { label: "DSGVO", href: "/dsgvo" },
-              { label: "CRA", href: "/cra" },
-              { label: "CSRD/ESG", href: "/csrd-esg" },
+              { label: "NISG 2026", href: `/${locale}/nisg-2026` },
+              { label: "AI Act", href: `/${locale}/eu-ai-act` },
+              { label: "DORA", href: `/${locale}/dora` },
+              { label: "DSGVO", href: `/${locale}/dsgvo` },
+              { label: "CRA", href: `/${locale}/cra` },
+              { label: "CSRD/ESG", href: `/${locale}/csrd-esg` },
             ].map(({ label, href }) => (
               <Link
                 key={href}
@@ -80,9 +78,9 @@ export default function NotFound() {
           </p>
           <div className="flex flex-wrap gap-2 justify-center">
             {[
-              { label: "Regulierung-Finder", href: "/tools/regulierung-finder" },
-              { label: "Compliance-Checkliste", href: "/tools/compliance-checkliste" },
-              { label: "Alle Tools", href: "/tools" },
+              { label: "Regulierung-Finder", href: `/${locale}/tools/regulierung-finder` },
+              { label: "Compliance-Checkliste", href: `/${locale}/tools/compliance-checkliste` },
+              { label: "Alle Tools", href: `/${locale}/tools` },
             ].map(({ label, href }) => (
               <Link
                 key={href}

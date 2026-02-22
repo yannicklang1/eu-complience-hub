@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SocialShareBar from "@/components/SocialShareBar";
+import { useTranslations } from "@/i18n/use-translations";
 
 /* ══════════════════════════════════════════════════════════════
    Knowledge Hub — Central Resource Page (English)
@@ -98,6 +99,7 @@ const fadeIn = {
 /* ══════════════════════════════════════════════════════════════ */
 
 export default function WissenContentEN() {
+  const { locale } = useTranslations();
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") ?? "";
   const [search, setSearch] = useState(initialQuery);
@@ -307,7 +309,7 @@ export default function WissenContentEN() {
                 Subscribe to the Compliance Briefing and receive deadline warnings, legislative updates and practical tips straight to your inbox.
               </p>
               <Link
-                href="/fristen-radar"
+                href={`/${locale}/fristen-radar`}
                 className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm text-slate-900"
                 style={{
                   background: "linear-gradient(135deg, #FACC15, #EAB308)",

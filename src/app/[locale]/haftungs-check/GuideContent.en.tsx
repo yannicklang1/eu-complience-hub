@@ -10,6 +10,7 @@ import LawRef from "@/components/LawRef";
 import { SourceRef, SourceList, type Source } from "@/components/SourceRef";
 import ToolRecommendation from "@/components/ToolRecommendation";
 import RelatedGuides from "@/components/RelatedGuides";
+import { useTranslations } from "@/i18n/use-translations";
 
 /* ─────────────────── Sources ─────────────────── */
 const sources: Source[] = [
@@ -115,6 +116,7 @@ function Section({
    ══════════════════════════════════════════════════════ */
 
 export default function GuideContentEN() {
+  const { locale } = useTranslations();
   return (
     <GuidePageLayout
       title={"Executive Liability"}
@@ -284,7 +286,7 @@ export default function GuideContentEN() {
             </li>
           </ul>
           <div className="mt-4">
-            <Link href="/nisg-2026#geschaeftsfuehrer" className="text-sm font-medium text-sky-500 hover:underline">
+            <Link href={`/${locale}/nisg-2026#geschaeftsfuehrer`} className="text-sm font-medium text-sky-500 hover:underline">
               More in the NISG 2026 Guide {"\u2192"}
             </Link>
           </div>
@@ -355,7 +357,7 @@ export default function GuideContentEN() {
             </span>
           </p>
           <div className="mt-3">
-            <Link href="/dora#strafen" className="text-sm font-medium text-emerald-600 hover:underline">
+            <Link href={`/${locale}/dora#strafen`} className="text-sm font-medium text-emerald-600 hover:underline">
               More in the DORA Guide {"\u2192"}
             </Link>
           </div>
@@ -423,7 +425,7 @@ export default function GuideContentEN() {
             governance structures {"\u2014"} this protects you in the event of liability claims.
           </p>
           <div className="mt-3">
-            <Link href="/eu-ai-act#strafen" className="text-sm font-medium text-violet-500 hover:underline">
+            <Link href={`/${locale}/eu-ai-act#strafen`} className="text-sm font-medium text-violet-500 hover:underline">
               More in the AI Act Guide {"\u2192"}
             </Link>
           </div>
@@ -469,7 +471,7 @@ export default function GuideContentEN() {
               Executive management can be held liable through recourse.
             </p>
             <div className="mt-3">
-              <Link href="/cra#strafen" className="text-sm font-medium text-[#8b5cf6] hover:underline">
+              <Link href={`/${locale}/cra#strafen`} className="text-sm font-medium text-[#8b5cf6] hover:underline">
                 More in the CRA Guide {"\u2192"}
               </Link>
             </div>

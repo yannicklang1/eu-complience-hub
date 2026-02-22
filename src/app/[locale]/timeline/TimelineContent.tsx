@@ -302,7 +302,7 @@ export default function TimelineContent({ locale }: { locale: string }) {
           <div className="relative max-w-4xl mx-auto px-6 lg:px-12">
             <nav className="flex items-center gap-2 mb-8">
               <Link
-                href="/"
+                href={`/${locale}`}
                 className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors"
               >
                 {ui.home}
@@ -386,7 +386,7 @@ export default function TimelineContent({ locale }: { locale: string }) {
                 {ui.ctaDesc}
               </p>
               <Link
-                href="/fristen-radar"
+                href={`/${locale}/fristen-radar`}
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-[Syne] font-bold text-[#0A2540] transition-all hover:-translate-y-0.5 hover:shadow-lg"
                 style={{
                   background: "linear-gradient(135deg, #FACC15, #EAB308)",

@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { getClientLocale } from "@/i18n/config";
 
 /* ── State Machine ── */
 type Status = "loading" | "success" | "already" | "error";
@@ -23,6 +24,7 @@ function ConfirmationInner() {
     status: "loading",
     message: "Bestätigung wird verarbeitet\u2026",
   });
+  const locale = getClientLocale();
 
   useEffect(() => {
     if (!token || token.length < 32) {
@@ -119,7 +121,7 @@ function ConfirmationInner() {
             {(result.status === "success" || result.status === "already") && (
               <>
                 <Link
-                  href="/tools/regulierung-finder"
+                  href={`/${locale}/tools/regulierung-finder`}
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm text-slate-900 transition-all duration-200"
                   style={{
                     background: "linear-gradient(135deg, #FACC15, #EAB308)",
@@ -132,7 +134,7 @@ function ConfirmationInner() {
                   </svg>
                 </Link>
                 <Link
-                  href="/fristen-radar"
+                  href={`/${locale}/fristen-radar`}
                   className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-sm text-slate-300 border border-slate-700 hover:border-slate-600 hover:text-slate-200 transition-colors"
                 >
                   Fristen-Radar ansehen
@@ -143,7 +145,7 @@ function ConfirmationInner() {
             {result.status === "error" && (
               <>
                 <Link
-                  href="/fristen-radar"
+                  href={`/${locale}/fristen-radar`}
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold text-sm text-slate-900 transition-all duration-200"
                   style={{
                     background: "linear-gradient(135deg, #FACC15, #EAB308)",
@@ -153,7 +155,7 @@ function ConfirmationInner() {
                   Erneut anmelden
                 </Link>
                 <Link
-                  href="/"
+                  href={`/${locale}`}
                   className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-sm text-slate-300 border border-slate-700 hover:border-slate-600 hover:text-slate-200 transition-colors"
                 >
                   Zur Startseite

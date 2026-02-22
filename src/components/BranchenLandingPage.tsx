@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AccordionSection from "@/components/AccordionSection";
 import BranchenIcon from "@/components/BranchenIcon";
+import { useTranslations } from "@/i18n/use-translations";
 import type {
   Branche,
   Regulation,
@@ -39,6 +40,7 @@ export default function BranchenLandingPage({
   /** Other industries for this regulation (for internal linking) */
   otherBranchen: Branche[];
 }) {
+  const { locale } = useTranslations();
   const accent = regulation.accent;
   const maxFine =
     branche.typicalRevenue > 0
@@ -64,21 +66,21 @@ export default function BranchenLandingPage({
             {/* Breadcrumb */}
             <nav className="flex items-center gap-2 mb-8 flex-wrap">
               <Link
-                href="/"
+                href={`/${locale}`}
                 className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors"
               >
                 Startseite
               </Link>
               <span className="font-mono text-[11px] text-white/35">/</span>
               <Link
-                href="/branchen"
+                href={`/${locale}/branchen`}
                 className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors"
               >
                 Branchen
               </Link>
               <span className="font-mono text-[11px] text-white/35">/</span>
               <Link
-                href={`/branchen#${branche.slug}`}
+                href={`/${locale}/branchen#${branche.slug}`}
                 className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors"
               >
                 {branche.name}
@@ -266,7 +268,7 @@ export default function BranchenLandingPage({
                 </p>
 
                 <Link
-                  href="/tools/bussgeld-rechner"
+                  href={`/${locale}/tools/bussgeld-rechner`}
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-[Syne] font-bold transition-all hover:-translate-y-0.5"
                   style={{
                     background: `${accent}10`,
@@ -350,7 +352,7 @@ export default function BranchenLandingPage({
               <div className="flex flex-wrap justify-center gap-3">
                 {regulation.slug === "nis2" && (
                   <Link
-                    href="/tools/nis2-betroffenheits-check"
+                    href={`/${locale}/tools/nis2-betroffenheits-check`}
                     className="px-5 py-2.5 rounded-xl text-sm font-[Syne] font-bold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg"
                     style={{ background: accent }}
                   >
@@ -358,7 +360,7 @@ export default function BranchenLandingPage({
                   </Link>
                 )}
                 <Link
-                  href="/tools/haftungs-pruefer"
+                  href={`/${locale}/tools/haftungs-pruefer`}
                   className="px-5 py-2.5 rounded-xl text-sm font-[Syne] font-bold transition-all hover:-translate-y-0.5"
                   style={{
                     background: "white",
@@ -369,7 +371,7 @@ export default function BranchenLandingPage({
                   GF-Haftungs-Prüfer
                 </Link>
                 <Link
-                  href="/tools/bussgeld-rechner"
+                  href={`/${locale}/tools/bussgeld-rechner`}
                   className="px-5 py-2.5 rounded-xl text-sm font-[Syne] font-bold transition-all hover:-translate-y-0.5"
                   style={{
                     background: "white",
@@ -410,7 +412,7 @@ export default function BranchenLandingPage({
                   {otherRegulations.map((reg) => (
                     <Link
                       key={reg.slug}
-                      href={`/branchen/${branche.slug}/${reg.slug}`}
+                      href={`/${locale}/branchen/${branche.slug}/${reg.slug}`}
                       className="rounded-xl border bg-white p-4 hover:shadow-md transition-all hover:-translate-y-0.5 group"
                       style={{ borderColor: `${reg.accent}20` }}
                     >
@@ -442,7 +444,7 @@ export default function BranchenLandingPage({
                   {otherBranchen.map((b) => (
                     <Link
                       key={b.slug}
-                      href={`/branchen/${b.slug}/${regulation.slug}`}
+                      href={`/${locale}/branchen/${b.slug}/${regulation.slug}`}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#d8dff0] bg-white text-xs font-medium text-[#3a4a6b] hover:text-[#0A2540] hover:border-[#0A2540]/30 transition-all hover:-translate-y-0.5"
                     >
                       <BranchenIcon icon={b.icon} className="w-3.5 h-3.5" />
@@ -474,7 +476,7 @@ export default function BranchenLandingPage({
                 </p>
               </div>
               <Link
-                href={regulation.guideHref}
+                href={`/${locale}${regulation.guideHref}`}
                 className="px-5 py-2.5 rounded-xl text-sm font-[Syne] font-bold text-white flex-shrink-0 transition-all hover:-translate-y-0.5 hover:shadow-lg"
                 style={{ background: accent }}
               >

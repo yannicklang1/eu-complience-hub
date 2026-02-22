@@ -5,10 +5,12 @@ import Footer from "@/components/Footer";
 export default function LegalPageLayout({
   title,
   subtitle,
+  locale,
   children,
 }: {
   title: string;
   subtitle?: string;
+  locale: string;
   children: React.ReactNode;
 }) {
   return (
@@ -24,7 +26,7 @@ export default function LegalPageLayout({
           <div className="relative max-w-3xl mx-auto px-6 sm:px-8">
             {/* Breadcrumb */}
             <nav className="flex items-center gap-2 mb-8">
-              <Link href="/" className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">
+              <Link href={`/${locale}`} className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">
                 Startseite
               </Link>
               <span className="font-mono text-[11px] text-white/35">/</span>

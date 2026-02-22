@@ -448,7 +448,7 @@ export default async function QuellenPage({
 
           <div className="relative max-w-5xl mx-auto px-6 lg:px-12">
             <nav className="flex items-center gap-2 mb-8">
-              <Link href="/" className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">{ui.home}</Link>
+              <Link href={`/${locale}`} className="font-mono text-[11px] text-white/40 hover:text-white/70 transition-colors">{ui.home}</Link>
               <span className="font-mono text-[11px] text-white/35">/</span>
               <span className="font-mono text-[11px] text-white/60">{ui.breadcrumb}</span>
             </nav>
@@ -607,7 +607,7 @@ export default async function QuellenPage({
                     </p>
                     <p className="text-[12px] text-[#7a8db0] mt-3">
                       {ui.missingSource}
-                      <Link href="/impressum" className="underline underline-offset-2 hover:text-[#3a4a6b] transition-colors">
+                      <Link href={`/${locale}/impressum`} className="underline underline-offset-2 hover:text-[#3a4a6b] transition-colors">
                         {ui.contactUs}
                       </Link>.
                     </p>
