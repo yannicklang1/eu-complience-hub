@@ -6,7 +6,22 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country/index";
 import { useTranslations } from "@/i18n/use-translations";
+
+/* ── Regional labor cost multipliers (EU average = 1.0) ── */
+const LABOR_COST_BY_COUNTRY: Record<string, number> = {
+  // Western Europe
+  DE: 1.20, AT: 1.15, NL: 1.20, BE: 1.15, LU: 1.30, FR: 1.10, IE: 1.15,
+  // Nordic
+  DK: 1.35, SE: 1.25, FI: 1.20,
+  // Southern Europe
+  IT: 0.90, ES: 0.80, PT: 0.65, GR: 0.60, MT: 0.70, CY: 0.75,
+  // Eastern Europe
+  PL: 0.50, CZ: 0.55, SK: 0.50, HU: 0.45, RO: 0.35, BG: 0.30,
+  HR: 0.45, SI: 0.70, EE: 0.60, LV: 0.50, LT: 0.50,
+};
 
 /* ══════════════════════════════════════════════════════════════
    Compliance-Kosten-Kalkulator
@@ -53,8 +68,11 @@ const REGULATIONS = [
 function estimateCosts(
   selectedRegs: string[],
   size: CompanySize,
-  maturity: MaturityLevel
+  maturity: MaturityLevel,
+  countryCode?: string,
 ): RegulationCost[] {
+  // Apply regional labor cost adjustment
+  const countryMultiplier = countryCode ? (LABOR_COST_BY_COUNTRY[countryCode] ?? 1.0) : 1.0;
   const sizeMultiplier: Record<CompanySize, number> = {
     micro: 0.3,
     small: 0.6,
@@ -147,8 +165,8 @@ function estimateCosts(
 
     const breakdown = base.items.map((item) => ({
       item: item.item,
-      min: Math.round(item.min * sm * md / 100) * 100,
-      max: Math.round(item.max * sm * md / 100) * 100,
+      min: Math.round(item.min * sm * md * countryMultiplier / 100) * 100,
+      max: Math.round(item.max * sm * md * countryMultiplier / 100) * 100,
     }));
 
     const minCost = breakdown.reduce((sum, b) => sum + b.min, 0);
@@ -178,6 +196,8 @@ function formatEuro(amount: number): string {
 
 export default function KostenKalkulatorTool() {
   const { locale } = useTranslations();
+  const { countryCode } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
   const [size, setSize] = useState<CompanySize | null>(null);
   const [maturity, setMaturity] = useState<MaturityLevel | null>(null);
   const [selectedRegs, setSelectedRegs] = useState<Set<string>>(new Set());
@@ -187,8 +207,8 @@ export default function KostenKalkulatorTool() {
 
   const results = useMemo(() => {
     if (!size || !maturity || selectedRegs.size === 0) return [];
-    return estimateCosts(Array.from(selectedRegs), size, maturity);
-  }, [size, maturity, selectedRegs]);
+    return estimateCosts(Array.from(selectedRegs), size, maturity, countryCode);
+  }, [size, maturity, selectedRegs, countryCode]);
 
   const totalMin = results.reduce((s, r) => s + r.minCost, 0);
   const totalMax = results.reduce((s, r) => s + r.maxCost, 0);
@@ -233,6 +253,14 @@ export default function KostenKalkulatorTool() {
             <p className="text-slate-400 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
               Schätzen Sie die Kosten für die Umsetzung von EU-Regulierungen — individuell nach Unternehmensgröße und Reifegrad.
             </p>
+            {countryMeta && (
+              <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+                <span className="text-base leading-none">{countryMeta.flag}</span>
+                <span className="text-white/60 text-xs font-medium">
+                  Kostenschätzung für {countryMeta.nameDE}
+                </span>
+              </div>
+            )}
           </div>
         </section>
 
@@ -368,6 +396,11 @@ export default function KostenKalkulatorTool() {
                     <p className="text-xs text-slate-500 mt-3">
                       Einmalige Implementierungskosten (ohne laufende Betriebskosten)
                     </p>
+                    {countryMeta && LABOR_COST_BY_COUNTRY[countryCode] && (
+                      <p className="text-[10px] text-slate-600 mt-2">
+                        {countryMeta.flag} Angepasst an das Kostenniveau in {countryMeta.nameDE} (Faktor: {LABOR_COST_BY_COUNTRY[countryCode]!.toFixed(2)}× EU-Durchschnitt)
+                      </p>
+                    )}
                   </div>
 
                   {/* Per-regulation breakdown */}

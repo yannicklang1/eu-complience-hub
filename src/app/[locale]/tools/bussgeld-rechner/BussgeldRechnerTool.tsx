@@ -10,6 +10,7 @@ import ToolNextSteps from "@/components/ToolNextSteps";
 import { useCountry } from "@/i18n/country-context";
 import { COUNTRY_META } from "@/i18n/country/index";
 import { useTranslations } from "@/i18n/use-translations";
+import type { RegulationKey } from "@/i18n/country/types";
 
 const LeadCaptureForm = dynamic(() => import("@/components/LeadCaptureForm"), {
   ssr: false,
@@ -21,6 +22,8 @@ const LeadCaptureForm = dynamic(() => import("@/components/LeadCaptureForm"), {
 
 interface FineRule {
   id: string;
+  /** Key in CountryData.regulations (may differ from id) */
+  countryKey: RegulationKey;
   name: string;
   fullName: string;
   color: string;
@@ -37,6 +40,7 @@ interface FineRule {
 const FINE_RULES: FineRule[] = [
   {
     id: "aiact",
+    countryKey: "ai-act",
     name: "AI Act",
     fullName: "EU KI-Verordnung (2024/1689)",
     color: "#0A2540",
@@ -48,6 +52,7 @@ const FINE_RULES: FineRule[] = [
   },
   {
     id: "dsgvo",
+    countryKey: "dsgvo",
     name: "DSGVO",
     fullName: "Datenschutz-Grundverordnung",
     color: "#6366f1",
@@ -59,6 +64,7 @@ const FINE_RULES: FineRule[] = [
   },
   {
     id: "cra",
+    countryKey: "cra",
     name: "CRA",
     fullName: "Cyber Resilience Act (2024/2847)",
     color: "#8b5cf6",
@@ -70,6 +76,7 @@ const FINE_RULES: FineRule[] = [
   },
   {
     id: "nis2",
+    countryKey: "nis2",
     name: "NIS2 / NISG",
     fullName: "NIS2-Richtlinie / NISG 2026",
     color: "#0ea5e9",
@@ -81,6 +88,7 @@ const FINE_RULES: FineRule[] = [
   },
   {
     id: "dora",
+    countryKey: "dora",
     name: "DORA",
     fullName: "Digital Operational Resilience Act",
     color: "#10b981",
@@ -187,11 +195,18 @@ export default function BussgeldRechnerTool() {
     );
   };
 
-  const activeFines = FINE_RULES.filter((r) => selectedRegs.includes(r.id)).map((rule) => ({
-    ...rule,
-    guideUrl: `/${locale}${rule.guideUrl}`,
-    fine: revenue ? calculateFine(rule, revenue) : 0,
-  }));
+  const activeFines = FINE_RULES.filter((r) => selectedRegs.includes(r.id)).map((rule) => {
+    const regData = countryData?.regulations?.[rule.countryKey];
+    return {
+      ...rule,
+      guideUrl: `/${locale}${rule.guideUrl}`,
+      fine: revenue ? calculateFine(rule, revenue) : 0,
+      nationalFines: regData?.nationalFines,
+      nationalAuthority: regData?.authority,
+      nationalAuthorityUrl: regData?.authorityUrl,
+      nationalLawName: regData?.nationalLawName,
+    };
+  });
 
   const totalRisk = activeFines.reduce((sum, f) => sum + f.fine, 0);
 
@@ -393,6 +408,35 @@ export default function BussgeldRechnerTool() {
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                               </svg>
                             </div>
+
+                            {/* Country-specific info */}
+                            {(item.nationalAuthority || item.nationalFines) && countryMeta && (
+                              <div className="mt-2 pt-2 border-t border-[#e8ecf4] space-y-1">
+                                {item.nationalFines && (
+                                  <div className="flex items-center gap-1.5 text-[10px] text-[#5a6a8b]">
+                                    <span className="leading-none">{countryMeta.flag}</span>
+                                    <span><strong>{countryMeta.nameDE}:</strong> {item.nationalFines}</span>
+                                  </div>
+                                )}
+                                {item.nationalAuthority && (
+                                  <div className="flex items-center gap-1.5 text-[10px] text-[#5a6a8b]">
+                                    <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21" />
+                                    </svg>
+                                    <span>
+                                      Aufsicht:{" "}
+                                      {item.nationalAuthorityUrl ? (
+                                        <a href={item.nationalAuthorityUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-[#3a4a6b] transition-colors" onClick={(e) => e.stopPropagation()}>
+                                          {item.nationalAuthority}
+                                        </a>
+                                      ) : (
+                                        item.nationalAuthority
+                                      )}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </Link>
                         </motion.div>
                       ))}

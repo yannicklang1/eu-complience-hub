@@ -6,7 +6,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country/index";
 import { useTranslations } from "@/i18n/use-translations";
+import type { RegulationKey } from "@/i18n/country/types";
 
 /* ══════════════════════════════════════════════════════════════
    Regulierung-Finder — Interactive Quiz
@@ -21,6 +24,8 @@ interface Answer {
 
 interface Regulation {
   key: string;
+  /** Key in CountryData.regulations (may differ from key) */
+  countryKey: RegulationKey;
   name: string;
   subtitle: string;
   href: string;
@@ -133,6 +138,7 @@ function evaluateRegulations(answers: Answer[]): Regulation[] {
   if (data.some((d) => ["personal", "sensitive", "children", "financial"].includes(d)) && hasEUCustomers) {
     results.push({
       key: "dsgvo",
+      countryKey: "dsgvo",
       name: "DSGVO",
       subtitle: "Datenschutz-Grundverordnung",
       href: "/dsgvo",
@@ -151,6 +157,7 @@ function evaluateRegulations(answers: Answer[]): Regulation[] {
   if ((isNis2Sector && isNis2Size) || isCriticalInfra) {
     results.push({
       key: "nis2",
+      countryKey: "nis2",
       name: "NIS2 / NISG 2026",
       subtitle: "Netz- und Informationssicherheit",
       href: "/nisg-2026",
@@ -163,6 +170,7 @@ function evaluateRegulations(answers: Answer[]): Regulation[] {
   } else if (isNis2Sector && !isNis2Size) {
     results.push({
       key: "nis2",
+      countryKey: "nis2",
       name: "NIS2 / NISG 2026",
       subtitle: "Netz- und Informationssicherheit",
       href: "/nisg-2026",
@@ -176,6 +184,7 @@ function evaluateRegulations(answers: Answer[]): Regulation[] {
   if (activities.includes("ai")) {
     results.push({
       key: "ai-act",
+      countryKey: "ai-act",
       name: "EU AI Act",
       subtitle: "KI-Verordnung",
       href: "/eu-ai-act",
@@ -189,6 +198,7 @@ function evaluateRegulations(answers: Answer[]): Regulation[] {
   if (sectors.includes("finance") || (sectors.includes("it") && data.includes("financial"))) {
     results.push({
       key: "dora",
+      countryKey: "dora",
       name: "DORA",
       subtitle: "Digital Operational Resilience Act",
       href: "/dora",
@@ -204,6 +214,7 @@ function evaluateRegulations(answers: Answer[]): Regulation[] {
   if (activities.includes("software") || (sectors.includes("manufacturing") && activities.includes("ai"))) {
     results.push({
       key: "cra",
+      countryKey: "cra",
       name: "Cyber Resilience Act",
       subtitle: "Cybersicherheit für Produkte",
       href: "/cra",
@@ -217,6 +228,7 @@ function evaluateRegulations(answers: Answer[]): Regulation[] {
   if (activities.includes("esg") || (size === "large" && isEU)) {
     results.push({
       key: "csrd",
+      countryKey: "csrd",
       name: "CSRD / ESG",
       subtitle: "Nachhaltigkeitsberichterstattung",
       href: "/csrd-esg",
@@ -232,6 +244,7 @@ function evaluateRegulations(answers: Answer[]): Regulation[] {
   if (activities.includes("online-platform")) {
     results.push({
       key: "dsa",
+      countryKey: "dsa",
       name: "Digital Services Act",
       subtitle: "Plattformregulierung",
       href: "/dsa",
@@ -245,6 +258,7 @@ function evaluateRegulations(answers: Answer[]): Regulation[] {
   if (activities.includes("crypto")) {
     results.push({
       key: "mica",
+      countryKey: "mica",
       name: "MiCA",
       subtitle: "Markets in Crypto-Assets",
       href: "/mica",
@@ -258,6 +272,7 @@ function evaluateRegulations(answers: Answer[]): Regulation[] {
   if (data.includes("iot") || (sectors.includes("manufacturing") && hasEUCustomers)) {
     results.push({
       key: "data-act",
+      countryKey: "data-act",
       name: "Data Act",
       subtitle: "Datenzugangsverordnung",
       href: "/data-act",
@@ -274,6 +289,7 @@ function evaluateRegulations(answers: Answer[]): Regulation[] {
     const isDirectlyAffected = activities.includes("ecommerce");
     results.push({
       key: "eprivacy",
+      countryKey: "eprivacy",
       name: "ePrivacy",
       subtitle: "Datenschutz in der elektronischen Kommunikation",
       href: "/eprivacy",
@@ -289,6 +305,7 @@ function evaluateRegulations(answers: Answer[]): Regulation[] {
   if (activities.includes("eid") || sectors.includes("public")) {
     results.push({
       key: "eidas",
+      countryKey: "eidas",
       name: "eIDAS 2.0",
       subtitle: "Elektronische Identifizierung",
       href: "/eidas",
@@ -304,6 +321,7 @@ function evaluateRegulations(answers: Answer[]): Regulation[] {
   if (activities.includes("software") || sectors.includes("manufacturing")) {
     results.push({
       key: "produkthaftung",
+      countryKey: "produkthaftung",
       name: "EU-Produkthaftung",
       subtitle: "Neue Produkthaftungsrichtlinie",
       href: "/produkthaftung",
@@ -317,6 +335,7 @@ function evaluateRegulations(answers: Answer[]): Regulation[] {
   if (sectors.includes("health")) {
     results.push({
       key: "ehds",
+      countryKey: "ehds",
       name: "EHDS",
       subtitle: "European Health Data Space",
       href: "/ehds",
@@ -337,6 +356,9 @@ function evaluateRegulations(answers: Answer[]): Regulation[] {
 
 export default function RegulierungFinderTool() {
   const { locale } = useTranslations();
+  const { countryData } = useCountry();
+  const countryCode = useCountry().countryCode;
+  const countryMeta = COUNTRY_META[countryCode];
   const [step, setStep] = useState(0); // 0..QUESTIONS.length = quiz, QUESTIONS.length = results
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [currentSelection, setCurrentSelection] = useState<string[]>([]);
@@ -420,6 +442,14 @@ export default function RegulierungFinderTool() {
             <p className="text-slate-400 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
               Finden Sie in wenigen Schritten heraus, welche EU-Regulierungen für Ihr Unternehmen relevant sind.
             </p>
+            {countryMeta && (
+              <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+                <span className="text-base leading-none">{countryMeta.flag}</span>
+                <span className="text-white/60 text-xs font-medium">
+                  Ergebnisse für {countryMeta.nameDE}
+                </span>
+              </div>
+            )}
           </div>
         </section>
 
@@ -566,62 +596,81 @@ export default function RegulierungFinderTool() {
 
                   {/* Results Cards */}
                   <div className="space-y-3">
-                    {results.map((reg, i) => (
-                      <motion.div
-                        key={reg.key}
-                        initial={{ opacity: 0, y: 16 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.08, duration: 0.3 }}
-                      >
-                        <Link
-                          href={`/${locale}${reg.href}`}
-                          className="block rounded-2xl border border-white/5 bg-slate-900/40 p-5 sm:p-6 hover:bg-slate-900/60 hover:border-white/10 transition-all duration-200 group"
+                    {results.map((reg, i) => {
+                      const regData = countryData?.regulations?.[reg.countryKey];
+                      const status = regData?.implementationStatus;
+                      const statusLabel = status === "implemented" ? "In Kraft" : status === "pending" ? "In Umsetzung" : status === "overdue" ? "Überfällig" : null;
+                      const statusColor = status === "implemented" ? "bg-emerald-500/15 text-emerald-400" : status === "pending" ? "bg-amber-500/15 text-amber-400" : status === "overdue" ? "bg-red-500/15 text-red-400" : "";
+
+                      return (
+                        <motion.div
+                          key={reg.key}
+                          initial={{ opacity: 0, y: 16 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.08, duration: 0.3 }}
                         >
-                          <div className="flex items-start gap-4">
-                            <div
-                              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                              style={{ background: `${reg.color}20` }}
-                            >
+                          <Link
+                            href={`/${locale}${reg.href}`}
+                            className="block rounded-2xl border border-white/5 bg-slate-900/40 p-5 sm:p-6 hover:bg-slate-900/60 hover:border-white/10 transition-all duration-200 group"
+                          >
+                            <div className="flex items-start gap-4">
                               <div
-                                className="w-3 h-3 rounded-full"
-                                style={{ background: reg.color }}
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h3 className="font-[Syne] font-bold text-white text-base group-hover:text-yellow-400 transition-colors">
-                                  {reg.name}
-                                </h3>
-                                <span
-                                  className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide ${
-                                    reg.relevance === "hoch"
-                                      ? "bg-red-500/15 text-red-400"
-                                      : reg.relevance === "mittel"
-                                      ? "bg-yellow-500/15 text-yellow-400"
-                                      : "bg-slate-500/15 text-slate-400"
-                                  }`}
-                                >
-                                  {reg.relevance}
-                                </span>
+                                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                                style={{ background: `${reg.color}20` }}
+                              >
+                                <div
+                                  className="w-3 h-3 rounded-full"
+                                  style={{ background: reg.color }}
+                                />
                               </div>
-                              <p className="text-xs text-slate-500 mb-2">{reg.subtitle}</p>
-                              <p className="text-sm text-slate-300 leading-relaxed">
-                                {reg.reason}
-                              </p>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                  <h3 className="font-[Syne] font-bold text-white text-base group-hover:text-yellow-400 transition-colors">
+                                    {reg.name}
+                                  </h3>
+                                  <span
+                                    className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide ${
+                                      reg.relevance === "hoch"
+                                        ? "bg-red-500/15 text-red-400"
+                                        : reg.relevance === "mittel"
+                                        ? "bg-yellow-500/15 text-yellow-400"
+                                        : "bg-slate-500/15 text-slate-400"
+                                    }`}
+                                  >
+                                    {reg.relevance}
+                                  </span>
+                                  {statusLabel && countryMeta && (
+                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${statusColor}`}>
+                                      {countryMeta.flag} {statusLabel}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-slate-500 mb-2">
+                                  {regData?.nationalLawName ? `${reg.subtitle} · ${regData.nationalLawName}` : reg.subtitle}
+                                </p>
+                                <p className="text-sm text-slate-300 leading-relaxed">
+                                  {reg.reason}
+                                </p>
+                                {regData?.authority && countryMeta && (
+                                  <p className="mt-1.5 text-[11px] text-slate-500">
+                                    {countryMeta.flag} Aufsicht in {countryMeta.nameDE}: {regData.authority}
+                                  </p>
+                                )}
+                              </div>
+                              <svg
+                                className="w-5 h-5 text-slate-600 group-hover:text-yellow-400 transition-colors flex-shrink-0 mt-1"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                              </svg>
                             </div>
-                            <svg
-                              className="w-5 h-5 text-slate-600 group-hover:text-yellow-400 transition-colors flex-shrink-0 mt-1"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={2}
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                            </svg>
-                          </div>
-                        </Link>
-                      </motion.div>
-                    ))}
+                          </Link>
+                        </motion.div>
+                      );
+                    })}
                   </div>
 
                   {/* Actions */}

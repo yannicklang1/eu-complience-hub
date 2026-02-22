@@ -7,7 +7,10 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country/index";
 import { useTranslations } from "@/i18n/use-translations";
+import type { RegulationKey } from "@/i18n/country/types";
 
 const LeadCaptureForm = dynamic(() => import("@/components/LeadCaptureForm"), {
   ssr: false,
@@ -19,6 +22,8 @@ const LeadCaptureForm = dynamic(() => import("@/components/LeadCaptureForm"), {
 
 interface Regulation {
   id: string;
+  /** Key in CountryData.regulations */
+  countryKey: RegulationKey;
   name: string;
   fullName: string;
   color: string;
@@ -30,6 +35,7 @@ interface Regulation {
 const REGULATIONS: Regulation[] = [
   {
     id: "nis2",
+    countryKey: "nis2",
     name: "NIS2 / NISG",
     fullName: "NIS2-Richtlinie / NISG 2026",
     color: "#0ea5e9",
@@ -39,6 +45,7 @@ const REGULATIONS: Regulation[] = [
   },
   {
     id: "dora",
+    countryKey: "dora",
     name: "DORA",
     fullName: "Digital Operational Resilience Act",
     color: "#10b981",
@@ -48,6 +55,7 @@ const REGULATIONS: Regulation[] = [
   },
   {
     id: "aiact",
+    countryKey: "ai-act",
     name: "AI Act",
     fullName: "EU KI-Verordnung",
     color: "#0A2540",
@@ -57,6 +65,7 @@ const REGULATIONS: Regulation[] = [
   },
   {
     id: "cra",
+    countryKey: "cra",
     name: "CRA",
     fullName: "Cyber Resilience Act",
     color: "#8b5cf6",
@@ -256,6 +265,8 @@ const TOTAL_STEPS = 3;
 
 export default function HaftungsPrueferTool() {
   const { locale } = useTranslations();
+  const { countryCode, countryData } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
   const [step, setStep] = useState(0);
   const [selectedRegs, setSelectedRegs] = useState<string[]>([]);
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
@@ -321,6 +332,14 @@ export default function HaftungsPrueferTool() {
             <p className="text-white/45 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
               Wie hoch ist Ihr persönliches Haftungsrisiko als Geschäftsführer bei NIS2, DORA, AI Act und CRA?
             </p>
+            {countryMeta && (
+              <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+                <span className="text-base leading-none">{countryMeta.flag}</span>
+                <span className="text-white/60 text-xs font-medium">
+                  Ergebnisse für {countryMeta.nameDE}
+                </span>
+              </div>
+            )}
           </div>
         </section>
 
@@ -400,8 +419,16 @@ export default function HaftungsPrueferTool() {
                                   )}
                                 </div>
                               </div>
-                              <div className="mt-2 ml-6 flex items-center gap-4 text-[11px] text-[#7a8db0]">
-                                <span>Bußgeld: <strong className="text-[#3a4a6b]">{reg.maxFine}</strong></span>
+                              <div className="mt-2 ml-6 space-y-1 text-[11px] text-[#7a8db0]">
+                                <div className="flex items-center gap-4">
+                                  <span>Bußgeld: <strong className="text-[#3a4a6b]">{countryData?.regulations?.[reg.countryKey]?.nationalFines ?? reg.maxFine}</strong></span>
+                                </div>
+                                {countryData?.regulations?.[reg.countryKey]?.authority && countryMeta && (
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[10px] leading-none">{countryMeta.flag}</span>
+                                    <span className="text-[10px]">Aufsicht: {countryData.regulations[reg.countryKey]!.authority}</span>
+                                  </div>
+                                )}
                               </div>
                             </button>
                           ))}
@@ -573,20 +600,36 @@ export default function HaftungsPrueferTool() {
                     {assessment.perRegulation.length > 0 && (
                       <div className="space-y-2 mb-6">
                         <h3 className="font-[Syne] font-bold text-[14px] text-[#060c1a] mb-2">Risiko pro Regulierung</h3>
-                        {assessment.perRegulation.map(({ regulation, riskLevel, riskNote }) => (
-                          <div key={regulation.id} className="flex items-start gap-3 p-3 rounded-xl bg-white/80 border border-white">
-                            <div className="w-3 h-3 rounded-full flex-shrink-0 mt-1.5" style={{ background: regulation.color }} />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-0.5">
-                                <span className="font-[Syne] font-bold text-[13px] text-[#060c1a]">{regulation.name}</span>
-                                <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-mono font-bold ${
-                                  riskLevel === "hoch" ? "bg-red-100 text-red-700" : riskLevel === "mittel" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"
-                                }`}>{riskLevel.toUpperCase()}</span>
+                        {assessment.perRegulation.map(({ regulation, riskLevel, riskNote }) => {
+                          const regData = countryData?.regulations?.[regulation.countryKey];
+                          return (
+                            <div key={regulation.id} className="flex items-start gap-3 p-3 rounded-xl bg-white/80 border border-white">
+                              <div className="w-3 h-3 rounded-full flex-shrink-0 mt-1.5" style={{ background: regulation.color }} />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-0.5">
+                                  <span className="font-[Syne] font-bold text-[13px] text-[#060c1a]">{regulation.name}</span>
+                                  <span className={`text-[9px] px-1.5 py-0.5 rounded-md font-mono font-bold ${
+                                    riskLevel === "hoch" ? "bg-red-100 text-red-700" : riskLevel === "mittel" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"
+                                  }`}>{riskLevel.toUpperCase()}</span>
+                                </div>
+                                <p className="text-[12px] text-[#7a8db0] leading-relaxed">{riskNote}</p>
+                                {regData?.authority && countryMeta && (
+                                  <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-[#5a6a8b]">
+                                    <span className="leading-none">{countryMeta.flag}</span>
+                                    <span>
+                                      Zuständig in {countryMeta.nameDE}:{" "}
+                                      {regData.authorityUrl ? (
+                                        <a href={regData.authorityUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-[#3a4a6b] transition-colors">
+                                          {regData.authority}
+                                        </a>
+                                      ) : regData.authority}
+                                    </span>
+                                  </div>
+                                )}
                               </div>
-                              <p className="text-[12px] text-[#7a8db0] leading-relaxed">{riskNote}</p>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
 
