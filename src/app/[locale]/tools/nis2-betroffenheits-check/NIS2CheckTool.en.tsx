@@ -8,6 +8,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
 import { useTranslations } from "@/i18n/use-translations";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
 
 const LeadCaptureForm = dynamic(() => import("@/components/LeadCaptureForm"), {
   ssr: false,
@@ -262,6 +264,8 @@ const ACCENT = "#0ea5e9"; // Sky blue, matching NISG guide
 
 export default function NIS2CheckTool() {
   const { locale } = useTranslations();
+  const { countryCode } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
   const [step, setStep] = useState(0);
   const [selectedSector, setSelectedSector] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<CompanySize | null>(null);
@@ -337,11 +341,19 @@ export default function NIS2CheckTool() {
               <span className="font-mono text-[11px] text-white/60">Applicability Check</span>
             </nav>
 
-            <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full border border-sky-400/20 bg-sky-400/10">
-              <svg className="w-4 h-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="text-sky-300 text-xs font-mono font-semibold">Duration: approx. 2 minutes</span>
+            <div className="flex items-center justify-center gap-2 flex-wrap mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-sky-400/20 bg-sky-400/10">
+                <svg className="w-4 h-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sky-300 text-xs font-mono font-semibold">Duration: approx. 2 minutes</span>
+              </div>
+              {countryMeta && (
+                <div className="flex items-center gap-1.5 rounded-full bg-white/[0.06] border border-white/[0.1] px-2.5 py-1">
+                  <span className="text-sm leading-none">{countryMeta.flag}</span>
+                  <span className="font-mono text-[10px] text-white/60 font-medium">{countryMeta.nameDE}</span>
+                </div>
+              )}
             </div>
 
             <h1 className="font-[Syne] font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.1] mb-4">

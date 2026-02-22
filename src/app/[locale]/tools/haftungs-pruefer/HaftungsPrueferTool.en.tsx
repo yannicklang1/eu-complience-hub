@@ -8,6 +8,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
 import { useTranslations } from "@/i18n/use-translations";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
 
 const LeadCaptureForm = dynamic(() => import("@/components/LeadCaptureForm"), {
   ssr: false,
@@ -256,6 +258,8 @@ const TOTAL_STEPS = 3;
 
 export default function HaftungsPrueferTool() {
   const { locale } = useTranslations();
+  const { countryCode } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
   const [step, setStep] = useState(0);
   const [selectedRegs, setSelectedRegs] = useState<string[]>([]);
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
@@ -309,11 +313,19 @@ export default function HaftungsPrueferTool() {
               <span className="font-mono text-[11px] text-white/35">/</span>
               <span className="font-mono text-[11px] text-white/60">Liability Assessment</span>
             </nav>
-            <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full border border-red-400/20 bg-red-400/10">
-              <svg className="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-              </svg>
-              <span className="text-red-300 text-xs font-mono font-semibold">Duration: approx. 3 minutes</span>
+            <div className="flex items-center justify-center gap-2 flex-wrap mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-red-400/20 bg-red-400/10">
+                <svg className="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                <span className="text-red-300 text-xs font-mono font-semibold">Duration: approx. 3 minutes</span>
+              </div>
+              {countryMeta && (
+                <div className="flex items-center gap-1.5 rounded-full bg-white/[0.06] border border-white/[0.1] px-2.5 py-1">
+                  <span className="text-sm leading-none">{countryMeta.flag}</span>
+                  <span className="font-mono text-[10px] text-white/60 font-medium">{countryMeta.nameDE}</span>
+                </div>
+              )}
             </div>
             <h1 className="font-[Syne] font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.1] mb-4">
               Director Liability Assessment

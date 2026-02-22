@@ -7,6 +7,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FristenRadarSignup from "@/components/FristenRadarSignup";
 import { DEADLINES, isPast, daysUntil, type Deadline } from "@/data/deadlines";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
 
 /* ═══════ English date formatter ═══════ */
 function formatDateEN(isoDate: string): string {
@@ -134,6 +136,8 @@ function FilterChip({
 
 /* ═══════ MAIN COMPONENT ═══════ */
 export default function FristenRadarPageEN() {
+  const { countryCode } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
   const [selectedRegs, setSelectedRegs] = useState<Set<string>>(new Set());
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
@@ -239,9 +243,17 @@ export default function FristenRadarPageEN() {
 
           <div className="relative max-w-4xl mx-auto px-6 lg:px-12 text-center">
             <motion.div variants={fadeUp} initial="hidden" animate="show">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-medium text-blue-300 mb-6">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-                Interactive Tool
+              <div className="flex items-center justify-center gap-2 flex-wrap mb-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-xs font-medium text-blue-300">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                  Interactive Tool
+                </div>
+                {countryMeta && (
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.06] border border-white/10">
+                    <span>{countryMeta.flag}</span>
+                    <span className="text-xs font-semibold text-slate-400">{countryMeta.nameDE}</span>
+                  </div>
+                )}
               </div>
 
               <h1 className="font-[Syne] font-[800] text-4xl md:text-5xl lg:text-6xl text-white leading-[1.08] tracking-tight mb-5">

@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useTranslations } from "@/i18n/use-translations";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
 import { evaluateRegulations, type Answer } from "@/lib/regulation-evaluator";
 
 /* ══════════════════════════════════════════════════════════════
@@ -198,6 +200,8 @@ const stepVariants = {
 
 export default function KontaktContentEN() {
   const { locale } = useTranslations();
+  const { countryCode } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
@@ -344,6 +348,8 @@ export default function KontaktContentEN() {
       companySize: form.companySize,
       branche: form.branche,
       annualRevenue: form.annualRevenue,
+      country: countryCode,
+      countryName: countryMeta?.nameDE ?? countryCode,
       sectors: allSectors,
       dataTypes: form.dataTypes,
       activities: form.activities,
@@ -375,7 +381,7 @@ export default function KontaktContentEN() {
       setErrorMessage("Connection error. Please try again.");
       setSubmitStatus("error");
     }
-  }, [canProceed, form]);
+  }, [canProceed, form, countryCode, countryMeta]);
 
   /* ── Summary label helpers ── */
   const sizeLabel = COMPANY_SIZES.find((s) => s.value === form.companySize)?.label ?? "-";
@@ -406,6 +412,12 @@ export default function KontaktContentEN() {
               </svg>
               <span className="text-xs font-semibold text-yellow-400">Free Compliance Report</span>
             </div>
+            {countryMeta && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10">
+                <span>{countryMeta.flag}</span>
+                <span className="text-xs font-semibold text-slate-400">{countryMeta.nameDE}</span>
+              </div>
+            )}
             <h1 className="font-[Syne] font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.1] mb-5">
               Your personalised{" "}
               <span className="bg-gradient-to-r from-yellow-400 to-yellow-500 bg-clip-text text-transparent">

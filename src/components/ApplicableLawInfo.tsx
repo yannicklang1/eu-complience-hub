@@ -6,10 +6,15 @@
  *
  * EU regulations:  directly applicable in all member states
  * EU directives:   national transposition applies (market principle)
+ *
+ * Now country-aware: shows national authority, law name,
+ * implementation status for the selected country.
  * ─────────────────────────────────────────────────────── */
 
 import type { RegulationKey } from "@/i18n/country/types";
 import type { Locale } from "@/i18n/config";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
 
 /* ── Regulation metadata ── */
 type LegalInstrument = "regulation" | "directive";
@@ -99,13 +104,43 @@ interface ApplicableLawInfoProps {
   locale: Locale;
 }
 
+/* ── Status display helpers ── */
+const STATUS_LABELS: Record<string, Record<string, string>> = {
+  de: { implemented: "In Kraft", pending: "In Umsetzung", overdue: "Überfällig" },
+  en: { implemented: "In Force", pending: "Pending", overdue: "Overdue" },
+  fr: { implemented: "En vigueur", pending: "En cours", overdue: "En retard" },
+};
+
+const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  implemented: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200" },
+  pending: { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200" },
+  overdue: { bg: "bg-red-50", text: "text-red-700", border: "border-red-200" },
+};
+
+const COUNTRY_SECTION_LABELS: Record<string, { authority: string; nationalLaw: string; status: string; notes: string }> = {
+  de: { authority: "Zuständige Behörde", nationalLaw: "Nationales Gesetz", status: "Umsetzungsstatus", notes: "Hinweise" },
+  en: { authority: "Supervisory Authority", nationalLaw: "National Law", status: "Implementation Status", notes: "Notes" },
+  fr: { authority: "Autorité compétente", nationalLaw: "Loi nationale", status: "Statut de mise en œuvre", notes: "Remarques" },
+};
+
 export function ApplicableLawInfo({ regulationKey, locale }: ApplicableLawInfoProps) {
   const meta = REG_META[regulationKey];
+  const { countryCode, countryData } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
+
   if (!meta) return null;
 
   const l = LABELS[locale] ?? LABELS.en;
+  const cl = COUNTRY_SECTION_LABELS[locale] ?? COUNTRY_SECTION_LABELS.en;
+  const sl = STATUS_LABELS[locale] ?? STATUS_LABELS.en;
 
   const instrumentLabel = meta.instrument === "regulation" ? l.regulation : l.directive;
+
+  /* ── Country-specific regulation data ── */
+  const regData = countryData?.regulations?.[regulationKey];
+  const status = regData?.implementationStatus;
+  const statusStyle = status ? STATUS_COLORS[status] : null;
+  const statusLabel = status ? sl[status] ?? status : null;
 
   let ruleDesc: string;
   let ruleIcon: string;
@@ -135,19 +170,85 @@ export function ApplicableLawInfo({ regulationKey, locale }: ApplicableLawInfoPr
   }
 
   return (
-    <div className={`rounded-xl border p-4 ${ruleBg}`}>
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-sm leading-none" aria-hidden="true">{ruleIcon}</span>
-        <span className="font-mono text-[10px] font-semibold tracking-[0.15em] uppercase text-[#3a4a6b]">
-          {l.heading}
-        </span>
+    <div className="space-y-3">
+      {/* ── Jurisdiction Rule ── */}
+      <div className={`rounded-xl border p-4 ${ruleBg}`}>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-sm leading-none" aria-hidden="true">{ruleIcon}</span>
+          <span className="font-mono text-[10px] font-semibold tracking-[0.15em] uppercase text-[#3a4a6b]">
+            {l.heading}
+          </span>
+        </div>
+        <div className="text-[11px] font-semibold text-[#0A2540] mb-1.5">
+          {instrumentLabel}
+        </div>
+        <p className="text-[11px] text-[#4a5a80] leading-relaxed">
+          {ruleDesc}
+        </p>
       </div>
-      <div className="text-[11px] font-semibold text-[#0A2540] mb-1.5">
-        {instrumentLabel}
-      </div>
-      <p className="text-[11px] text-[#4a5a80] leading-relaxed">
-        {ruleDesc}
-      </p>
+
+      {/* ── Country-Specific Info ── */}
+      {regData && countryMeta && (
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-base leading-none">{countryMeta.flag}</span>
+            <span className="font-mono text-[10px] font-semibold tracking-[0.15em] uppercase text-[#3a4a6b]">
+              {countryMeta.nameDE}
+            </span>
+            {statusLabel && statusStyle && (
+              <span className={`ml-auto px-2 py-0.5 rounded-md text-[10px] font-bold ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border} border`}>
+                {statusLabel}
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            {/* Authority */}
+            {regData.authority && (
+              <div>
+                <span className="text-[10px] font-semibold text-[#7a8db0] uppercase tracking-wider">{cl.authority}</span>
+                {regData.authorityUrl ? (
+                  <a
+                    href={regData.authorityUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-[11px] text-indigo-600 hover:text-indigo-800 font-medium mt-0.5 underline underline-offset-2 decoration-indigo-300 hover:decoration-indigo-500 transition-colors"
+                  >
+                    {regData.authority}
+                  </a>
+                ) : (
+                  <p className="text-[11px] text-[#0A2540] font-medium mt-0.5">{regData.authority}</p>
+                )}
+              </div>
+            )}
+
+            {/* National Law Name */}
+            {regData.nationalLawName && (
+              <div>
+                <span className="text-[10px] font-semibold text-[#7a8db0] uppercase tracking-wider">{cl.nationalLaw}</span>
+                <p className="text-[11px] text-[#0A2540] font-mono mt-0.5">{regData.nationalLawName}</p>
+              </div>
+            )}
+
+            {/* National Deadline */}
+            {regData.nationalDeadline && (
+              <div>
+                <span className="text-[10px] font-semibold text-[#7a8db0] uppercase tracking-wider">Deadline</span>
+                <p className="text-[11px] text-[#0A2540] font-semibold mt-0.5">{regData.nationalDeadline}</p>
+              </div>
+            )}
+
+            {/* National Notes */}
+            {regData.nationalNotes && (
+              <div className="pt-1 border-t border-slate-200">
+                <p className="text-[11px] text-[#4a5a80] leading-relaxed italic">
+                  {regData.nationalNotes}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

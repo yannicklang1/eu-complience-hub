@@ -7,6 +7,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SocialShareBar from "@/components/SocialShareBar";
 import { useTranslations } from "@/i18n/use-translations";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
+import type { RegulationKey } from "@/i18n/country/types";
 
 /* ══════════════════════════════════════════════════════════════
    Regulation Comparison — Interactive comparison matrix (English)
@@ -14,6 +17,7 @@ import { useTranslations } from "@/i18n/use-translations";
 
 interface Regulation {
   id: string;
+  countryKey: RegulationKey;
   name: string;
   fullName: string;
   type: "Regulation" | "Directive";
@@ -33,6 +37,7 @@ interface Regulation {
 const REGULATIONS: Regulation[] = [
   {
     id: "nisg",
+    countryKey: "nis2",
     name: "NISG 2026",
     fullName: "Network and Information System Security Act",
     type: "Directive",
@@ -50,6 +55,7 @@ const REGULATIONS: Regulation[] = [
   },
   {
     id: "aiact",
+    countryKey: "ai-act",
     name: "AI Act",
     fullName: "EU Artificial Intelligence Act",
     type: "Regulation",
@@ -67,6 +73,7 @@ const REGULATIONS: Regulation[] = [
   },
   {
     id: "dora",
+    countryKey: "dora",
     name: "DORA",
     fullName: "Digital Operational Resilience Act",
     type: "Regulation",
@@ -84,6 +91,7 @@ const REGULATIONS: Regulation[] = [
   },
   {
     id: "dsgvo",
+    countryKey: "dsgvo",
     name: "GDPR",
     fullName: "General Data Protection Regulation",
     type: "Regulation",
@@ -101,6 +109,7 @@ const REGULATIONS: Regulation[] = [
   },
   {
     id: "cra",
+    countryKey: "cra",
     name: "CRA",
     fullName: "Cyber Resilience Act",
     type: "Regulation",
@@ -118,6 +127,7 @@ const REGULATIONS: Regulation[] = [
   },
   {
     id: "csrd",
+    countryKey: "csrd",
     name: "CSRD",
     fullName: "Corporate Sustainability Reporting Directive",
     type: "Directive",
@@ -135,6 +145,7 @@ const REGULATIONS: Regulation[] = [
   },
   {
     id: "mica",
+    countryKey: "mica",
     name: "MiCA",
     fullName: "Markets in Crypto-Assets Regulation",
     type: "Regulation",
@@ -152,6 +163,7 @@ const REGULATIONS: Regulation[] = [
   },
   {
     id: "dataact",
+    countryKey: "data-act",
     name: "Data Act",
     fullName: "EU Data Act",
     type: "Regulation",
@@ -169,6 +181,7 @@ const REGULATIONS: Regulation[] = [
   },
   {
     id: "bafg",
+    countryKey: "bafg",
     name: "BaFG",
     fullName: "Accessibility Strengthening Act",
     type: "Directive",
@@ -198,6 +211,8 @@ const COMPARISON_FIELDS: { key: keyof Regulation; label: string; icon: string }[
 
 export default function VergleichContentEN() {
   const { locale } = useTranslations();
+  const { countryCode, countryData } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
   const [selected, setSelected] = useState<Set<string>>(
     new Set(REGULATIONS.map((r) => r.id))
   );
@@ -230,10 +245,18 @@ export default function VergleichContentEN() {
             }}
           />
           <div className="relative max-w-5xl mx-auto px-6 text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-yellow-400/10 border border-yellow-400/20 mb-6">
-              <span className="text-yellow-400 text-xs font-semibold">
-                {REGULATIONS.length} Regulations
-              </span>
+            <div className="flex items-center justify-center gap-3 flex-wrap mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-yellow-400/10 border border-yellow-400/20">
+                <span className="text-yellow-400 text-xs font-semibold">
+                  {REGULATIONS.length} Regulations
+                </span>
+              </div>
+              {countryMeta && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+                  <span>{countryMeta.flag}</span>
+                  <span className="text-xs font-semibold text-slate-400">{countryMeta.nameDE}</span>
+                </div>
+              )}
             </div>
             <h1 className="font-[Syne] font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.1] mb-5">
               Regulation{" "}
@@ -398,6 +421,52 @@ export default function VergleichContentEN() {
                   })}
                 </div>
               ))}
+
+              {/* Country Implementation Status Row */}
+              {countryMeta && countryData && (
+                <div
+                  className="grid gap-px bg-white/[0.02]"
+                  style={{
+                    gridTemplateColumns: `200px repeat(${filteredRegs.length}, 1fr)`,
+                  }}
+                >
+                  <div className="bg-slate-900/60 p-4 flex items-center gap-2">
+                    <span className="text-sm">{countryMeta.flag}</span>
+                    <span className="text-xs font-semibold text-slate-400">
+                      Implementation {countryMeta.nameDE}
+                    </span>
+                  </div>
+                  {filteredRegs.map((reg) => {
+                    const regData = countryData.regulations?.[reg.countryKey];
+                    const status = regData?.implementationStatus;
+                    const statusLabel =
+                      status === "implemented" ? "In force" :
+                      status === "pending" ? "Pending" :
+                      status === "overdue" ? "Overdue" :
+                      "\u2013";
+                    const statusColor =
+                      status === "implemented" ? "#10b981" :
+                      status === "pending" ? "#f59e0b" :
+                      status === "overdue" ? "#ef4444" :
+                      "#64748b";
+                    return (
+                      <div key={reg.id} className="bg-slate-900/60 p-4 flex flex-col items-center justify-center gap-1">
+                        <span
+                          className="px-2.5 py-1 rounded-lg text-[11px] font-bold"
+                          style={{ background: `${statusColor}15`, color: statusColor }}
+                        >
+                          {statusLabel}
+                        </span>
+                        {regData?.nationalLawName && (
+                          <span className="text-[10px] text-slate-500 text-center font-mono">
+                            {regData.nationalLawName}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Personal Liability Row */}
               <div

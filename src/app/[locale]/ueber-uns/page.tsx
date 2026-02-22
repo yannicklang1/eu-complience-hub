@@ -4,6 +4,7 @@ import { BASE_URL, SITE_NAME } from "@/lib/constants";
 import { LOCALES, LOCALE_OG, type Locale } from "@/i18n/config";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import CountryBadge from "@/components/CountryBadge";
 
 /* ── Static params for all locales ── */
 export function generateStaticParams() {
@@ -135,7 +136,7 @@ const CONTENT: Record<string, PageContent> = {
       { icon: "\uD83D\uDD0D", title: "Quellenbasiert", description: "Jede Angabe ist mit der offiziellen Rechtsquelle verlinkt. Wir zitieren EU-Amtsblaetter, nationale Gesetzblaetter und offizielle Behoerden-Dokumente." },
       { icon: "\u26A1", title: "Praxisnah", description: "Keine abstrakten Theorien, sondern konkrete Handlungsempfehlungen. Fristen, Strafen, Checklisten und Tools -- alles was Sie fuer die Umsetzung brauchen." },
       { icon: "\uD83D\uDD12", title: "Unabhaengig", description: "Keine Werbung, keine bezahlten Empfehlungen. Unsere Tool-Vergleiche und Software-Empfehlungen basieren auf objektiven Kriterien." },
-      { icon: "\uD83C\uDF0D", title: "AT/DACH-Fokus", description: "Wir beruecksichtigen die nationale Umsetzung in Oesterreich, Deutschland und der Schweiz -- nicht nur die EU-Ebene." },
+      { icon: "\uD83C\uDF0D", title: "EU-27 Abdeckung", description: "Wir beruecksichtigen die nationale Umsetzung in allen 27 EU-Mitgliedstaaten -- mit Behoerden, nationalen Gesetzen und Umsetzungsstatus je Land." },
       { icon: "\uD83D\uDCC8", title: "Aktuell gehalten", description: "Regulierungen aendern sich. Unsere Guides werden regelmaessig aktualisiert und mit einem Pruefdatum versehen." },
     ],
     stats: [
@@ -176,7 +177,7 @@ const CONTENT: Record<string, PageContent> = {
       { icon: "\uD83D\uDD0D", title: "Source-Based", description: "Every statement is linked to the official legal source. We cite EU official journals, national gazettes and official authority documents." },
       { icon: "\u26A1", title: "Practical", description: "No abstract theories, but concrete recommendations for action. Deadlines, fines, checklists and tools -- everything you need for implementation." },
       { icon: "\uD83D\uDD12", title: "Independent", description: "No advertising, no paid recommendations. Our tool comparisons and software recommendations are based on objective criteria." },
-      { icon: "\uD83C\uDF0D", title: "AT/DACH Focus", description: "We consider national implementation in Austria, Germany and Switzerland -- not just the EU level." },
+      { icon: "\uD83C\uDF0D", title: "EU-27 Coverage", description: "Country-specific authorities, national transposition status and local deadlines for all 27 EU member states — not just the EU level." },
       { icon: "\uD83D\uDCC8", title: "Kept Up to Date", description: "Regulations change. Our guides are regularly updated and marked with a review date." },
     ],
     stats: [
@@ -279,6 +280,9 @@ export default async function UeberUnsPage({
             }}
           />
           <div className="relative max-w-4xl mx-auto px-6 text-center">
+            <div className="flex justify-center mb-6">
+              <CountryBadge />
+            </div>
             <h1 className="font-[Syne] font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.1] mb-5">
               {c.heroTitle1}
               <span className="bg-gradient-to-r from-yellow-400 to-yellow-500 bg-clip-text text-transparent">

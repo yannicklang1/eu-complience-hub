@@ -3,6 +3,30 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { DEADLINES, isPast } from "@/data/deadlines";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
+import type { RegulationKey } from "@/i18n/country/types";
+
+/* ─── Regulation name → CountryData key mapping ─── */
+const REG_TO_KEY: Record<string, RegulationKey> = {
+  DORA: "dora",
+  "AI Act": "ai-act",
+  NISG: "nis2",
+  CRA: "cra",
+  CSRD: "csrd",
+  BaFG: "bafg",
+  HSchG: "hschg",
+  DSGVO: "dsgvo",
+  MiCA: "mica",
+  "Green Claims": "green-claims",
+  DPP: "dpp",
+  PLD: "produkthaftung",
+  DSA: "dsa",
+  "Data Act": "data-act",
+  eIDAS: "eidas",
+  EHDS: "ehds",
+  ePrivacy: "eprivacy",
+};
 
 /* ─── Data ─── */
 const timelineEvents = DEADLINES.map((d) => ({
@@ -12,6 +36,7 @@ const timelineEvents = DEADLINES.map((d) => ({
   color: d.color,
   reg: d.reg,
   iso: d.iso,
+  countryKey: REG_TO_KEY[d.reg],
 }));
 
 const ITEMS = timelineEvents.length;
@@ -21,10 +46,12 @@ function TimelineItem({
   ev,
   index,
   scrollYProgress,
+  authority,
 }: {
   ev: (typeof timelineEvents)[0];
   index: number;
   scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"];
+  authority?: string;
 }) {
   const past = isPast(ev.iso);
 
@@ -110,6 +137,11 @@ function TimelineItem({
         <p className="text-sm text-white/35 leading-relaxed max-w-sm">
           {ev.desc}
         </p>
+        {authority && (
+          <p className="text-[11px] text-white/25 mt-1 font-mono">
+            Aufsicht: {authority}
+          </p>
+        )}
       </div>
     </motion.div>
   );
@@ -175,6 +207,8 @@ function ProgressDot({
    MAIN COMPONENT
    ═══════════════════════════════════════════════════ */
 export default function StickyTimeline() {
+  const { countryCode, countryData } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -227,6 +261,12 @@ export default function StickyTimeline() {
               <span className="font-mono text-[11px] tracking-[0.2em] uppercase font-medium text-[#FACC15]">
                 Zeitplan 2025 – 2027
               </span>
+              {countryMeta && (
+                <div className="flex items-center gap-1.5 rounded-full bg-white/[0.06] border border-white/[0.1] px-2.5 py-1">
+                  <span className="text-sm leading-none">{countryMeta.flag}</span>
+                  <span className="font-mono text-[10px] text-white/60 font-medium">{countryMeta.nameDE}</span>
+                </div>
+              )}
             </div>
             <h2 className="font-[Syne] font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight text-white mb-3">
               Compliance-<span className="text-[#FACC15]">Timeline.</span>
@@ -239,14 +279,18 @@ export default function StickyTimeline() {
           {/* Timeline items */}
           <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hidden flex flex-col justify-start">
             <div className="space-y-1">
-              {timelineEvents.map((ev, i) => (
-                <TimelineItem
-                  key={i}
-                  ev={ev}
-                  index={i}
-                  scrollYProgress={scrollYProgress}
-                />
-              ))}
+              {timelineEvents.map((ev, i) => {
+                const regData = ev.countryKey ? countryData?.regulations?.[ev.countryKey] : undefined;
+                return (
+                  <TimelineItem
+                    key={i}
+                    ev={ev}
+                    index={i}
+                    scrollYProgress={scrollYProgress}
+                    authority={regData?.authority}
+                  />
+                );
+              })}
             </div>
           </div>
         </div>
