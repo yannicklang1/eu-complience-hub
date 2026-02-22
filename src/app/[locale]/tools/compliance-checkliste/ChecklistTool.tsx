@@ -7,6 +7,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
 import { useTranslations } from "@/i18n/use-translations";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
+import type { RegulationKey } from "@/i18n/country/types";
 
 /* ══════════════════════════════════════════════════════════════
    Data Model — Regulation Checklists
@@ -20,6 +23,7 @@ interface CheckItem {
 
 interface RegulationChecklist {
   key: string;
+  countryKey: RegulationKey;
   title: string;
   shortTitle: string;
   description: string;
@@ -33,6 +37,7 @@ interface RegulationChecklist {
 const REGULATIONS: RegulationChecklist[] = [
   {
     key: "nis2",
+    countryKey: "nis2",
     title: "NIS2 / NISG 2026",
     shortTitle: "NIS2",
     description: "Netz- und Informationssicherheit für wesentliche und wichtige Einrichtungen",
@@ -53,6 +58,7 @@ const REGULATIONS: RegulationChecklist[] = [
   },
   {
     key: "dsgvo",
+    countryKey: "dsgvo",
     title: "DSGVO",
     shortTitle: "DSGVO",
     description: "Datenschutz-Grundverordnung — Schutz personenbezogener Daten",
@@ -72,6 +78,7 @@ const REGULATIONS: RegulationChecklist[] = [
   },
   {
     key: "ai-act",
+    countryKey: "ai-act",
     title: "EU AI Act",
     shortTitle: "AI Act",
     description: "KI-Verordnung — Regulierung von Künstlicher Intelligenz",
@@ -91,6 +98,7 @@ const REGULATIONS: RegulationChecklist[] = [
   },
   {
     key: "dora",
+    countryKey: "dora",
     title: "DORA",
     shortTitle: "DORA",
     description: "Digital Operational Resilience Act — IT-Resilienz im Finanzsektor",
@@ -109,6 +117,7 @@ const REGULATIONS: RegulationChecklist[] = [
   },
   {
     key: "cra",
+    countryKey: "cra",
     title: "Cyber Resilience Act",
     shortTitle: "CRA",
     description: "Cybersicherheit für Produkte mit digitalen Elementen",
@@ -127,6 +136,7 @@ const REGULATIONS: RegulationChecklist[] = [
   },
   {
     key: "csrd",
+    countryKey: "csrd",
     title: "CSRD / ESG",
     shortTitle: "CSRD",
     description: "Nachhaltigkeitsberichterstattung nach European Sustainability Reporting Standards",
@@ -151,6 +161,8 @@ const REGULATIONS: RegulationChecklist[] = [
 
 export default function ChecklistTool() {
   const { locale } = useTranslations();
+  const { countryCode, countryData } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
   const [expandedReg, setExpandedReg] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
@@ -194,11 +206,19 @@ export default function ChecklistTool() {
             }}
           />
           <div className="relative max-w-4xl mx-auto px-6 text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-mono font-semibold tracking-wider uppercase mb-6">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Interaktives Tool
+            <div className="flex items-center justify-center gap-2 flex-wrap mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-mono font-semibold tracking-wider uppercase">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Interaktives Tool
+              </div>
+              {countryMeta && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+                  <span>{countryMeta.flag}</span>
+                  <span className="text-xs font-semibold text-slate-400">{countryMeta.nameDE}</span>
+                </div>
+              )}
             </div>
             <h1 className="font-[Syne] font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.1] mb-5">
               EU Compliance-
@@ -235,6 +255,8 @@ export default function ChecklistTool() {
             {REGULATIONS.map((reg) => {
               const stats = regStats.find((s) => s.key === reg.key)!;
               const isExpanded = expandedReg === reg.key;
+              const regData = countryData?.regulations?.[reg.countryKey];
+              const displayDeadline = regData?.nationalDeadline ?? reg.deadline;
 
               return (
                 <div
@@ -257,9 +279,9 @@ export default function ChecklistTool() {
                         <h2 className="font-[Syne] font-bold text-lg sm:text-xl text-white">
                           {reg.title}
                         </h2>
-                        {reg.deadline && (
+                        {displayDeadline && (
                           <span className="text-[10px] px-2 py-0.5 rounded-md font-mono font-bold text-white/80 bg-white/10">
-                            Frist: {reg.deadline}
+                            Frist: {displayDeadline}
                           </span>
                         )}
                       </div>
@@ -367,18 +389,38 @@ export default function ChecklistTool() {
                             );
                           })}
 
-                          {/* Link to guide */}
-                          <div className="pt-3 flex items-center gap-2">
-                            <Link
-                              href={`/${locale}${reg.href}`}
-                              className="inline-flex items-center gap-1.5 text-xs font-semibold transition-colors"
-                              style={{ color: reg.accent }}
-                            >
-                              Zum {reg.shortTitle}-Leitfaden
-                              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                                <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                              </svg>
-                            </Link>
+                          {/* Link to guide + country info */}
+                          <div className="pt-3 space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Link
+                                href={`/${locale}${reg.href}`}
+                                className="inline-flex items-center gap-1.5 text-xs font-semibold transition-colors"
+                                style={{ color: reg.accent }}
+                              >
+                                Zum {reg.shortTitle}-Leitfaden
+                                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                                  <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              </Link>
+                            </div>
+                            {regData?.authority && countryMeta && (
+                              <div className="flex items-center gap-2 text-xs text-slate-500">
+                                <span>{countryMeta.flag}</span>
+                                <span>Aufsicht:</span>
+                                {regData.authorityUrl ? (
+                                  <a href={regData.authorityUrl} target="_blank" rel="noopener noreferrer" className="text-slate-400 underline underline-offset-2 hover:text-white transition-colors">
+                                    {regData.authority}
+                                  </a>
+                                ) : (
+                                  <span className="text-slate-400">{regData.authority}</span>
+                                )}
+                                {regData.nationalLawName && (
+                                  <span className="ml-2 px-1.5 py-0.5 rounded bg-white/5 text-slate-500 text-[10px] font-mono">
+                                    {regData.nationalLawName}
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </motion.div>
