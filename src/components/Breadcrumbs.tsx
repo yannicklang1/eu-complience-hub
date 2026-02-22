@@ -12,12 +12,20 @@ interface BreadcrumbItem {
  */
 export default function Breadcrumbs({
   items,
+  homeLabel = "Startseite",
+  locale,
 }: {
   items: BreadcrumbItem[];
+  homeLabel?: string;
+  locale?: string;
 }) {
+  const prefix = locale ? `/${locale}` : "";
   const allItems: BreadcrumbItem[] = [
-    { label: "Startseite", href: "/" },
-    ...items,
+    { label: homeLabel, href: `${prefix}/` },
+    ...items.map((item) => ({
+      ...item,
+      href: item.href ? `${prefix}${item.href}` : undefined,
+    })),
   ];
 
   const jsonLd = {

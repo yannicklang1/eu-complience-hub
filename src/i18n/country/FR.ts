@@ -1,0 +1,128 @@
+import type { CountryData } from "./types";
+
+const FR: CountryData = {
+  code: "FR",
+  nameLocal: "France",
+  nameEN: "France",
+  nameDE: "Frankreich",
+  flag: "🇫🇷",
+  languages: ["fr"],
+  euMemberSince: 1957,
+  dpaName: "Commission Nationale de l'Informatique et des Libertés (CNIL)",
+  dpaUrl: "https://www.cnil.fr",
+  csirtName: "ANSSI / CERT-FR",
+  csirtUrl: "https://www.cert.ssi.gouv.fr",
+  regulations: {
+    nis2: {
+      nationalLawName: "Loi relative à la résilience des infrastructures critiques et au renforcement de la cybersécurité",
+      authority: "Agence Nationale de la Sécurité des Systèmes d'Information (ANSSI)",
+      authorityUrl: "https://www.ssi.gouv.fr",
+      implementationStatus: "pending",
+      nationalNotes: "Frankreich setzt NIS2 um. ANSSI bleibt die nationale Cybersicherheitsbehörde.",
+    },
+    "ai-act": {
+      authority: "Autorité de régulation de la communication audiovisuelle et numérique (ARCOM)",
+      authorityUrl: "https://www.arcom.fr",
+      implementationStatus: "pending",
+      nationalNotes: "Frankreich designiert nationale Aufsichtsbehörden für den AI Act.",
+    },
+    dora: {
+      authority: "Autorité de contrôle prudentiel et de résolution (ACPR)",
+      authorityUrl: "https://acpr.banque-france.fr",
+      nationalDeadline: "17 January 2025",
+      implementationStatus: "implemented",
+      nationalNotes: "DORA seit Januar 2025 unmittelbar anwendbar. ACPR beaufsichtigt französische Finanzunternehmen.",
+    },
+    dsgvo: {
+      nationalLawName: "Loi Informatique et Libertés (LIL)",
+      authority: "Commission Nationale de l'Informatique et des Libertés (CNIL)",
+      authorityUrl: "https://www.cnil.fr",
+      implementationStatus: "implemented",
+      nationalFines: "Bis zu 20 Mio. € oder 4 % des weltweiten Jahresumsatzes",
+      nationalNotes: "DSGVO vollständig umgesetzt. CNIL gehört zu den aktivsten EU-Datenschutzbehörden.",
+    },
+    csrd: {
+      authority: "Autorité des marchés financiers (AMF)",
+      authorityUrl: "https://www.amf-france.org",
+      implementationStatus: "implemented",
+      nationalNotes: "Frankreich hat die CSRD umgesetzt. Große börsennotierte Unternehmen berichten ab GJ 2024.",
+    },
+    dsa: {
+      authority: "Autorité de régulation de la communication audiovisuelle et numérique (ARCOM)",
+      authorityUrl: "https://www.arcom.fr",
+      implementationStatus: "implemented",
+      nationalNotes: "ARCOM ist der französische Koordinator für digitale Dienste im Rahmen des DSA.",
+    },
+    mica: {
+      authority: "Autorité des marchés financiers (AMF)",
+      authorityUrl: "https://www.amf-france.org",
+      implementationStatus: "implemented",
+      nationalNotes: "MiCA seit Dezember 2024 vollständig anwendbar. AMF beaufsichtigt Krypto-Dienstleister.",
+    },
+    cra: {
+      authority: "Agence Nationale de la Sécurité des Systèmes d'Information (ANSSI)",
+      authorityUrl: "https://www.ssi.gouv.fr",
+      implementationStatus: "pending",
+      nationalNotes: "Der CRA gilt ab August 2025 (Grundpflichten). ANSSI wird voraussichtlich als Marktüberwachungsbehörde für Cybersicherheit digitaler Produkte designiert.",
+    },
+    bafg: {
+      nationalLawName: "Loi relative au devoir de vigilance (Loi n° 2017-399)",
+      authority: "Ministère de l'Économie, des Finances et de la Souveraineté industrielle et numérique",
+      authorityUrl: "https://www.economie.gouv.fr",
+      implementationStatus: "implemented",
+      nationalNotes: "Frankreich war Vorreiter mit dem Loi de Vigilance (2017). Sorgfaltspflichten gelten für Unternehmen mit über 5.000 MA in Frankreich. Die CSDDD wird darauf aufbauen.",
+    },
+    hschg: {
+      authority: "Direction Générale de la Concurrence, de la Consommation et de la Répression des Fraudes (DGCCRF)",
+      authorityUrl: "https://www.economie.gouv.fr/dgccrf",
+      implementationStatus: "implemented",
+      nationalNotes: "Das EU-Produktsicherheitsgesetz (GPSR) gilt seit Dezember 2024 direkt. DGCCRF ist die zuständige Marktüberwachungsbehörde.",
+    },
+    "data-act": {
+      authority: "CNIL / Autorité de Régulation des Communications Électroniques (ARCEP)",
+      authorityUrl: "https://www.arcep.fr",
+      nationalDeadline: "12. September 2025",
+      implementationStatus: "pending",
+      nationalNotes: "Der Data Act gilt ab September 2025. CNIL und ARCEP koordinieren die nationale Durchsetzung.",
+    },
+    eprivacy: {
+      authority: "Commission Nationale de l'Informatique et des Libertés (CNIL)",
+      authorityUrl: "https://www.cnil.fr",
+      implementationStatus: "pending",
+      nationalNotes: "Die ePrivacy-Verordnung ist noch nicht verabschiedet. Frankreich wendet die Cookie-Regelungen der CNIL-Leitlinien an.",
+    },
+    eidas: {
+      nationalLawName: "Ordonnance n° 2017-1426 relative à l'identification électronique",
+      authority: "Agence Nationale de la Sécurité des Systèmes d'Information (ANSSI)",
+      authorityUrl: "https://www.ssi.gouv.fr",
+      implementationStatus: "implemented",
+      nationalNotes: "eIDAS 2.0 schafft den Rahmen für die EUDI-Wallet. Frankreich entwickelt France Identité als nationale digitale Identitätslösung.",
+    },
+    ehds: {
+      authority: "Agence du Numérique en Santé (ANS) / Ministère de la Santé",
+      authorityUrl: "https://esante.gouv.fr",
+      implementationStatus: "pending",
+      nationalNotes: "Der EHDS ist in Umsetzung. Frankreich baut auf der bestehenden Gesundheitsdateninfrastruktur (Mon Espace Santé / DMP) auf.",
+    },
+    "green-claims": {
+      authority: "Direction Générale de la Concurrence, de la Consommation et de la Répression des Fraudes (DGCCRF)",
+      authorityUrl: "https://www.economie.gouv.fr/dgccrf",
+      implementationStatus: "pending",
+      nationalNotes: "Die Green Claims Directive wird voraussichtlich 2026 in französisches Recht umgesetzt. Frankreich hat bereits strenge Anti-Greenwashing-Regeln (Loi Climat et Résilience 2021).",
+    },
+    produkthaftung: {
+      authority: "Ministère de la Justice",
+      authorityUrl: "https://www.justice.gouv.fr",
+      implementationStatus: "pending",
+      nationalNotes: "Die neue EU-Produkthaftungsrichtlinie muss bis Dezember 2026 umgesetzt werden. Die französischen Regelungen zur responsabilité du fait des produits défectueux werden angepasst.",
+    },
+    dpp: {
+      authority: "Agence de la transition écologique (ADEME) / Ministère de la Transition Écologique",
+      authorityUrl: "https://www.ademe.fr",
+      implementationStatus: "pending",
+      nationalNotes: "Der Digitale Produktpass wird stufenweise ab 2027 eingeführt. Frankreich hat mit dem Indice de réparabilité bereits Vorreiter-Erfahrung bei Produkttransparenz.",
+    },
+  },
+};
+
+export default FR;

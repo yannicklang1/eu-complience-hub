@@ -1,0 +1,128 @@
+import type { CountryData } from "./types";
+
+const IT: CountryData = {
+  code: "IT",
+  nameLocal: "Italia",
+  nameEN: "Italy",
+  nameDE: "Italien",
+  flag: "🇮🇹",
+  languages: ["it"],
+  euMemberSince: 1957,
+  dpaName: "Garante per la protezione dei dati personali (Garante Privacy)",
+  dpaUrl: "https://www.garanteprivacy.it",
+  csirtName: "ACN / CSIRT Italia",
+  csirtUrl: "https://www.csirt.gov.it",
+  regulations: {
+    nis2: {
+      nationalLawName: "Decreto Legislativo NIS2 (D.Lgs. 138/2024)",
+      authority: "Agenzia per la Cybersicurezza Nazionale (ACN)",
+      authorityUrl: "https://www.acn.gov.it",
+      implementationStatus: "implemented",
+      nationalNotes: "Italien hat NIS2 mit D.Lgs. 138/2024 umgesetzt (Oktober 2024). ACN ist die nationale Behörde.",
+    },
+    "ai-act": {
+      authority: "Agenzia per l'Italia Digitale (AgID) / ACN",
+      authorityUrl: "https://www.agid.gov.it",
+      implementationStatus: "pending",
+      nationalNotes: "Italien designiert Marktüberwachungsbehörden für den AI Act.",
+    },
+    dora: {
+      authority: "Banca d'Italia / Commissione Nazionale per le Società e la Borsa (CONSOB)",
+      authorityUrl: "https://www.bancaditalia.it",
+      nationalDeadline: "17 January 2025",
+      implementationStatus: "implemented",
+      nationalNotes: "DORA seit Januar 2025 unmittelbar anwendbar. Banca d'Italia und CONSOB beaufsichtigen italienische Finanzunternehmen.",
+    },
+    dsgvo: {
+      nationalLawName: "Codice in materia di protezione dei dati personali (D.Lgs. 196/2003, mod. 2018)",
+      authority: "Garante per la protezione dei dati personali",
+      authorityUrl: "https://www.garanteprivacy.it",
+      implementationStatus: "implemented",
+      nationalFines: "Bis zu 20 Mio. € oder 4 % des weltweiten Jahresumsatzes",
+      nationalNotes: "Italien hat aktive DSGVO-Durchsetzung. Der Garante sperrte ChatGPT vorübergehend 2023.",
+    },
+    csrd: {
+      authority: "Commissione Nazionale per le Società e la Borsa (CONSOB)",
+      authorityUrl: "https://www.consob.it",
+      implementationStatus: "implemented",
+      nationalNotes: "Italien hat die CSRD umgesetzt. Große börsennotierte Unternehmen berichten ab GJ 2024.",
+    },
+    dsa: {
+      authority: "Autorità per le Garanzie nelle Comunicazioni (AGCOM)",
+      authorityUrl: "https://www.agcom.it",
+      implementationStatus: "implemented",
+      nationalNotes: "AGCOM ist der italienische Koordinator für digitale Dienste im Rahmen des DSA.",
+    },
+    mica: {
+      authority: "Banca d'Italia / CONSOB",
+      authorityUrl: "https://www.bancaditalia.it",
+      implementationStatus: "implemented",
+      nationalNotes: "MiCA seit Dezember 2024 vollständig anwendbar. Banca d'Italia und CONSOB beaufsichtigen Krypto-Dienstleister.",
+    },
+    cra: {
+      authority: "Agenzia per la Cybersicurezza Nazionale (ACN)",
+      authorityUrl: "https://www.acn.gov.it",
+      implementationStatus: "pending",
+      nationalNotes: "Der CRA gilt ab August 2025 (Grundpflichten). ACN wird voraussichtlich als Marktüberwachungsbehörde für Cybersicherheit digitaler Produkte designiert.",
+    },
+    bafg: {
+      authority: "Ministero delle Imprese e del Made in Italy (MIMIT)",
+      authorityUrl: "https://www.mimit.gov.it",
+      implementationStatus: "pending",
+      nationalNotes: "Italien setzt die EU-Lieferkettenrichtlinie (CSDDD) um. Ein nationales Sorgfaltspflichtengesetz ist in Vorbereitung.",
+    },
+    hschg: {
+      authority: "Ministero delle Imprese e del Made in Italy (MIMIT) / Camere di Commercio",
+      authorityUrl: "https://www.mimit.gov.it",
+      implementationStatus: "implemented",
+      nationalNotes: "Das EU-Produktsicherheitsgesetz (GPSR) gilt seit Dezember 2024 direkt. Marktüberwachung durch MIMIT und Handelskammern.",
+    },
+    "data-act": {
+      authority: "Garante per la protezione dei dati personali / AgID",
+      authorityUrl: "https://www.garanteprivacy.it",
+      nationalDeadline: "12. September 2025",
+      implementationStatus: "pending",
+      nationalNotes: "Der Data Act gilt ab September 2025. Garante Privacy und AgID koordinieren die nationale Durchsetzung.",
+    },
+    eprivacy: {
+      authority: "Garante per la protezione dei dati personali",
+      authorityUrl: "https://www.garanteprivacy.it",
+      implementationStatus: "pending",
+      nationalNotes: "Die ePrivacy-Verordnung ist noch nicht verabschiedet. Italien wendet die Datenschutzbestimmungen des Codice Privacy (D.Lgs. 196/2003) an.",
+    },
+    eidas: {
+      nationalLawName: "Codice dell'Amministrazione Digitale (CAD, D.Lgs. 82/2005)",
+      authority: "Agenzia per l'Italia Digitale (AgID)",
+      authorityUrl: "https://www.agid.gov.it",
+      implementationStatus: "implemented",
+      nationalNotes: "eIDAS 2.0 schafft den Rahmen für die EUDI-Wallet. Italien betreibt SPID und CIE (Carta d'Identità Elettronica) als digitale Identitätslösungen.",
+    },
+    ehds: {
+      authority: "Ministero della Salute / Agenzia Nazionale per i Servizi Sanitari Regionali (AGENAS)",
+      authorityUrl: "https://www.salute.gov.it",
+      implementationStatus: "pending",
+      nationalNotes: "Der EHDS ist in Umsetzung. Italien baut auf dem Fascicolo Sanitario Elettronico (FSE 2.0) als nationale Gesundheitsdateninfrastruktur auf.",
+    },
+    "green-claims": {
+      authority: "Autorità Garante della Concorrenza e del Mercato (AGCM)",
+      authorityUrl: "https://www.agcm.it",
+      implementationStatus: "pending",
+      nationalNotes: "Die Green Claims Directive wird voraussichtlich 2026 in italienisches Recht umgesetzt. AGCM verfolgt bereits Greenwashing-Fälle.",
+    },
+    produkthaftung: {
+      nationalLawName: "Codice del Consumo (D.Lgs. 206/2005)",
+      authority: "Ministero della Giustizia",
+      authorityUrl: "https://www.giustizia.it",
+      implementationStatus: "pending",
+      nationalNotes: "Die neue EU-Produkthaftungsrichtlinie muss bis Dezember 2026 umgesetzt werden. Der Codice del Consumo wird entsprechend angepasst.",
+    },
+    dpp: {
+      authority: "Ministero dell'Ambiente e della Sicurezza Energetica (MASE)",
+      authorityUrl: "https://www.mase.gov.it",
+      implementationStatus: "pending",
+      nationalNotes: "Der Digitale Produktpass wird stufenweise ab 2027 eingeführt. MASE koordiniert die nationale Umsetzung.",
+    },
+  },
+};
+
+export default IT;

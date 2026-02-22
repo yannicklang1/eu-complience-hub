@@ -2,305 +2,148 @@ import type { MetadataRoute } from "next";
 import { getAllBranchenGesetzParams } from "@/data/branchenData";
 import { getAllComparisonSlugs } from "@/data/softwareData";
 import { BASE_URL } from "@/lib/constants";
+import { LOCALES } from "@/i18n/config";
+
+/* ── Helper: build one sitemap entry with hreflang alternates ── */
+function localeEntry(
+  slug: string,
+  priority: number,
+  changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"],
+  now: Date
+): MetadataRoute.Sitemap[number] {
+  const languages: Record<string, string> = {};
+  for (const locale of LOCALES) {
+    const path = slug ? `/${locale}/${slug}` : `/${locale}`;
+    languages[locale] = `${BASE_URL}${path}`;
+  }
+  // x-default points to the German (default) version
+  languages["x-default"] = slug
+    ? `${BASE_URL}/de/${slug}`
+    : `${BASE_URL}/de`;
+
+  return {
+    url: slug ? `${BASE_URL}/de/${slug}` : `${BASE_URL}/de`,
+    lastModified: now,
+    changeFrequency,
+    priority,
+    alternates: { languages },
+  };
+}
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
-  /* ── Branchen × Regulierung pages (dynamic) ── */
-  const branchenPages: MetadataRoute.Sitemap = getAllBranchenGesetzParams().map(
-    ({ branche, gesetz }) => ({
-      url: `${BASE_URL}/branchen/${branche}/${gesetz}`,
-      lastModified: now,
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    })
+  /* ── Branchen × Regulierung pages (dynamic, one per locale) ── */
+  const branchenPages: MetadataRoute.Sitemap = getAllBranchenGesetzParams().flatMap(
+    ({ branche, gesetz }) =>
+      LOCALES.map((locale) => ({
+        url: `${BASE_URL}/${locale}/branchen/${branche}/${gesetz}`,
+        lastModified: now,
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
+        alternates: {
+          languages: Object.fromEntries([
+            ...LOCALES.map((l) => [
+              l,
+              `${BASE_URL}/${l}/branchen/${branche}/${gesetz}`,
+            ]),
+            ["x-default", `${BASE_URL}/de/branchen/${branche}/${gesetz}`],
+          ]),
+        },
+      }))
   );
 
-  /* ── Software comparison pages (dynamic) ── */
+  /* ── Software comparison pages (dynamic, DE only — not translated) ── */
   const comparisonPages: MetadataRoute.Sitemap = getAllComparisonSlugs().map(
     (slug) => ({
-      url: `${BASE_URL}/tools/${slug}`,
+      url: `${BASE_URL}/de/tools/${slug}`,
       lastModified: now,
       changeFrequency: "monthly" as const,
       priority: 0.8,
+      alternates: {
+        languages: {
+          de: `${BASE_URL}/de/tools/${slug}`,
+          "x-default": `${BASE_URL}/de/tools/${slug}`,
+        },
+      },
     })
   );
 
   return [
-    {
-      url: BASE_URL,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 1.0,
-    },
+    /* ── Homepage ── */
+    localeEntry("", 1.0, "weekly", now),
+
     /* ── Guide Pages ── */
-    {
-      url: `${BASE_URL}/eu-ai-act`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/nisg-2026`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/dora`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/cra`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/dsgvo`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/csrd-esg`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/bafg`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/hschg`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/haftungs-check`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
-      url: `${BASE_URL}/green-claims`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
-      url: `${BASE_URL}/mica`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/produkthaftung`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
-      url: `${BASE_URL}/digitaler-produktpass`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
-      url: `${BASE_URL}/dsa`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
-      url: `${BASE_URL}/ehds`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/data-act`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
-      url: `${BASE_URL}/eprivacy`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
-      url: `${BASE_URL}/eidas`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
+    localeEntry("eu-ai-act", 0.9, "monthly", now),
+    localeEntry("nisg-2026", 0.8, "monthly", now),
+    localeEntry("dora", 0.8, "monthly", now),
+    localeEntry("cra", 0.8, "monthly", now),
+    localeEntry("dsgvo", 0.9, "monthly", now),
+    localeEntry("csrd-esg", 0.8, "monthly", now),
+    localeEntry("bafg", 0.8, "monthly", now),
+    localeEntry("hschg", 0.8, "monthly", now),
+    localeEntry("haftungs-check", 0.85, "monthly", now),
+    localeEntry("green-claims", 0.85, "monthly", now),
+    localeEntry("mica", 0.9, "monthly", now),
+    localeEntry("produkthaftung", 0.85, "monthly", now),
+    localeEntry("digitaler-produktpass", 0.85, "monthly", now),
+    localeEntry("dsa", 0.85, "monthly", now),
+    localeEntry("ehds", 0.8, "monthly", now),
+    localeEntry("data-act", 0.85, "monthly", now),
+    localeEntry("eprivacy", 0.85, "monthly", now),
+    localeEntry("eidas", 0.8, "monthly", now),
+
     /* ── Tools Hub ── */
-    {
-      url: `${BASE_URL}/tools`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
+    localeEntry("tools", 0.9, "weekly", now),
+
     /* ── Interactive Tools ── */
-    {
-      url: `${BASE_URL}/tools/nis2-betroffenheits-check`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/tools/haftungs-pruefer`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
-      url: `${BASE_URL}/tools/bussgeld-rechner`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
-      url: `${BASE_URL}/tools/compliance-checkliste`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/tools/regulierung-finder`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/tools/kosten-kalkulator`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
-      url: `${BASE_URL}/tools/reifegrad-check`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
+    localeEntry("tools/nis2-betroffenheits-check", 0.9, "monthly", now),
+    localeEntry("tools/haftungs-pruefer", 0.85, "monthly", now),
+    localeEntry("tools/bussgeld-rechner", 0.85, "monthly", now),
+    localeEntry("tools/compliance-checkliste", 0.9, "monthly", now),
+    localeEntry("tools/regulierung-finder", 0.9, "monthly", now),
+    localeEntry("tools/kosten-kalkulator", 0.85, "monthly", now),
+    localeEntry("tools/reifegrad-check", 0.85, "monthly", now),
+
     /* ── Wissen Hub ── */
-    {
-      url: `${BASE_URL}/wissen`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
+    localeEntry("wissen", 0.9, "weekly", now),
+
     /* ── Branchen Hub ── */
-    {
-      url: `${BASE_URL}/branchen`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.85,
-    },
+    localeEntry("branchen", 0.85, "weekly", now),
+
     /* ── Branchen × Regulierung Landingpages ── */
     ...branchenPages,
+
     /* ── Software Comparison Pages ── */
     ...comparisonPages,
+
     /* ── Glossar ── */
-    {
-      url: `${BASE_URL}/glossar`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
+    localeEntry("glossar", 0.85, "monthly", now),
+
     /* ── Reference ── */
-    {
-      url: `${BASE_URL}/quellen`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.75,
-    },
-    {
-      url: `${BASE_URL}/compliance-verzeichnis`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/fristen-radar`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${BASE_URL}/newsletter`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${BASE_URL}/timeline`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
+    localeEntry("quellen", 0.75, "monthly", now),
+    localeEntry("compliance-verzeichnis", 0.7, "monthly", now),
+    localeEntry("fristen-radar", 0.9, "weekly", now),
+    localeEntry("timeline", 0.8, "monthly", now),
+
     /* ── Aktuelles ── */
-    {
-      url: `${BASE_URL}/aktuelles`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.85,
-    },
+    localeEntry("aktuelles", 0.85, "weekly", now),
+
     /* ── Vergleich ── */
-    {
-      url: `${BASE_URL}/vergleich`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
+    localeEntry("vergleich", 0.85, "monthly", now),
+
     /* ── FAQ ── */
-    {
-      url: `${BASE_URL}/faq`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
+    localeEntry("faq", 0.85, "monthly", now),
+
     /* ── Kontakt ── */
-    {
-      url: `${BASE_URL}/kontakt`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
+    localeEntry("kontakt", 0.8, "monthly", now),
+
     /* ── About ── */
-    {
-      url: `${BASE_URL}/ueber-uns`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
+    localeEntry("ueber-uns", 0.6, "monthly", now),
+
     /* ── Legal Pages ── */
-    {
-      url: `${BASE_URL}/impressum`,
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-    {
-      url: `${BASE_URL}/datenschutz`,
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
-    {
-      url: `${BASE_URL}/haftungsausschluss`,
-      lastModified: now,
-      changeFrequency: "yearly",
-      priority: 0.3,
-    },
+    localeEntry("impressum", 0.3, "yearly", now),
+    localeEntry("datenschutz", 0.3, "yearly", now),
+    localeEntry("haftungsausschluss", 0.3, "yearly", now),
   ];
 }

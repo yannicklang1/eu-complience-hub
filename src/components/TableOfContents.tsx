@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useTranslations } from "@/i18n/use-translations";
 
 export interface TocItem {
   id: string;
@@ -17,6 +18,7 @@ export default function TableOfContents({
 }) {
   const [activeId, setActiveId] = useState<string>("");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { t } = useTranslations();
 
   /* Scrollspy — track which section is in view */
   useEffect(() => {
@@ -53,9 +55,9 @@ export default function TableOfContents({
   return (
     <>
       {/* Desktop: Sticky sidebar */}
-      <nav aria-label="Inhaltsverzeichnis">
+      <nav aria-label={t("guide.toc")}>
         <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 text-[#7a8db0]">
-          Inhalt
+          {t("guide.toc")}
         </div>
         <div className="space-y-1 relative">
           {/* Active indicator line */}
@@ -93,7 +95,7 @@ export default function TableOfContents({
       <div className="lg:hidden fixed bottom-20 right-4 z-[60]">
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label={mobileOpen ? "Inhaltsverzeichnis schließen" : "Inhaltsverzeichnis öffnen"}
+          aria-label={mobileOpen ? `${t("guide.toc")} – ${t("common.close")}` : `${t("guide.toc")} – ${t("common.readMore")}`}
           aria-expanded={mobileOpen}
           className="w-12 h-12 rounded-2xl shadow-xl flex items-center justify-center transition-all duration-200"
           style={{
@@ -114,7 +116,7 @@ export default function TableOfContents({
             className="absolute bottom-16 right-0 w-64 rounded-2xl bg-white border border-[#d8dff0] shadow-2xl shadow-blue-900/10 p-4 overflow-hidden z-[61]"
           >
             <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase mb-3 text-[#7a8db0]">
-              Inhalt
+              {t("guide.toc")}
             </div>
             <div className="space-y-1 max-h-64 overflow-y-auto">
               {items.map(({ id, label }) => (

@@ -1,10 +1,5 @@
 import type { Metadata } from "next";
 import { Syne, DM_Sans, DM_Mono } from "next/font/google";
-import CookieConsent from "@/components/CookieConsent";
-import AdBlockOverlay from "@/components/AdBlockOverlay";
-import { AdSenseScript } from "@/components/AdSense";
-import GoogleAnalytics from "@/components/GoogleAnalytics";
-import BackToTop from "@/components/BackToTop";
 import { BASE_URL } from "@/lib/constants";
 import "./globals.css";
 
@@ -169,15 +164,7 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <a href="#main-content" className="skip-link">
-          Zum Hauptinhalt springen
-        </a>
-        <main id="main-content">{children}</main>
-        <CookieConsent />
-        <AdBlockOverlay />
-        <GoogleAnalytics />
-        <AdSenseScript />
-        <BackToTop />
+        {children}
       </body>
     </html>
   );

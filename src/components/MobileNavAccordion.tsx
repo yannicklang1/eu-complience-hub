@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import type { NavDropdown } from "@/data/navigation";
+import { useTranslations } from "@/i18n/use-translations";
 
 function BadgeSpan({ badge }: { badge: string }) {
   const cls =
@@ -27,6 +28,7 @@ export default function MobileNavAccordion({
   onNavigate: () => void;
 }) {
   const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const { locale } = useTranslations();
 
   return (
     <div>
@@ -70,7 +72,7 @@ export default function MobileNavAccordion({
                     {group.items.map((item) => (
                       <Link
                         key={item.href}
-                        href={item.href}
+                        href={`/${locale}${item.href}`}
                         onClick={onNavigate}
                         className="flex items-center justify-between py-2.5 text-[#3a4a6b]"
                       >

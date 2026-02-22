@@ -7,6 +7,9 @@ import DropdownMenu from "./DropdownMenu";
 import MobileNavAccordion from "./MobileNavAccordion";
 import { BrandLogo } from "./BrandLogo";
 import CommandPalette from "./CommandPalette";
+import { useTranslations } from "@/i18n/use-translations";
+import { LocaleSwitcher } from "./LocaleSwitcher";
+import { CountryPicker } from "./CountryPicker";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -48,6 +51,7 @@ export default function Header() {
   }, [mobileOpen]);
 
   const closeMobileMenu = useCallback(() => setMobileOpen(false), []);
+  const { t, locale } = useTranslations();
 
   return (
     <header
@@ -59,7 +63,7 @@ export default function Header() {
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-12 py-4 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 group">
+        <Link href={`/${locale}`} className="flex items-center gap-3 group">
           <div className="w-9 h-9 flex items-center justify-center">
             <BrandLogo size={36} />
           </div>
@@ -74,48 +78,50 @@ export default function Header() {
         </Link>
 
         {/* Desktop Nav */}
-        <nav aria-label="Hauptnavigation" className="hidden md:flex items-center gap-1">
+        <nav aria-label={t("a11y.mainNav")} className="hidden md:flex items-center gap-1">
           <DropdownMenu dropdown={regulierungenDropdown} scrolled={scrolled} />
           <Link
-            href="/branchen"
+            href={`/${locale}/branchen`}
             className={`px-4 py-2 rounded-xl text-[13px] font-[Syne] font-semibold tracking-[-0.01em] transition-all duration-200 ${
               scrolled ? "text-[#3a4a6b] hover:text-[#0A2540] hover:bg-[#0A2540]/[0.04]" : "text-white/80 hover:text-white hover:bg-white/[0.08]"
             }`}
           >
-            Branchen
+            {t("nav.industries")}
           </Link>
           <DropdownMenu dropdown={toolsDropdown} scrolled={scrolled} />
           <Link
-            href="/wissen"
+            href={`/${locale}/wissen`}
             className={`px-4 py-2 rounded-xl text-[13px] font-[Syne] font-semibold tracking-[-0.01em] transition-all duration-200 ${
               scrolled ? "text-[#3a4a6b] hover:text-[#0A2540] hover:bg-[#0A2540]/[0.04]" : "text-white/80 hover:text-white hover:bg-white/[0.08]"
             }`}
           >
-            Wissen
+            {t("nav.knowledge")}
           </Link>
           <Link
-            href="/aktuelles"
+            href={`/${locale}/aktuelles`}
             className={`px-4 py-2 rounded-xl text-[13px] font-[Syne] font-semibold tracking-[-0.01em] transition-all duration-200 ${
               scrolled ? "text-[#3a4a6b] hover:text-[#0A2540] hover:bg-[#0A2540]/[0.04]" : "text-white/80 hover:text-white hover:bg-white/[0.08]"
             }`}
           >
-            Aktuelles
+            {t("nav.news")}
           </Link>
         </nav>
 
         {/* CTA */}
         <div className="hidden md:flex items-center gap-3">
+          <LocaleSwitcher currentLocale={locale} scrolled={scrolled} />
+          <CountryPicker locale={locale} />
           <CommandPalette scrolled={scrolled} />
           <Link
-            href="/fristen-radar"
+            href={`/${locale}/fristen-radar`}
             className={`px-4 py-2 rounded-xl text-[13px] font-[Syne] font-semibold tracking-[-0.01em] transition-all duration-200 ${
               scrolled ? "text-[#3a4a6b] hover:text-[#0A2540] hover:bg-[#0A2540]/[0.04]" : "text-white/80 hover:text-white hover:bg-white/[0.08]"
             }`}
           >
-            Compliance-Briefing
+            {t("nav.briefing")}
           </Link>
           <Link
-            href="/kontakt"
+            href={`/${locale}/kontakt`}
             className="px-5 py-2.5 rounded-xl text-sm font-[Syne] font-bold transition-all duration-300 hover:-translate-y-0.5"
             style={{
               background: "linear-gradient(135deg, #FACC15, #EAB308)",
@@ -123,7 +129,7 @@ export default function Header() {
               boxShadow: "0 4px 16px rgba(250,204,21,0.3)",
             }}
           >
-            Compliance-Report
+            {t("nav.report")}
           </Link>
         </div>
 
@@ -132,7 +138,7 @@ export default function Header() {
           ref={menuButtonRef}
           className="md:hidden flex flex-col gap-1.5 p-2"
           onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label={mobileOpen ? "Menü schließen" : "Menü öffnen"}
+          aria-label={mobileOpen ? t("nav.mobile.closeMenu") : t("nav.mobile.openMenu")}
           aria-expanded={mobileOpen}
           aria-controls="mobile-menu"
         >
@@ -165,47 +171,47 @@ export default function Header() {
         >
           {/* Branchen (direct link) */}
           <Link
-            href="/branchen"
+            href={`/${locale}/branchen`}
             className="flex items-center justify-between py-3 border-b border-[#0A2540]/[0.04] text-[#3a4a6b]"
             onClick={closeMobileMenu}
           >
-            <span className="text-sm font-medium">Branchen</span>
+            <span className="text-sm font-medium">{t("nav.industries")}</span>
           </Link>
 
           {/* Wissen (direct link) */}
           <Link
-            href="/wissen"
+            href={`/${locale}/wissen`}
             className="flex items-center justify-between py-3 border-b border-[#0A2540]/[0.04] text-[#3a4a6b]"
             onClick={closeMobileMenu}
           >
-            <span className="text-sm font-medium">Wissen</span>
+            <span className="text-sm font-medium">{t("nav.knowledge")}</span>
           </Link>
 
           {/* Aktuelles (direct link) */}
           <Link
-            href="/aktuelles"
+            href={`/${locale}/aktuelles`}
             className="flex items-center justify-between py-3 border-b border-[#0A2540]/[0.04] text-[#3a4a6b]"
             onClick={closeMobileMenu}
           >
-            <span className="text-sm font-medium">Aktuelles</span>
+            <span className="text-sm font-medium">{t("nav.news")}</span>
           </Link>
 
           {/* Tools Hub (direct link) */}
           <Link
-            href="/tools"
+            href={`/${locale}/tools`}
             className="flex items-center justify-between py-3 border-b border-[#0A2540]/[0.04] text-[#3a4a6b]"
             onClick={closeMobileMenu}
           >
-            <span className="text-sm font-medium">Alle Tools</span>
+            <span className="text-sm font-medium">{t("nav.allTools")}</span>
           </Link>
 
           {/* Compliance-Briefing (direct link) */}
           <Link
-            href="/fristen-radar"
+            href={`/${locale}/fristen-radar`}
             className="flex items-center justify-between py-3 border-b border-[#0A2540]/[0.04] text-[#3a4a6b]"
             onClick={closeMobileMenu}
           >
-            <span className="text-sm font-medium">Compliance-Briefing</span>
+            <span className="text-sm font-medium">{t("nav.briefing")}</span>
           </Link>
 
           {/* Accordion sections */}
@@ -213,7 +219,7 @@ export default function Header() {
           <MobileNavAccordion dropdown={toolsDropdown} onNavigate={closeMobileMenu} />
 
           <Link
-            href="/kontakt"
+            href={`/${locale}/kontakt`}
             className="mt-4 w-full py-3 rounded-xl text-center font-[Syne] font-bold text-sm block"
             style={{
               background: "linear-gradient(135deg, #FACC15, #EAB308)",
@@ -221,7 +227,7 @@ export default function Header() {
             }}
             onClick={closeMobileMenu}
           >
-            Compliance-Report erstellen
+            {t("nav.reportCreate")}
           </Link>
         </nav>
       )}

@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useTranslations } from "@/i18n/use-translations";
 
 /* ══════════════════════════════════════════════════════════════
    GuideCTA — Call-to-action strip for the bottom of guide pages.
@@ -12,12 +13,13 @@ export default function GuideCTA({ accent = "#0A2540" }: { accent?: string }) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const { t, locale } = useTranslations();
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!email || !email.includes("@")) {
       setStatus("error");
-      setMessage("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+      setMessage(t("form.invalidEmail"));
       return;
     }
 
@@ -38,15 +40,15 @@ export default function GuideCTA({ accent = "#0A2540" }: { accent?: string }) {
 
       if (res.ok) {
         setStatus("success");
-        setMessage(data.message ?? "Bitte bestätigen Sie Ihre E-Mail-Adresse.");
+        setMessage(data.message ?? t("form.confirmEmail"));
         setEmail("");
       } else {
         setStatus("error");
-        setMessage(data.error ?? "Ein Fehler ist aufgetreten.");
+        setMessage(data.error ?? t("form.error"));
       }
     } catch {
       setStatus("error");
-      setMessage("Verbindungsfehler. Bitte versuchen Sie es später erneut.");
+      setMessage(t("form.connectionError"));
     }
   }
 
@@ -83,10 +85,10 @@ export default function GuideCTA({ accent = "#0A2540" }: { accent?: string }) {
           </div>
           <div>
             <h3 className="font-[Syne] font-bold text-[15px] text-[#0A2540]">
-              Compliance-Briefing erhalten
+              {t("cta.getBriefing")}
             </h3>
             <p className="text-sm text-[#7a8db0] mt-0.5">
-              Nur bei kritischen Fristen und Gesetzesänderungen. Max. 3×/Monat.
+              {t("cta.frequency")}
             </p>
           </div>
         </div>
@@ -107,8 +109,8 @@ export default function GuideCTA({ accent = "#0A2540" }: { accent?: string }) {
                 setEmail(e.target.value);
                 if (status === "error") setStatus("idle");
               }}
-              placeholder="ihre@firma.at"
-              aria-label="E-Mail-Adresse für Compliance-Briefing"
+              placeholder={t("form.emailPlaceholder")}
+              aria-label={t("form.emailAriaLabel")}
               required
               className="flex-1 rounded-xl border border-[#d8dff0] bg-[#f8f9fc] px-4 py-2.5 text-sm text-[#0A2540] placeholder:text-[#a0aec0] outline-none focus:border-[#0A2540]/30 focus:ring-2 focus:ring-[#0A2540]/5 transition-all"
             />
@@ -118,7 +120,7 @@ export default function GuideCTA({ accent = "#0A2540" }: { accent?: string }) {
               className="px-5 py-2.5 rounded-xl font-bold text-sm text-white transition-all hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
               style={{ background: accent }}
             >
-              {status === "loading" ? "..." : "Anmelden"}
+              {status === "loading" ? "..." : t("form.subscribe")}
             </button>
           </form>
         )}
@@ -128,50 +130,50 @@ export default function GuideCTA({ accent = "#0A2540" }: { accent?: string }) {
         )}
 
         <p className="text-[11px] text-[#a0aec0] mt-3">
-          DSGVO-konform. Jederzeit kündbar. Kein Spam.
+          {t("cta.gdprNotice")}
         </p>
       </div>
 
       {/* ── Quick Links ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <Link
-          href="/tools"
+          href={`/${locale}/tools`}
           className="group flex items-center gap-3 px-4 py-3 rounded-xl border border-[#e0e5f0] bg-white hover:border-[#d0d8ec] transition-colors"
         >
           <span className="text-lg">⚡</span>
           <div>
             <p className="text-sm font-semibold text-[#0A2540] group-hover:text-[#1a365d]">
-              Compliance-Tools
+              {t("cta.tools")}
             </p>
-            <p className="text-[11px] text-[#7a8db0]">8 kostenlose Werkzeuge</p>
+            <p className="text-[11px] text-[#7a8db0]">{t("cta.toolsDesc")}</p>
           </div>
         </Link>
         <Link
-          href="/vergleich"
+          href={`/${locale}/vergleich`}
           className="group flex items-center gap-3 px-4 py-3 rounded-xl border border-[#e0e5f0] bg-white hover:border-[#d0d8ec] transition-colors"
         >
           <span className="text-lg">🔀</span>
           <div>
             <p className="text-sm font-semibold text-[#0A2540] group-hover:text-[#1a365d]">
-              Regulierungsvergleich
+              {t("cta.comparison")}
             </p>
-            <p className="text-[11px] text-[#7a8db0]">Seite an Seite vergleichen</p>
+            <p className="text-[11px] text-[#7a8db0]">{t("cta.comparisonDesc")}</p>
           </div>
         </Link>
         <Link
-          href="/faq"
+          href={`/${locale}/faq`}
           className="group flex items-center gap-3 px-4 py-3 rounded-xl border border-[#e0e5f0] bg-white hover:border-[#d0d8ec] transition-colors"
         >
           <span className="text-lg">❓</span>
           <div>
             <p className="text-sm font-semibold text-[#0A2540] group-hover:text-[#1a365d]">
-              Häufige Fragen
+              {t("cta.faq")}
             </p>
-            <p className="text-[11px] text-[#7a8db0]">20+ Antworten</p>
+            <p className="text-[11px] text-[#7a8db0]">{t("cta.faqDesc")}</p>
           </div>
         </Link>
         <Link
-          href="/kontakt"
+          href={`/${locale}/kontakt`}
           className="group flex items-center gap-3 px-4 py-3 rounded-xl border border-[#e0e5f0] bg-white hover:border-[#d0d8ec] transition-colors"
         >
           <svg className="w-5 h-5 text-[#0A2540] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
@@ -179,9 +181,9 @@ export default function GuideCTA({ accent = "#0A2540" }: { accent?: string }) {
           </svg>
           <div>
             <p className="text-sm font-semibold text-[#0A2540] group-hover:text-[#1a365d]">
-              Compliance-Report
+              {t("cta.report")}
             </p>
-            <p className="text-[11px] text-[#7a8db0]">Kostenlose Analyse für Ihr Unternehmen</p>
+            <p className="text-[11px] text-[#7a8db0]">{t("cta.reportDesc")}</p>
           </div>
         </Link>
       </div>

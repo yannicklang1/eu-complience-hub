@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "@/i18n/use-translations";
 
 /* ══════════════════════════════════════════════════════════════
    CommandPalette — Cmd+K global search overlay
@@ -75,6 +76,7 @@ export default function CommandPalette({ scrolled = false }: { scrolled?: boolea
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { t, locale } = useTranslations();
 
   const openPalette = useCallback(() => {
     setQuery("");
@@ -158,9 +160,9 @@ export default function CommandPalette({ scrolled = false }: { scrolled?: boolea
   const navigate = useCallback(
     (href: string) => {
       setOpen(false);
-      router.push(href);
+      router.push(`/${locale}${href}`);
     },
-    [router]
+    [router, locale]
   );
 
   /* ── Keyboard navigation ── */
@@ -198,12 +200,12 @@ export default function CommandPalette({ scrolled = false }: { scrolled?: boolea
             ? "bg-[#0A2540]/[0.04] border-[#0A2540]/10 text-[#7a8db0] hover:bg-[#0A2540]/[0.08] hover:text-[#3a4a6b]"
             : "bg-white/[0.06] border-white/10 text-slate-400 hover:bg-white/[0.1] hover:text-slate-300"
         }`}
-        aria-label="Suche öffnen (Cmd+K)"
+        aria-label={t("search.hint")}
       >
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
         </svg>
-        <span className="hidden lg:inline">Suche</span>
+        <span className="hidden lg:inline">{t("search.placeholder")}</span>
         <kbd className={`ml-1 px-1.5 py-0.5 rounded text-[10px] font-mono border ${
           scrolled
             ? "bg-[#0A2540]/[0.04] border-[#0A2540]/10"
@@ -235,7 +237,7 @@ export default function CommandPalette({ scrolled = false }: { scrolled?: boolea
               transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] as const }}
               className="fixed top-[15vh] left-1/2 -translate-x-1/2 z-[101] w-[90vw] max-w-xl"
               role="dialog"
-              aria-label="Suche"
+              aria-label={t("search.placeholder")}
               aria-modal="true"
             >
               <div className="bg-[#0f1729] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
@@ -250,7 +252,7 @@ export default function CommandPalette({ scrolled = false }: { scrolled?: boolea
                     value={query}
                     onChange={(e) => { setQuery(e.target.value); setActiveIndex(0); }}
                     onKeyDown={handleKeyDown}
-                    placeholder="Regulierung, Tool oder Seite suchen..."
+                    placeholder={t("search.placeholder")}
                     className="flex-1 bg-transparent text-white text-sm placeholder:text-slate-500 focus:outline-none"
                     autoComplete="off"
                     spellCheck="false"
@@ -265,7 +267,7 @@ export default function CommandPalette({ scrolled = false }: { scrolled?: boolea
                   {query.trim() === "" && (
                     <div className="px-5 py-8 text-center">
                       <p className="text-sm text-slate-500">
-                        Tippen Sie, um Regulierungen, Tools und Seiten zu finden.
+                        {t("search.hint")}
                       </p>
                     </div>
                   )}
@@ -273,7 +275,7 @@ export default function CommandPalette({ scrolled = false }: { scrolled?: boolea
                   {query.trim() !== "" && flatResults.length === 0 && (
                     <div className="px-5 py-8 text-center">
                       <p className="text-sm text-slate-500">
-                        Keine Ergebnisse für &ldquo;{query}&rdquo;
+                        {t("search.noResults")} &ldquo;{query}&rdquo;
                       </p>
                     </div>
                   )}
@@ -331,11 +333,11 @@ export default function CommandPalette({ scrolled = false }: { scrolled?: boolea
                   <div className="flex items-center gap-1">
                     <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono text-slate-500 bg-white/5 border border-white/10">↑</kbd>
                     <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono text-slate-500 bg-white/5 border border-white/10">↓</kbd>
-                    <span className="text-[10px] text-slate-600 ml-1">Navigieren</span>
+                    <span className="text-[10px] text-slate-600 ml-1">{t("common.next")}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono text-slate-500 bg-white/5 border border-white/10">↵</kbd>
-                    <span className="text-[10px] text-slate-600 ml-1">Öffnen</span>
+                    <span className="text-[10px] text-slate-600 ml-1">{t("common.readMore")}</span>
                   </div>
                 </div>
               </div>

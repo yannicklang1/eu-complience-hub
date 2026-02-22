@@ -4,12 +4,14 @@ import Link from "next/link";
 import { footerRegulations, footerTools } from "@/data/navigation";
 import { BrandLogo } from "./BrandLogo";
 import { useCookieConsent } from "@/hooks/useCookieConsent";
+import { useTranslations } from "@/i18n/use-translations";
 
 export default function Footer() {
   const { reset: resetCookieConsent } = useCookieConsent();
+  const { t, locale } = useTranslations();
 
   return (
-    <footer role="contentinfo" aria-label="Seitenfuß" className="relative overflow-hidden bg-[#060c1a]">
+    <footer role="contentinfo" aria-label={t("a11y.contentInfo")} className="relative overflow-hidden bg-[#060c1a]">
       {/* Subtle dot pattern */}
       <div
         className="absolute inset-0 opacity-10 pointer-events-none"
@@ -46,9 +48,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-sm leading-relaxed max-w-sm text-white/50 mb-6">
-              Europäische Regulierungen. Klar erklärt. Wir übersetzen Brüsseler
-              Gesetzestext in konkrete Handlungsschritte – für KMUs, Startups
-              und Konzerne.
+              {t("footer.description")}
             </p>
 
             {/* Accent line divider */}
@@ -68,13 +68,13 @@ export default function Footer() {
               <>
                 <div>
                   <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 text-[#FACC15]/70">
-                    Regulierungen
+                    {t("footer.regulations")}
                   </div>
                   <ul className="space-y-2">
                     {col1.map((item) => (
                       <li key={item.href}>
                         <Link
-                          href={item.href}
+                          href={`/${locale}${item.href}`}
                           className="text-[13px] text-white/50 transition-colors duration-200 hover:text-white/80"
                         >
                           {item.label}
@@ -91,7 +91,7 @@ export default function Footer() {
                     {col2.map((item) => (
                       <li key={item.href}>
                         <Link
-                          href={item.href}
+                          href={`/${locale}${item.href}`}
                           className="text-[13px] text-white/50 transition-colors duration-200 hover:text-white/80"
                         >
                           {item.label}
@@ -107,13 +107,13 @@ export default function Footer() {
           {/* Tools */}
           <div>
             <div className="font-mono text-[10px] font-semibold tracking-[0.2em] uppercase mb-4 text-[#FACC15]/70">
-              Tools
+              {t("footer.tools")}
             </div>
             <ul className="space-y-2">
               {footerTools.map((item) => (
                 <li key={item.href}>
                   <Link
-                    href={item.href}
+                    href={`/${locale}${item.href}`}
                     className="text-[13px] text-white/50 transition-colors duration-200 hover:text-white/80"
                   >
                     {item.label}
@@ -127,32 +127,27 @@ export default function Footer() {
         {/* Legal disclaimer */}
         <div className="py-6 border-b border-white/[0.04]">
           <p className="font-mono text-[10px] text-white/35 leading-relaxed max-w-3xl">
-            EU Compliance Hub ist ein unabhängiges Informationsportal und steht in keiner
-            Verbindung zu Institutionen der Europäischen Union oder des Europarats. Alle
-            Inhalte dienen ausschließlich der allgemeinen Information und stellen keine
-            Rechtsberatung dar. {"\u201EEU\u201D"} wird beschreibend für den Themenbereich europäischer
-            Regulierungen verwendet.
+            {t("footer.legalDisclaimer")}
           </p>
         </div>
 
         {/* Bottom bar */}
         <div className="flex flex-col md:flex-row items-center justify-between pt-6 gap-4">
           <p className="font-mono text-[11px] text-white/35">
-            &copy; {new Date().getFullYear()} EU Compliance Hub. Kein
-            Rechtsbeistand. Alle Angaben ohne Gewähr.
+            &copy; {new Date().getFullYear()} {t("footer.copyright")}
           </p>
           <div className="flex items-center gap-6 flex-wrap justify-center">
             {[
-              { label: "Über uns", href: "/ueber-uns" },
-              { label: "Aktuelles", href: "/aktuelles" },
-              { label: "FAQ", href: "/faq" },
-              { label: "Compliance-Report", href: "/kontakt" },
-              { label: "Impressum", href: "/impressum" },
-              { label: "Datenschutz", href: "/datenschutz" },
-              { label: "Haftungsausschluss", href: "/haftungsausschluss" },
+              { label: t("footer.aboutUs"), href: `/${locale}/ueber-uns` },
+              { label: t("footer.news"), href: `/${locale}/aktuelles` },
+              { label: t("footer.faq"), href: `/${locale}/faq` },
+              { label: t("footer.report"), href: `/${locale}/kontakt` },
+              { label: t("footer.impressum"), href: `/${locale}/impressum` },
+              { label: t("footer.privacy"), href: `/${locale}/datenschutz` },
+              { label: t("footer.disclaimerLink"), href: `/${locale}/haftungsausschluss` },
             ].map(({ label, href }) => (
               <Link
-                key={label}
+                key={href}
                 href={href}
                 className="text-[11px] text-white/40 transition-colors duration-200 hover:text-white/60"
               >
@@ -163,7 +158,7 @@ export default function Footer() {
               onClick={resetCookieConsent}
               className="text-[11px] text-white/40 transition-colors duration-200 hover:text-white/60 cursor-pointer"
             >
-              Cookie-Einstellungen
+              {t("footer.cookieSettings")}
             </button>
           </div>
         </div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useCookieConsent } from "@/hooks/useCookieConsent";
+import { useTranslations } from "@/i18n/use-translations";
 
 /**
  * DSGVO/TDDDG-compliant cookie consent banner with granular categories.
@@ -21,6 +22,7 @@ export default function CookieConsent() {
   const [showDetails, setShowDetails] = useState(false);
   const [analytics, setAnalytics] = useState(false);
   const [marketing, setMarketing] = useState(false);
+  const { t, locale } = useTranslations();
 
   // Don't render until loaded from localStorage, and hide if already decided
   if (!loaded || consent !== null) return null;
@@ -32,7 +34,7 @@ export default function CookieConsent() {
   return (
     <div
       role="dialog"
-      aria-label="Cookie-Einstellungen"
+      aria-label={t("cookies.title")}
       aria-modal="false"
       className="fixed bottom-0 left-0 right-0 z-[100] p-4 sm:p-6 animate-slide-up-sm"
     >
@@ -64,21 +66,18 @@ export default function CookieConsent() {
             </svg>
           </div>
           <h3 className="font-[Syne] font-bold text-white text-sm">
-            Datenschutz-Einstellungen
+            {t("cookies.title")}
           </h3>
         </div>
 
         {/* Text */}
         <p className="text-[13px] text-white/45 leading-relaxed mb-5">
-          Wir verwenden Cookies und ähnliche Technologien. Technisch notwendige
-          Cookies sind für den Betrieb erforderlich (§&nbsp;165 Abs.&nbsp;3 TKG
-          2021). Analyse- und Werbe-Cookies setzen wir nur mit Ihrer
-          ausdrücklichen Einwilligung.{" "}
+          {t("cookies.description")}{" "}
           <Link
-            href="/datenschutz"
+            href={`/${locale}/datenschutz`}
             className="text-[#FACC15]/80 hover:text-[#FACC15] underline underline-offset-2 transition-colors"
           >
-            Datenschutzerklärung
+            {t("cookies.privacyLink")}
           </Link>
         </p>
 
@@ -89,10 +88,10 @@ export default function CookieConsent() {
             <div className="flex items-center justify-between py-3 px-4 rounded-xl bg-white/[0.04] border border-white/[0.06]">
               <div>
                 <div className="text-sm font-semibold text-white/80">
-                  Notwendig
+                  {t("cookies.necessary")}
                 </div>
                 <div className="text-[11px] text-white/30 mt-0.5">
-                  Betrieb der Website. Kann nicht deaktiviert werden.
+                  {t("cookies.necessaryDesc")}
                 </div>
               </div>
               <div className="relative w-11 h-6 rounded-full bg-emerald-500/30 cursor-not-allowed flex-shrink-0">
@@ -107,16 +106,16 @@ export default function CookieConsent() {
             >
               <div>
                 <div className="text-sm font-semibold text-white/80">
-                  Analyse
+                  {t("cookies.analytics")}
                 </div>
                 <div className="text-[11px] text-white/30 mt-0.5">
-                  Anonyme Nutzungsstatistiken zur Verbesserung der Website.
+                  {t("cookies.analyticsDesc")}
                 </div>
               </div>
               <button
                 role="switch"
                 aria-checked={analytics}
-                aria-label="Analyse-Cookies"
+                aria-label={t("cookies.analyticsAriaLabel")}
                 onClick={(e) => {
                   e.stopPropagation();
                   setAnalytics(!analytics);
@@ -142,16 +141,16 @@ export default function CookieConsent() {
             >
               <div>
                 <div className="text-sm font-semibold text-white/80">
-                  Werbung
+                  {t("cookies.marketing")}
                 </div>
                 <div className="text-[11px] text-white/30 mt-0.5">
-                  Personalisierte Werbung und Anzeigen.
+                  {t("cookies.marketingDesc")}
                 </div>
               </div>
               <button
                 role="switch"
                 aria-checked={marketing}
-                aria-label="Werbe-Cookies"
+                aria-label={t("cookies.marketingAriaLabel")}
                 onClick={(e) => {
                   e.stopPropagation();
                   setMarketing(!marketing);
@@ -179,7 +178,7 @@ export default function CookieConsent() {
                 boxShadow: "0 4px 16px rgba(250,204,21,0.2)",
               }}
             >
-              Auswahl speichern
+              {t("cookies.save")}
             </button>
           </div>
         )}
@@ -191,13 +190,13 @@ export default function CookieConsent() {
               onClick={acceptNecessary}
               className="flex-1 px-5 py-3 rounded-xl border border-white/10 bg-white/[0.04] text-white/70 text-sm font-medium transition-all duration-200 hover:bg-white/[0.08] hover:border-white/20 hover:text-white"
             >
-              Nur notwendige
+              {t("cookies.necessaryOnly")}
             </button>
             <button
               onClick={() => setShowDetails(true)}
               className="flex-1 px-5 py-3 rounded-xl border border-white/10 bg-white/[0.04] text-white/70 text-sm font-medium transition-all duration-200 hover:bg-white/[0.08] hover:border-white/20 hover:text-white"
             >
-              Einstellungen
+              {t("cookies.settings")}
             </button>
             <button
               onClick={acceptAll}
@@ -207,7 +206,7 @@ export default function CookieConsent() {
                 boxShadow: "0 4px 16px rgba(250,204,21,0.2)",
               }}
             >
-              Alle akzeptieren
+              {t("cookies.acceptAll")}
             </button>
           </div>
         )}

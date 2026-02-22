@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useTranslations } from "@/i18n/use-translations";
 
 /**
  * Compliance-Briefing Signup — compact email form with API integration.
@@ -20,12 +21,13 @@ export default function FristenRadarSignup({
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const { t } = useTranslations();
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!email || !email.includes("@")) {
       setStatus("error");
-      setMessage("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+      setMessage(t("form.invalidEmail"));
       return;
     }
 
@@ -46,15 +48,15 @@ export default function FristenRadarSignup({
 
       if (res.ok) {
         setStatus("success");
-        setMessage(data.message ?? "Fast geschafft! Bitte bestätigen Sie Ihre E-Mail-Adresse.");
+        setMessage(data.message ?? t("form.confirmEmail"));
         setEmail("");
       } else {
         setStatus("error");
-        setMessage(data.error ?? "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.");
+        setMessage(data.error ?? t("form.error"));
       }
     } catch {
       setStatus("error");
-      setMessage("Verbindungsfehler. Bitte versuchen Sie es später erneut.");
+      setMessage(t("form.connectionError"));
     }
   }
 
@@ -69,7 +71,7 @@ export default function FristenRadarSignup({
           </svg>
         </div>
         <p className={`text-sm font-semibold ${isHero ? "text-white" : "text-[#060c1a]"}`}>
-          Fast geschafft!
+          {t("form.success")}
         </p>
         <p className={`text-sm ${isHero ? "text-white/50" : "text-[#7a8db0]"} max-w-sm`}>
           {message}
@@ -91,8 +93,8 @@ export default function FristenRadarSignup({
             setEmail(e.target.value);
             if (status === "error") setStatus("idle");
           }}
-          placeholder="ihre@firma.at"
-          aria-label="E-Mail-Adresse für Compliance-Briefing"
+          placeholder={t("form.emailPlaceholder")}
+          aria-label={t("form.emailAriaLabel")}
           required
           className={
             isHero
@@ -116,10 +118,10 @@ export default function FristenRadarSignup({
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
-                Wird gesendet…
+                {t("form.sending")}
               </span>
             ) : (
-              "Briefing aktivieren"
+              t("form.submitBriefing")
             )}
           </span>
           <div className="absolute inset-0 bg-gradient-to-r from-amber-300 to-[#FACC15] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -131,8 +133,7 @@ export default function FristenRadarSignup({
       )}
 
       <p className={`font-mono text-[11px] mt-5 tracking-wide ${isHero ? "text-white/20" : "text-[#7a8db0]/60"}`}>
-        Nur bei kritischen Fristen und Gesetzesänderungen. Max. 3×/Monat. Jederzeit kündbar. DSGVO-konform.
-        *Gelegentlich erhalten Sie auch Hinweise auf geprüfte Compliance-Tools (als Anzeige gekennzeichnet).
+        {t("form.disclaimer")}
       </p>
     </div>
   );

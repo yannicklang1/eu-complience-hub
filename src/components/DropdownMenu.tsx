@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import type { NavDropdown } from "@/data/navigation";
+import { useTranslations } from "@/i18n/use-translations";
 
 function BadgeSpan({ badge }: { badge: string }) {
   const cls =
@@ -28,6 +29,7 @@ export default function DropdownMenu({
 }) {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { locale } = useTranslations();
 
   const isWide = dropdown.groups.length >= 3;
 
@@ -117,7 +119,7 @@ export default function DropdownMenu({
                         {group.items.map((item) => (
                           <Link
                             key={item.href}
-                            href={item.href}
+                            href={`/${locale}${item.href}`}
                             role="menuitem"
                             onClick={() => setOpen(false)}
                             className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg transition-all duration-150 hover:bg-[#0A2540]/[0.04] group"
@@ -154,7 +156,7 @@ export default function DropdownMenu({
                     {dropdown.groups.reduce((s, g) => s + g.items.length, 0)} Regulierungen
                   </span>
                   <Link
-                    href="/timeline"
+                    href={`/${locale}/timeline`}
                     onClick={() => setOpen(false)}
                     className="text-[11px] font-[Syne] font-semibold text-[#FACC15] hover:text-[#EAB308] transition-colors flex items-center gap-1"
                   >
@@ -179,7 +181,7 @@ export default function DropdownMenu({
                     {group.items.map((item) => (
                       <Link
                         key={item.href}
-                        href={item.href}
+                        href={`/${locale}${item.href}`}
                         role="menuitem"
                         onClick={() => setOpen(false)}
                         className="flex items-center gap-3 mx-2 px-3 py-2.5 rounded-xl transition-all duration-150 hover:bg-[#0A2540]/[0.04] group"

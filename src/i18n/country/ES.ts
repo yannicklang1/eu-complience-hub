@@ -1,0 +1,128 @@
+import type { CountryData } from "./types";
+
+const ES: CountryData = {
+  code: "ES",
+  nameLocal: "España",
+  nameEN: "Spain",
+  nameDE: "Spanien",
+  flag: "🇪🇸",
+  languages: ["es"],
+  euMemberSince: 1986,
+  dpaName: "Agencia Española de Protección de Datos (AEPD)",
+  dpaUrl: "https://www.aepd.es",
+  csirtName: "CCN-CERT / INCIBE-CERT",
+  csirtUrl: "https://www.ccn-cert.cni.es",
+  regulations: {
+    nis2: {
+      nationalLawName: "Ley de Ciberseguridad Nacional (en tramitación)",
+      authority: "Centro Nacional de Ciberseguridad (CNN) / DSN",
+      authorityUrl: "https://www.ccn.cni.es",
+      implementationStatus: "pending",
+      nationalNotes: "Spanien setzt NIS2 um. Das nationale Cybersicherheitsgesetz befindet sich in parlamentarischer Beratung.",
+    },
+    "ai-act": {
+      authority: "Agencia Española de Supervisión de la Inteligencia Artificial (AESIA)",
+      authorityUrl: "https://www.aesia.gob.es",
+      implementationStatus: "pending",
+      nationalNotes: "Spanien hat AESIA als nationale KI-Aufsichtsbehörde eingerichtet — eine der ersten in der EU.",
+    },
+    dora: {
+      authority: "Banco de España / Comisión Nacional del Mercado de Valores (CNMV)",
+      authorityUrl: "https://www.bde.es",
+      nationalDeadline: "17 January 2025",
+      implementationStatus: "implemented",
+      nationalNotes: "DORA seit Januar 2025 unmittelbar anwendbar. Banco de España und CNMV beaufsichtigen spanische Finanzunternehmen.",
+    },
+    dsgvo: {
+      nationalLawName: "Ley Orgánica de Protección de Datos Personales y garantía de los derechos digitales (LOPDGDD)",
+      authority: "Agencia Española de Protección de Datos (AEPD)",
+      authorityUrl: "https://www.aepd.es",
+      implementationStatus: "implemented",
+      nationalFines: "Bis zu 20 Mio. € oder 4 % des weltweiten Jahresumsatzes",
+      nationalNotes: "Spanien hat 2018 das LOPDGDD verabschiedet, einschließlich digitaler Rechte. AEPD ist aktive Vollzugsbehörde.",
+    },
+    csrd: {
+      authority: "Comisión Nacional del Mercado de Valores (CNMV)",
+      authorityUrl: "https://www.cnmv.es",
+      implementationStatus: "implemented",
+      nationalNotes: "Spanien hat die CSRD umgesetzt. Große börsennotierte Unternehmen berichten ab GJ 2024.",
+    },
+    dsa: {
+      authority: "Ministerio para la Transformación Digital",
+      authorityUrl: "https://www.mineco.gob.es",
+      implementationStatus: "implemented",
+      nationalNotes: "Spanien hat das Ministerium für digitale Transformation als Koordinator für digitale Dienste benannt.",
+    },
+    mica: {
+      authority: "Comisión Nacional del Mercado de Valores (CNMV)",
+      authorityUrl: "https://www.cnmv.es",
+      implementationStatus: "implemented",
+      nationalNotes: "MiCA seit Dezember 2024 vollständig anwendbar. CNMV beaufsichtigt Krypto-Dienstleister.",
+    },
+    cra: {
+      authority: "Instituto Nacional de Ciberseguridad (INCIBE) / Ministerio de Industria",
+      authorityUrl: "https://www.incibe.es",
+      implementationStatus: "pending",
+      nationalNotes: "Der CRA gilt ab August 2025 (Grundpflichten). INCIBE wird voraussichtlich als Marktüberwachungsbehörde für Cybersicherheitsprodukte designiert.",
+    },
+    bafg: {
+      authority: "Ministerio de Trabajo y Economía Social",
+      authorityUrl: "https://www.mites.gob.es",
+      implementationStatus: "pending",
+      nationalNotes: "Spanien setzt die EU-Lieferkettenrichtlinie (CSDDD) um. Ein eigenes nationales Lieferkettensorgfaltspflichtengesetz ist in Vorbereitung.",
+    },
+    hschg: {
+      authority: "Ministerio de Consumo / Dirección General de Consumo",
+      authorityUrl: "https://www.consumo.gob.es",
+      implementationStatus: "implemented",
+      nationalNotes: "Das EU-Produktsicherheitsgesetz (GPSR) gilt seit Dezember 2024 direkt. Marktüberwachung erfolgt durch staatliche und regionale Behörden.",
+    },
+    "data-act": {
+      authority: "Agencia Española de Protección de Datos (AEPD) / SETSI",
+      authorityUrl: "https://www.aepd.es",
+      nationalDeadline: "12. September 2025",
+      implementationStatus: "pending",
+      nationalNotes: "Der Data Act gilt ab September 2025. AEPD und das Staatssekretariat für Telekommunikation koordinieren die Durchsetzung.",
+    },
+    eprivacy: {
+      authority: "Agencia Española de Protección de Datos (AEPD)",
+      authorityUrl: "https://www.aepd.es",
+      implementationStatus: "pending",
+      nationalNotes: "Die ePrivacy-Verordnung ist noch nicht verabschiedet. Spanien wendet das LSSI (Ley de Servicios de la Sociedad de la Información) für Cookie-Regelungen an.",
+    },
+    eidas: {
+      nationalLawName: "Ley 6/2020, reguladora de determinados aspectos de los servicios electrónicos de confianza",
+      authority: "Secretaría de Estado de Digitalización e Inteligencia Artificial (SEDIA)",
+      authorityUrl: "https://portal.mineco.gob.es",
+      implementationStatus: "implemented",
+      nationalNotes: "eIDAS 2.0 schafft den Rahmen für die EUDI-Wallet. Spanien betreibt das System Cl@ve als nationale digitale Identitätslösung.",
+    },
+    ehds: {
+      authority: "Ministerio de Sanidad",
+      authorityUrl: "https://www.sanidad.gob.es",
+      implementationStatus: "pending",
+      nationalNotes: "Der EHDS ist in Umsetzung. Spanien baut auf der bestehenden Gesundheitsdateninfrastruktur (SNS Digital / Historia Clínica Digital) auf.",
+    },
+    "green-claims": {
+      authority: "Ministerio de Consumo",
+      authorityUrl: "https://www.consumo.gob.es",
+      implementationStatus: "pending",
+      nationalNotes: "Die Green Claims Directive wird voraussichtlich 2026 in spanisches Recht umgesetzt. Spanien hat bereits erste Greenwashing-Maßnahmen im Verbraucherschutzrecht.",
+    },
+    produkthaftung: {
+      nationalLawName: "Texto Refundido de la Ley General para la Defensa de los Consumidores y Usuarios (Real Decreto Legislativo 1/2007)",
+      authority: "Ministerio de Justicia",
+      authorityUrl: "https://www.mjusticia.gob.es",
+      implementationStatus: "pending",
+      nationalNotes: "Die neue EU-Produkthaftungsrichtlinie muss bis Dezember 2026 umgesetzt werden. Die bestehenden Verbraucherschutzregelungen werden modernisiert.",
+    },
+    dpp: {
+      authority: "Ministerio para la Transición Ecológica y el Reto Demográfico (MITECO)",
+      authorityUrl: "https://www.miteco.gob.es",
+      implementationStatus: "pending",
+      nationalNotes: "Der Digitale Produktpass wird stufenweise ab 2027 eingeführt. MITECO koordiniert die nationale Umsetzung.",
+    },
+  },
+};
+
+export default ES;
