@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
+import { useAdminAuth } from "../AdminAuthProvider";
 
 /* ═══════════════════════════════════════════════════════════
    TYPES
@@ -13,7 +13,6 @@ interface Subscriber {
   status: "active" | "pending" | "unsubscribed";
   source: string | null;
   source_page: string | null;
-  country: string | null;
   commercial_consent: boolean;
   created_at: string;
   opt_in_confirmed_at: string | null;
@@ -36,7 +35,6 @@ interface ApiResponse {
   stats: Stats | null;
 }
 
-type AuthState = "idle" | "loading" | "authenticated" | "error";
 
 /* ═══════════════════════════════════════════════════════════
    CONSTANTS
@@ -48,18 +46,6 @@ const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }
   unsubscribed: { label: "Abgemeldet", color: "#dc2626", bg: "rgba(220,38,38,0.12)" },
 };
 
-const COUNTRY_LABELS: Record<string, string> = {
-  AT: "🇦🇹 AT", DE: "🇩🇪 DE", BE: "🇧🇪 BE", BG: "🇧🇬 BG",
-  HR: "🇭🇷 HR", CY: "🇨🇾 CY", CZ: "🇨🇿 CZ", DK: "🇩🇰 DK",
-  EE: "🇪🇪 EE", FI: "🇫🇮 FI", FR: "🇫🇷 FR", GR: "🇬🇷 GR",
-  HU: "🇭🇺 HU", IE: "🇮🇪 IE", IT: "🇮🇹 IT", LV: "🇱🇻 LV",
-  LT: "🇱🇹 LT", LU: "🇱🇺 LU", MT: "🇲🇹 MT", NL: "🇳🇱 NL",
-  PL: "🇵🇱 PL", PT: "🇵🇹 PT", RO: "🇷🇴 RO", SK: "🇸🇰 SK",
-  SI: "🇸🇮 SI", ES: "🇪🇸 ES", SE: "🇸🇪 SE",
-  CH: "🇨🇭 CH", LI: "🇱🇮 LI",
-  OTHER_EU: "🇪🇺 EU", OTHER: "🌍",
-};
-
 const ITEMS_PER_PAGE = 25;
 
 /* ═══════════════════════════════════════════════════════════
@@ -67,79 +53,54 @@ const ITEMS_PER_PAGE = 25;
    ═══════════════════════════════════════════════════════════ */
 
 export default function SubscriberDashboard() {
-  const [authState, setAuthState] = useState<AuthState>("idle");
-  const [adminKey, setAdminKey] = useState("");
+  const { adminKey } = useAdminAuth();
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [filterStatus, setFilterStatus] = useState("");
-  const [filterCountry, setFilterCountry] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
 
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
 
   const fetchSubscribers = useCallback(
-    async (p: number, status: string, country: string) => {
-      setAuthState("loading");
+    async (p: number, status: string) => {
       try {
         const params = new URLSearchParams({
           page: p.toString(),
           limit: ITEMS_PER_PAGE.toString(),
         });
         if (status) params.set("status", status);
-        if (country) params.set("country", country);
 
         const res = await fetch(`/api/admin/subscribers?${params.toString()}`, {
           headers: { "x-admin-key": adminKey },
         });
 
-        if (res.status === 401) {
-          setAuthState("error");
-          setErrorMessage("Ungültiger Admin-Key.");
-          return;
-        }
-
-        if (!res.ok) {
-          setAuthState("error");
-          setErrorMessage(`Fehler: ${res.status}`);
-          return;
-        }
+        if (!res.ok) return;
 
         const data: ApiResponse = await res.json();
         setSubscribers(data.subscribers);
         setTotal(data.total ?? 0);
         setStats(data.stats ?? null);
-        setAuthState("authenticated");
-      } catch (err) {
-        setAuthState("error");
-        setErrorMessage(err instanceof Error ? err.message : "Verbindungsfehler");
+      } catch {
+        // silent
       }
     },
     [adminKey],
   );
 
-  function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    if (!adminKey.trim()) return;
-    fetchSubscribers(1, filterStatus, filterCountry);
-  }
-
   useEffect(() => {
-    if (authState === "authenticated") {
-      fetchSubscribers(page, filterStatus, filterCountry);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, filterStatus, filterCountry]);
+    // Data fetching on filter/page change — setState in callback is intentional
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchSubscribers(page, filterStatus);
+  }, [page, filterStatus, fetchSubscribers]);
 
   function exportCSV() {
     if (subscribers.length === 0) return;
 
-    const headers = ["E-Mail", "Status", "Land", "Quelle", "Commercial Consent", "Erstellt", "Bestätigt", "Abgemeldet"];
+    const headers = ["E-Mail", "Status", "Quelle", "Commercial Consent", "Erstellt", "Bestätigt", "Abgemeldet"];
     const rows = subscribers.map((s) => [
       s.email,
       s.status,
-      s.country ?? "",
       s.source ?? "",
       s.commercial_consent ? "Ja" : "Nein",
       new Date(s.created_at).toLocaleDateString("de-AT"),
@@ -157,64 +118,9 @@ export default function SubscriberDashboard() {
     URL.revokeObjectURL(url);
   }
 
-  /* ── Login Screen ── */
-  if (authState !== "authenticated") {
-    return (
-      <div className="min-h-screen bg-[#060c1a] flex items-center justify-center p-6">
-        <form
-          onSubmit={handleLogin}
-          className="w-full max-w-sm rounded-2xl border border-white/5 bg-slate-900/60 p-8"
-        >
-          <h1 className="font-[Syne] font-extrabold text-xl text-white mb-2">
-            Subscriber-Dashboard
-          </h1>
-          <p className="text-sm text-slate-400 mb-6">
-            Admin-Key eingeben, um die Subscriber-Liste zu sehen.
-          </p>
-
-          <label htmlFor="admin-key" className="block text-xs font-medium text-slate-400 mb-2">
-            Admin-Key
-          </label>
-          <input
-            id="admin-key"
-            type="password"
-            value={adminKey}
-            onChange={(e) => {
-              setAdminKey(e.target.value);
-              if (authState === "error") setAuthState("idle");
-            }}
-            className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-600 outline-none focus:border-yellow-400/30 transition-colors"
-            placeholder="••••••••"
-          />
-
-          {authState === "error" && (
-            <p className="text-sm text-red-400 mt-3" role="alert">{errorMessage}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={authState === "loading"}
-            className="mt-5 w-full rounded-xl py-3 text-sm font-[Syne] font-bold text-[#0A2540] disabled:opacity-50"
-            style={{
-              background: "linear-gradient(135deg, #FACC15, #EAB308)",
-            }}
-          >
-            {authState === "loading" ? "Lade…" : "Anmelden"}
-          </button>
-
-          <div className="mt-4 text-center">
-            <Link href="/admin/leads" className="text-xs text-slate-500 hover:text-yellow-400 transition-colors">
-              Zum Lead-Dashboard
-            </Link>
-          </div>
-        </form>
-      </div>
-    );
-  }
-
   /* ── Dashboard ── */
   return (
-    <div className="min-h-screen bg-[#060c1a] p-6 lg:p-10">
+    <div className="bg-[#060c1a] p-6 lg:p-10">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
@@ -227,12 +133,6 @@ export default function SubscriberDashboard() {
             </p>
           </div>
           <div className="flex gap-3">
-            <Link
-              href="/admin/leads"
-              className="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 border border-white/10 hover:border-white/20 transition-colors"
-            >
-              Lead-Dashboard
-            </Link>
             <button
               onClick={exportCSV}
               className="px-4 py-2 rounded-xl text-xs font-medium text-[#0A2540] bg-yellow-400 hover:bg-yellow-300 transition-colors"
@@ -282,21 +182,6 @@ export default function SubscriberDashboard() {
             <option value="unsubscribed">Abgemeldet</option>
           </select>
 
-          <select
-            value={filterCountry}
-            onChange={(e) => {
-              setFilterCountry(e.target.value);
-              setPage(1);
-            }}
-            aria-label="Land filtern"
-            className="rounded-xl border border-white/10 bg-white/5 text-sm text-white px-4 py-2 outline-none"
-          >
-            <option value="">Alle Länder</option>
-            {Object.entries(COUNTRY_LABELS).map(([val, label]) => (
-              <option key={val} value={val}>{label}</option>
-            ))}
-          </select>
-
           <div className="flex-1" />
 
           <span className="text-xs text-slate-500 self-center font-mono">
@@ -315,9 +200,6 @@ export default function SubscriberDashboard() {
                   </th>
                   <th className="text-left px-4 py-3 text-[11px] font-mono font-semibold text-slate-500 tracking-wider uppercase">
                     Status
-                  </th>
-                  <th className="text-left px-4 py-3 text-[11px] font-mono font-semibold text-slate-500 tracking-wider uppercase hidden md:table-cell">
-                    Land
                   </th>
                   <th className="text-left px-4 py-3 text-[11px] font-mono font-semibold text-slate-500 tracking-wider uppercase hidden sm:table-cell">
                     Quelle
@@ -352,9 +234,6 @@ export default function SubscriberDashboard() {
                           {statusInfo.label}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-slate-400 text-[12px] hidden md:table-cell">
-                        {s.country ? COUNTRY_LABELS[s.country] ?? s.country : "—"}
-                      </td>
                       <td className="px-4 py-3 text-slate-400 text-[12px] hidden sm:table-cell">
                         {s.source ?? "—"}
                       </td>
@@ -387,7 +266,7 @@ export default function SubscriberDashboard() {
 
                 {subscribers.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center text-slate-500">
+                    <td colSpan={6} className="px-4 py-12 text-center text-slate-500">
                       Keine Subscriber gefunden.
                     </td>
                   </tr>

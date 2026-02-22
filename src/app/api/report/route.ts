@@ -5,6 +5,7 @@ import { createRateLimiter, getClientIp } from "@/lib/rate-limit";
 import { validateEmail, sanitize } from "@/lib/validation";
 import { log } from "@/lib/logger";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-auth";
 import { generateReportData, type ReportInput } from "@/lib/report-engine";
 import { sendReportEmail } from "@/lib/resend";
 import ReportDocument from "@/lib/pdf/ReportDocument";
@@ -30,6 +31,19 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    /* ── Auth check — require login for report generation ── */
+    const authSupabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await authSupabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Bitte melden Sie sich an, um einen Report zu erstellen.", loginRequired: true },
+        { status: 401 },
+      );
+    }
+
     const body = await request.json();
 
     /* ── Validate required fields ── */
@@ -176,7 +190,7 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Insert report metadata
+      // Insert report metadata (with user_id if authenticated)
       const { error: dbError } = await supabase.from("reports").insert({
         report_token: reportToken,
         email,
@@ -192,6 +206,7 @@ export async function POST(request: NextRequest) {
         pdf_storage_path: storagePath,
         gdpr_consent: true,
         commercial_consent: input.commercialConsent,
+        user_id: user.id,
       });
 
       if (dbError) {

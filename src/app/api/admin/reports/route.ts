@@ -4,10 +4,11 @@ import { log } from "@/lib/logger";
 import { adminLimiter, getClientIp } from "@/lib/rate-limit";
 
 /* ══════════════════════════════════════════════════════════════
-   GET /api/admin/subscribers — Admin subscriber list
+   GET /api/admin/reports — Admin reports list with stats
    ══════════════════════════════════════════════════════════════ */
+
 export async function GET(request: NextRequest) {
-  /* --- Rate limiting (brute-force protection) --- */
+  /* --- Rate limiting --- */
   if (adminLimiter.isLimited(getClientIp(request))) {
     return NextResponse.json(
       { error: "Zu viele Anfragen. Bitte versuchen Sie es in einer Minute erneut." },
@@ -30,58 +31,57 @@ export async function GET(request: NextRequest) {
   const page = parseInt(url.searchParams.get("page") ?? "1", 10);
   const limit = Math.min(parseInt(url.searchParams.get("limit") ?? "50", 10), 200);
   const offset = (page - 1) * limit;
-  const status = url.searchParams.get("status"); // active, pending, unsubscribed
+  const grade = url.searchParams.get("grade"); // A, B, C, D, E
 
   let query = adminClient
-    .from("subscribers")
-    .select("id, email, status, source, source_page, commercial_consent, created_at, opt_in_confirmed_at, unsubscribed_at", { count: "exact" })
+    .from("reports")
+    .select(
+      "id, report_token, email, contact_name, company_name, company_size, branche, maturity_grade, evaluated_regulations, cost_estimate, download_count, pdf_storage_path, created_at",
+      { count: "exact" },
+    )
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
-  if (status && ["active", "pending", "unsubscribed"].includes(status)) {
-    query = query.eq("status", status);
+  if (grade && ["A", "B", "C", "D", "E"].includes(grade)) {
+    query = query.eq("maturity_grade", grade);
   }
 
   const { data, error, count } = await query;
 
   if (error) {
-    log.error("[admin/subscribers]", "Query failed", { code: error.code, message: error.message });
+    log.error("[admin/reports]", "Query failed", { code: error.code, message: error.message });
     return NextResponse.json({ error: "Abfrage fehlgeschlagen." }, { status: 500 });
   }
 
   /* --- Aggregate stats --- */
-  const { count: totalActive } = await adminClient
-    .from("subscribers")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "active");
+  const { count: totalReports } = await adminClient
+    .from("reports")
+    .select("id", { count: "exact", head: true });
 
-  const { count: totalPending } = await adminClient
-    .from("subscribers")
+  const { count: withPdf } = await adminClient
+    .from("reports")
     .select("id", { count: "exact", head: true })
-    .eq("status", "pending");
+    .not("pdf_storage_path", "is", null);
 
-  const { count: totalUnsubscribed } = await adminClient
-    .from("subscribers")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "unsubscribed");
+  // Sum download_count via raw query or manual sum
+  const { data: downloadSum } = await adminClient
+    .from("reports")
+    .select("download_count");
 
-  const { count: commercialOptIn } = await adminClient
-    .from("subscribers")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "active")
-    .eq("commercial_consent", true);
+  const totalDownloads = (downloadSum ?? []).reduce(
+    (sum, r) => sum + ((r as { download_count: number }).download_count ?? 0),
+    0,
+  );
 
   return NextResponse.json({
-    subscribers: data,
+    reports: data,
     total: count,
     page,
     limit,
     stats: {
-      total: (totalActive ?? 0) + (totalPending ?? 0) + (totalUnsubscribed ?? 0),
-      active: totalActive ?? 0,
-      pending: totalPending ?? 0,
-      unsubscribed: totalUnsubscribed ?? 0,
-      commercial_opt_in: commercialOptIn ?? 0,
+      total: totalReports ?? 0,
+      with_pdf: withPdf ?? 0,
+      total_downloads: totalDownloads,
     },
   });
 }

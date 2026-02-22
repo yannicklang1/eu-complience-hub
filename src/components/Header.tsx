@@ -9,6 +9,7 @@ import { BrandLogo } from "./BrandLogo";
 import CommandPalette from "./CommandPalette";
 import { useTranslations } from "@/i18n/use-translations";
 import { RegionSwitcher } from "./RegionSwitcher";
+import AuthButton from "./AuthButton";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -110,6 +111,7 @@ export default function Header() {
         <div className="hidden md:flex items-center gap-3">
           <RegionSwitcher currentLocale={locale} scrolled={scrolled} />
           <CommandPalette scrolled={scrolled} />
+          <AuthButton scrolled={scrolled} />
           <Link
             href={`/${locale}/kontakt`}
             className="px-5 py-2.5 rounded-xl text-sm font-[Syne] font-bold transition-all duration-300 hover:-translate-y-0.5"
@@ -202,6 +204,11 @@ export default function Header() {
           {/* Region (Country + Language) */}
           <div className="py-3 border-b border-[#0A2540]/[0.04]">
             <RegionSwitcher currentLocale={locale} scrolled={true} />
+          </div>
+
+          {/* Auth button */}
+          <div className="py-3 border-b border-[#0A2540]/[0.04]" onClick={closeMobileMenu}>
+            <AuthButton scrolled={true} variant="mobile" />
           </div>
 
           <Link

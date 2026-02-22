@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { DEFAULT_LOCALE, COUNTRY_TO_LOCALE, isValidLocale } from "@/i18n/config";
 import type { Locale } from "@/i18n/config";
+import { createSupabaseMiddlewareClient } from "@/lib/supabase-auth";
 
 /** Cookie name for persisted locale preference */
 const LOCALE_COOKIE = "locale";
@@ -12,6 +13,8 @@ const LOCALE_COOKIE = "locale";
 const EXCLUDED_PREFIXES = [
   "/api/",
   "/admin/",
+  "/auth/",
+  "/portal/",
   "/_next/",
   "/favicon",
   "/robots",
@@ -74,10 +77,39 @@ function detectLocale(request: NextRequest): Locale {
   return DEFAULT_LOCALE;
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip excluded paths
+  // Skip excluded paths (except /auth/ and /portal/ which need session handling)
+  const needsAuth = pathname.startsWith("/portal") || pathname.startsWith("/auth/");
+  if (shouldSkip(pathname) && !needsAuth) {
+    return NextResponse.next();
+  }
+
+  // ── Supabase session refresh for auth/portal routes ──
+  if (needsAuth) {
+    const response = NextResponse.next({ request });
+    const supabase = createSupabaseMiddlewareClient(request, response);
+
+    // Refresh session (keeps auth tokens fresh)
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Protect /portal/* — redirect to login if not authenticated
+    if (pathname.startsWith("/portal") && !user) {
+      const loginUrl = new URL("/auth/login", request.url);
+      loginUrl.searchParams.set("next", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    // Redirect logged-in users away from login page
+    if (pathname === "/auth/login" && user) {
+      return NextResponse.redirect(new URL("/portal", request.url));
+    }
+
+    return response;
+  }
+
+  // Skip remaining excluded paths
   if (shouldSkip(pathname)) {
     return NextResponse.next();
   }

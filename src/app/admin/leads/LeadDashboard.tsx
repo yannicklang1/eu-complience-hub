@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAdminAuth } from "../AdminAuthProvider";
 
 /* ═══════════════════════════════════════════════════════════
    TYPES
@@ -52,7 +52,6 @@ interface ApiResponse {
   stats: LeadStats | null;
 }
 
-type AuthState = "idle" | "loading" | "authenticated" | "error";
 
 /* ═══════════════════════════════════════════════════════════
    CONSTANTS
@@ -90,8 +89,7 @@ const ITEMS_PER_PAGE = 25;
    ═══════════════════════════════════════════════════════════ */
 
 export default function LeadDashboard() {
-  const [authState, setAuthState] = useState<AuthState>("idle");
-  const [adminKey, setAdminKey] = useState("");
+  const { adminKey } = useAdminAuth();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [stats, setStats] = useState<LeadStats | null>(null);
   const [total, setTotal] = useState(0);
@@ -100,13 +98,11 @@ export default function LeadDashboard() {
   const [filterBranche, setFilterBranche] = useState("");
   const [filterCountry, setFilterCountry] = useState("");
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [errorMessage, setErrorMessage] = useState("");
 
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
 
   const fetchLeads = useCallback(
     async (p: number, source: string, branche: string, country: string) => {
-      setAuthState("loading");
       try {
         const params = new URLSearchParams({
           page: p.toString(),
@@ -120,43 +116,24 @@ export default function LeadDashboard() {
           headers: { "x-admin-key": adminKey },
         });
 
-        if (res.status === 401) {
-          setAuthState("error");
-          setErrorMessage("Ungültiger Admin-Key.");
-          return;
-        }
-
-        if (!res.ok) {
-          setAuthState("error");
-          setErrorMessage(`Fehler: ${res.status}`);
-          return;
-        }
+        if (!res.ok) return;
 
         const data: ApiResponse = await res.json();
         setLeads(data.leads);
         setTotal(data.total ?? 0);
         setStats(data.stats ?? null);
-        setAuthState("authenticated");
-      } catch (err) {
-        setAuthState("error");
-        setErrorMessage(err instanceof Error ? err.message : "Verbindungsfehler");
+      } catch {
+        // silent
       }
     },
     [adminKey],
   );
 
-  function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    if (!adminKey.trim()) return;
-    fetchLeads(1, filterSource, filterBranche, filterCountry);
-  }
-
   useEffect(() => {
-    if (authState === "authenticated") {
-      fetchLeads(page, filterSource, filterBranche, filterCountry);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, filterSource, filterBranche, filterCountry]);
+    // Data fetching on filter/page change — setState in callback is intentional
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchLeads(page, filterSource, filterBranche, filterCountry);
+  }, [page, filterSource, filterBranche, filterCountry, fetchLeads]);
 
   function exportCSV() {
     if (leads.length === 0) return;
@@ -197,85 +174,14 @@ export default function LeadDashboard() {
     URL.revokeObjectURL(url);
   }
 
-  /* ─── Login Screen ─── */
-  if (authState !== "authenticated") {
-    return (
-      <div className="min-h-screen bg-[#f8f9fd] flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-sm"
-        >
-          <div className="rounded-2xl border border-[#d8dff0] bg-white p-8 shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0A2540] to-[#0D3068] flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                </svg>
-              </div>
-              <div>
-                <h1 className="font-[Syne] font-extrabold text-xl text-[#060c1a]">
-                  Lead-Dashboard
-                </h1>
-                <p className="text-[12px] text-[#7a8db0]">Admin-Zugang erforderlich</p>
-              </div>
-            </div>
-
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="block text-[13px] font-medium text-[#060c1a] mb-1.5">
-                  Service Role Key
-                </label>
-                <input
-                  type="password"
-                  value={adminKey}
-                  onChange={(e) => setAdminKey(e.target.value)}
-                  placeholder="sb_secret_..."
-                  className="w-full px-4 py-3 rounded-lg border border-[#d8dff0] bg-white text-sm text-[#060c1a] placeholder:text-[#7a8db0] focus:outline-none focus:border-[#0A2540] focus:ring-2 focus:ring-[#0A2540]/20"
-                />
-              </div>
-
-              {authState === "error" && (
-                <div className="rounded-lg bg-red-50 border border-red-200 p-3">
-                  <p className="text-[13px] text-red-700">{errorMessage}</p>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={authState === "loading" || !adminKey.trim()}
-                className="w-full py-3 rounded-xl text-sm font-[Syne] font-bold text-white bg-gradient-to-r from-[#0A2540] to-[#0D3068] hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {authState === "loading" ? "Verbinde..." : "Anmelden"}
-              </button>
-            </form>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
-
   /* ─── Dashboard ─── */
   return (
-    <div className="min-h-screen bg-[#f8f9fd]">
+    <div className="bg-[#f8f9fd]">
       {/* Top Bar */}
       <div className="bg-white border-b border-[#e0e5f0] px-4 sm:px-8 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <h2 className="font-[Syne] font-bold text-lg text-[#060c1a]">Lead-Dashboard</h2>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0A2540] to-[#0D3068] flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-              </svg>
-            </div>
-            <h1 className="font-[Syne] font-bold text-lg text-[#060c1a]">Lead-Dashboard</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              href="/admin/subscribers"
-              className="px-4 py-2 rounded-lg text-sm font-medium text-[#3a4a6b] hover:bg-[#0A2540]/5 transition-all"
-            >
-              Subscribers
-            </Link>
             <button
               onClick={exportCSV}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-[#0A2540] bg-[#0A2540]/5 hover:bg-[#0A2540]/10 transition-all"
