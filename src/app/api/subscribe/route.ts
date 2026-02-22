@@ -186,7 +186,7 @@ export async function GET(request: NextRequest) {
 
   const { data: subscriber, error: fetchError } = await supabase
     .from("subscribers")
-    .select("id, status, email, unsubscribe_token")
+    .select("id, status, email, unsubscribe_token, country")
     .eq("opt_in_token", token)
     .single();
 
@@ -224,9 +224,9 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  /* Send welcome email (fire-and-forget) */
+  /* Send welcome email (fire-and-forget) — include country for personalization */
   if (subscriber.unsubscribe_token) {
-    sendWelcomeEmail(subscriber.email, subscriber.unsubscribe_token).catch(() => {});
+    sendWelcomeEmail(subscriber.email, subscriber.unsubscribe_token, subscriber.country ?? undefined).catch(() => {});
   }
 
   return NextResponse.json(

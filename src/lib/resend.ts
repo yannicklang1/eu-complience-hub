@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 import { BASE_URL, SITE_NAME } from "@/lib/constants";
 import { log } from "@/lib/logger";
+import { COUNTRY_META } from "@/i18n/country";
+import type { EUCountryCode } from "@/i18n/config";
 
 /* ══════════════════════════════════════════════════════════════
    Resend Email Service — Double-Opt-In & Transactional Emails
@@ -66,18 +68,24 @@ export async function sendOptInEmail(
 export async function sendWelcomeEmail(
   email: string,
   unsubscribeToken: string,
+  country?: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const resend = getResend();
     const unsubscribePageUrl = `${BASE_URL}/newsletter/abmeldung?token=${unsubscribeToken}`;
     const unsubscribeApiUrl = `${BASE_URL}/api/unsubscribe?token=${unsubscribeToken}`;
 
+    // Resolve country metadata for personalization
+    const countryMeta = country && country in COUNTRY_META
+      ? COUNTRY_META[country as EUCountryCode]
+      : null;
+
     const { error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: email,
       subject: `Willkommen beim ${SITE_NAME} Compliance-Briefing`,
-      html: buildWelcomeHtml(unsubscribePageUrl),
-      text: buildWelcomeText(unsubscribePageUrl),
+      html: buildWelcomeHtml(unsubscribePageUrl, countryMeta),
+      text: buildWelcomeText(unsubscribePageUrl, countryMeta),
       headers: {
         /* List-Unsubscribe header points to API for one-click mail client unsubscribe */
         "List-Unsubscribe": `<${unsubscribeApiUrl}>`,
@@ -191,7 +199,25 @@ Der Link ist 48 Stunden gültig.
 ${SITE_NAME} — Europäische Regulierungen. Klar erklärt.`;
 }
 
-function buildWelcomeHtml(unsubscribeUrl: string): string {
+interface CountryMetaInfo {
+  nameDE: string;
+  nameEN: string;
+  nameLocal: string;
+  flag: string;
+}
+
+function buildWelcomeHtml(unsubscribeUrl: string, countryMeta: CountryMetaInfo | null): string {
+  const countrySection = countryMeta ? `
+      <!-- Country-specific note -->
+      <div style="margin:0 0 24px;padding:16px;background:rgba(250,204,21,0.06);border:1px solid rgba(250,204,21,0.12);border-radius:8px">
+        <div style="font-size:13px;font-weight:700;color:#FACC15;margin-bottom:6px">
+          ${countryMeta.flag} Länderspezifisch: ${countryMeta.nameDE}
+        </div>
+        <p style="margin:0;font-size:13px;color:#94a3b8;line-height:1.5">
+          Ihre Inhalte werden auf ${countryMeta.nameDE} zugeschnitten — mit nationalen Umsetzungsfristen, zuständigen Behörden und länderspezifischen Besonderheiten.
+        </p>
+      </div>` : "";
+
   return `<!DOCTYPE html>
 <html lang="de" dir="ltr">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
@@ -230,7 +256,7 @@ function buildWelcomeHtml(unsubscribeUrl: string): string {
           Praxistipps zur Umsetzung für Ihr Unternehmen
         </td></tr>
       </table>
-
+${countrySection}
       <!-- CTA to site -->
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 24px">
       <tr><td style="border-radius:8px;background:linear-gradient(135deg,#FACC15,#EAB308);padding:1px">
@@ -255,7 +281,11 @@ function buildWelcomeHtml(unsubscribeUrl: string): string {
 </body></html>`;
 }
 
-function buildWelcomeText(unsubscribeUrl: string): string {
+function buildWelcomeText(unsubscribeUrl: string, countryMeta: CountryMetaInfo | null): string {
+  const countryLine = countryMeta
+    ? `\n${countryMeta.flag} Länderspezifisch: ${countryMeta.nameDE}\nIhre Inhalte werden auf ${countryMeta.nameDE} zugeschnitten — mit nationalen Umsetzungsfristen, zuständigen Behörden und länderspezifischen Besonderheiten.\n`
+    : "";
+
   return `${SITE_NAME} – Compliance-Briefing
 
 Willkommen beim Compliance-Briefing!
@@ -266,7 +296,7 @@ Ihre E-Mail-Adresse wurde erfolgreich bestätigt. Ab sofort erhalten Sie:
 - Fristen-Warnungen vor kritischen EU-Regulierungs-Deadlines
 - Zusammenfassungen neuer Gesetze und Verordnungen
 - Praxistipps zur Umsetzung für Ihr Unternehmen
-
+${countryLine}
 Besuchen Sie den Fristen-Radar: ${BASE_URL}/fristen-radar
 
 ---
