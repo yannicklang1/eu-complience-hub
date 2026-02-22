@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { DEADLINES, isPast, daysUntil, formatDateDE } from "@/data/deadlines";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
 
 /* ── Per-locale UI strings ── */
 const UI = {
@@ -282,6 +284,8 @@ function TimelineCard({
 /* ═══════════════ Main Component ═══════════════ */
 export default function TimelineContent({ locale }: { locale: string }) {
   const ui = getUI(locale);
+  const { countryCode } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
 
   return (
     <>
@@ -313,11 +317,19 @@ export default function TimelineContent({ locale }: { locale: string }) {
               </span>
             </nav>
 
-            <div className="flex items-center gap-3 mb-3">
-              <div className="h-px w-10 bg-[#FACC15]" />
-              <span className="font-mono text-[11px] tracking-[0.2em] uppercase font-medium text-[#FACC15]">
-                {ui.tagline}
-              </span>
+            <div className="flex items-center gap-3 mb-3 flex-wrap">
+              <div className="flex items-center gap-3">
+                <div className="h-px w-10 bg-[#FACC15]" />
+                <span className="font-mono text-[11px] tracking-[0.2em] uppercase font-medium text-[#FACC15]">
+                  {ui.tagline}
+                </span>
+              </div>
+              {countryMeta && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.06] border border-white/10">
+                  <span>{countryMeta.flag}</span>
+                  <span className="text-xs font-semibold text-slate-400">{countryMeta.nameDE}</span>
+                </div>
+              )}
             </div>
 
             <h1 className="font-[Syne] font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.1] mb-4">

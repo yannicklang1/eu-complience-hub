@@ -10,6 +10,8 @@ import FristenRadarSignup from "@/components/FristenRadarSignup";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import { DEADLINES, isPast, daysUntil } from "@/data/deadlines";
 import { useTranslations } from "@/i18n/use-translations";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
 import type { Messages } from "@/i18n/messages/de";
 
 /* Lazy-load ComplianceRadar — heavy framer-motion animation, desktop-only */
@@ -286,6 +288,8 @@ function SectionLabel({ children, dark = false }: { children: ReactNode; dark?: 
    ══════════════════════════════════════════════════════ */
 export default function HomePage() {
   const { messages, locale } = useTranslations();
+  const { countryCode } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
   const h = messages.home;
 
   const pillars = useMemo(() => buildPillars(h.pillarData), [h.pillarData]);
@@ -364,6 +368,12 @@ export default function HomePage() {
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse-dot" />
                 <span className="font-mono text-[10px] text-emerald-400 font-medium">LIVE</span>
               </div>
+              {countryMeta && (
+                <div className="flex items-center gap-1.5 ml-1 rounded-full bg-white/[0.06] border border-white/[0.1] px-2.5 py-1">
+                  <span className="text-sm leading-none">{countryMeta.flag}</span>
+                  <span className="font-mono text-[10px] text-white/60 font-medium">{countryMeta.nameDE}</span>
+                </div>
+              )}
             </div>
 
             {/* Title — responsive font sizing with svh-aware clamp */}

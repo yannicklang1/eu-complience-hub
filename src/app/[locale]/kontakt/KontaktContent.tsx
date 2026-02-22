@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useTranslations } from "@/i18n/use-translations";
+import { useCountry } from "@/i18n/country-context";
+import { COUNTRY_META } from "@/i18n/country";
 import { evaluateRegulations, type Answer } from "@/lib/regulation-evaluator";
 
 /* ══════════════════════════════════════════════════════════════
@@ -186,6 +188,8 @@ const stepVariants = {
 
 export default function KontaktContent() {
   const { locale } = useTranslations();
+  const { countryCode } = useCountry();
+  const countryMeta = COUNTRY_META[countryCode];
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
@@ -334,6 +338,8 @@ export default function KontaktContent() {
       companySize: form.companySize,
       branche: form.branche,
       annualRevenue: form.annualRevenue,
+      country: countryCode,
+      countryName: countryMeta?.nameDE ?? countryCode,
       sectors: allSectors,
       dataTypes: form.dataTypes,
       activities: form.activities,
@@ -365,7 +371,7 @@ export default function KontaktContent() {
       setErrorMessage("Verbindungsfehler. Bitte versuchen Sie es erneut.");
       setSubmitStatus("error");
     }
-  }, [canProceed, form]);
+  }, [canProceed, form, countryCode, countryMeta]);
 
   /* ── Summary label helpers ── */
   const sizeLabel = COMPANY_SIZES.find((s) => s.value === form.companySize)?.label ?? "-";
@@ -390,11 +396,19 @@ export default function KontaktContent() {
             }}
           />
           <div className="relative max-w-3xl mx-auto px-6 text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20 mb-5">
-              <svg className="w-3.5 h-3.5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-              </svg>
-              <span className="text-xs font-semibold text-yellow-400">Kostenloser Compliance-Report</span>
+            <div className="flex items-center justify-center gap-2 flex-wrap mb-5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-400/10 border border-yellow-400/20">
+                <svg className="w-3.5 h-3.5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+                <span className="text-xs font-semibold text-yellow-400">Kostenloser Compliance-Report</span>
+              </div>
+              {countryMeta && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10">
+                  <span>{countryMeta.flag}</span>
+                  <span className="text-xs font-semibold text-slate-400">{countryMeta.nameDE}</span>
+                </div>
+              )}
             </div>
             <h1 className="font-[Syne] font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.1] mb-5">
               Ihr pers{"\u00F6"}nlicher{" "}
