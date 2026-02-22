@@ -132,7 +132,7 @@ export default async function ImpressumPage({
           f\u00fcr die Inhalte externer Links. F\u00fcr den Inhalt der verlinkten Seiten
           sind ausschlie\u00dflich deren Betreiber verantwortlich. Weitere Details
           finden Sie in unserem{" "}
-          <a href="/haftungsausschluss">Haftungsausschluss</a>.
+          <a href={`/${locale}/haftungsausschluss`}>Haftungsausschluss</a>.
         </p>
 
         <hr />
