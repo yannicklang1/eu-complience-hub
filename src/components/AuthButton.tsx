@@ -64,9 +64,10 @@ export default function AuthButton({ scrolled, variant = "desktop" }: AuthButton
       return (
         <Link
           href="/portal"
-          className="flex items-center gap-2 text-sm font-[Syne] font-bold text-[#0A2540] bg-yellow-400 rounded-xl px-4 py-2.5"
+          className="flex items-center gap-2 text-[13px] font-semibold text-[#0A2540] rounded-md px-4 py-2.5"
+          style={{ background: "linear-gradient(135deg, #FACC15, #EAB308)" }}
         >
-          <span className="w-6 h-6 rounded-full bg-[#0A2540]/20 flex items-center justify-center text-[10px] font-bold">
+          <span className="w-5 h-5 rounded-[4px] bg-[#0A2540]/15 flex items-center justify-center text-[9px] font-bold">
             {initials}
           </span>
           Mein Portal
@@ -77,7 +78,8 @@ export default function AuthButton({ scrolled, variant = "desktop" }: AuthButton
     return (
       <Link
         href="/auth/login"
-        className="text-sm font-[Syne] font-bold text-[#0A2540] bg-yellow-400 rounded-xl px-4 py-2.5 text-center"
+        className="text-[13px] font-semibold text-[#0A2540] rounded-md px-4 py-2.5 text-center"
+        style={{ background: "linear-gradient(135deg, #FACC15, #EAB308)" }}
       >
         Anmelden
       </Link>
@@ -89,16 +91,22 @@ export default function AuthButton({ scrolled, variant = "desktop" }: AuthButton
     return (
       <Link
         href="/portal"
-        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+        className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-[13px] font-medium transition-all duration-200 ${
           scrolled
-            ? "text-[#0A2540] hover:bg-[#0A2540]/5"
-            : "text-white/80 hover:text-white"
+            ? "text-[#0A2540]/70 hover:text-[#0A2540] hover:bg-[#0A2540]/5"
+            : "text-white/50 hover:text-white/80"
         }`}
       >
-        <span className="w-6 h-6 rounded-full bg-yellow-400/20 flex items-center justify-center text-[10px] font-bold text-yellow-400">
+        <span
+          className={`w-5 h-5 rounded-[4px] flex items-center justify-center text-[9px] font-semibold ${
+            scrolled
+              ? "bg-yellow-400/15 text-yellow-600"
+              : "bg-white/[0.08] text-white/60"
+          }`}
+        >
           {initials}
         </span>
-        Mein Portal
+        Portal
       </Link>
     );
   }
@@ -106,10 +114,10 @@ export default function AuthButton({ scrolled, variant = "desktop" }: AuthButton
   return (
     <Link
       href="/auth/login"
-      className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+      className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-all duration-200 ${
         scrolled
-          ? "text-[#0A2540]/70 hover:text-[#0A2540] hover:bg-[#0A2540]/5"
-          : "text-white/60 hover:text-white"
+          ? "text-[#0A2540]/50 hover:text-[#0A2540] hover:bg-[#0A2540]/5"
+          : "text-white/40 hover:text-white/70"
       }`}
     >
       Anmelden
