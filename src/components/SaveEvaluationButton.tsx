@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 
@@ -34,12 +34,19 @@ export default function SaveEvaluationButton({
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [state, setState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
     supabase.auth.getUser().then(({ data }: { data: { user: unknown } }) => {
       setIsLoggedIn(!!data.user);
     });
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, []);
 
   async function handleSave() {
@@ -71,11 +78,13 @@ export default function SaveEvaluationButton({
 
       setState("saved");
       // Reset after 3 seconds so user can save again
-      setTimeout(() => setState("idle"), 3000);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => setState("idle"), 3000);
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Verbindungsfehler");
       setState("error");
-      setTimeout(() => setState("idle"), 3000);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => setState("idle"), 3000);
     }
   }
 

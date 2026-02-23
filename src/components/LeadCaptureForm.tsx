@@ -208,7 +208,8 @@ export default function LeadCaptureForm({
       });
 
       if (!response.ok) {
-        throw new Error(`Fehler ${response.status}`);
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.error ?? `Fehler ${response.status}`);
       }
 
       setSubmitStatus("success");

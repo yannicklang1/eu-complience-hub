@@ -8,6 +8,16 @@ import type { EUCountryCode } from "@/i18n/config";
    Resend Email Service — Double-Opt-In & Transactional Emails
    ══════════════════════════════════════════════════════════════ */
 
+/** Escape user-provided strings before interpolating into HTML templates. */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL = "EU Compliance Hub <noreply@eu-compliance-hub.eu>";
 
@@ -489,8 +499,8 @@ function buildReportHtml(
   data: ReportEmailData,
   s: ReturnType<typeof getReportEmailStrings>,
 ): string {
-  const greeting = s.greeting.replace("{{name}}", contactName);
-  const intro = s.intro.replace("{{company}}", companyName);
+  const greeting = s.greeting.replace("{{name}}", escapeHtml(contactName));
+  const intro = s.intro.replace("{{company}}", escapeHtml(companyName));
 
   return `<!DOCTYPE html>
 <html lang="de" dir="ltr">

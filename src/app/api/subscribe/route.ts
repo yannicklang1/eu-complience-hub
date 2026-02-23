@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
             status: "pending",
             opt_in_token,
             unsubscribe_token,
+            opt_in_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
             opt_in_confirmed_at: null,
             unsubscribed_at: null,
             commercial_consent,
@@ -117,6 +118,7 @@ export async function POST(request: NextRequest) {
       status: "pending",
       opt_in_token,
       unsubscribe_token,
+      opt_in_expires_at: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
       commercial_consent,
       commercial_consent_at: commercial_consent ? new Date().toISOString() : null,
       source: sanitize(body.source) ?? "fristen-radar",
@@ -173,6 +175,14 @@ export async function POST(request: NextRequest) {
    GET /api/subscribe?token=xxx — Confirm double-opt-in
    ══════════════════════════════════════════════════════════════ */
 export async function GET(request: NextRequest) {
+  /* --- Rate limiting --- */
+  if (publicFormLimiter.isLimited(getClientIp(request))) {
+    return NextResponse.json(
+      { error: "Zu viele Anfragen. Bitte versuchen Sie es in einer Minute erneut." },
+      { status: 429 },
+    );
+  }
+
   const token = request.nextUrl.searchParams.get("token");
 
   if (!token || token.length < 32) {
@@ -186,7 +196,7 @@ export async function GET(request: NextRequest) {
 
   const { data: subscriber, error: fetchError } = await supabase
     .from("subscribers")
-    .select("id, status, email, unsubscribe_token, country")
+    .select("id, status, email, unsubscribe_token, country, opt_in_expires_at")
     .eq("opt_in_token", token)
     .single();
 
@@ -194,6 +204,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { error: "Ungültiger oder abgelaufener Bestätigungslink." },
       { status: 404 },
+    );
+  }
+
+  /* --- Check opt-in token expiry (48 h) --- */
+  if (subscriber.opt_in_expires_at && new Date(subscriber.opt_in_expires_at) < new Date()) {
+    return NextResponse.json(
+      { error: "Ungültiger oder abgelaufener Bestätigungslink." },
+      { status: 410 },
     );
   }
 

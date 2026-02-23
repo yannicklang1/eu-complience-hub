@@ -12,10 +12,16 @@ import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 type AuthMode = "login" | "register";
 type AuthState = "idle" | "loading" | "success" | "error";
 
+/** Only allow relative paths starting with / (prevents open redirects). */
+function safeNextPath(value: string): string {
+  if (!value.startsWith("/") || value.startsWith("//")) return "/portal";
+  return value;
+}
+
 export default function AuthForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/portal";
+  const next = safeNextPath(searchParams.get("next") ?? "/portal");
   const urlError = searchParams.get("error");
 
   const [mode, setMode] = useState<AuthMode>("login");
@@ -50,7 +56,7 @@ export default function AuthForm() {
       },
     });
     if (oauthError) {
-      setError(oauthError.message);
+      setError("Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.");
       setAuthState("error");
     }
   }
@@ -82,7 +88,12 @@ export default function AuthForm() {
         },
       });
       if (signUpError) {
-        setError(signUpError.message);
+        const msg = signUpError.message;
+        if (msg.includes("already registered") || msg.includes("User already registered")) {
+          setError("Diese E-Mail-Adresse ist bereits registriert.");
+        } else {
+          setError("Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.");
+        }
         setAuthState("error");
         return;
       }
@@ -99,7 +110,7 @@ export default function AuthForm() {
         setError(
           signInError.message.includes("Invalid login")
             ? "Ungültige E-Mail oder Passwort."
-            : signInError.message,
+            : "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
         );
         setAuthState("error");
         return;

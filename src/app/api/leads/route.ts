@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/lib/supabase";
+import { getSupabaseAdmin, verifyAdminKey } from "@/lib/supabase";
 import { log } from "@/lib/logger";
 import { publicFormLimiter, adminLimiter, getClientIp } from "@/lib/rate-limit";
 import { sanitize, validateEmail } from "@/lib/validation";
@@ -141,11 +141,8 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  /* Auth: Accept either the ADMIN_SECRET_KEY or the SUPABASE_SERVICE_ROLE_KEY */
-  const authHeader = request.headers.get("x-admin-key");
-  const adminKey = process.env.ADMIN_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!adminKey || authHeader !== adminKey) {
+  /* Auth: Timing-safe comparison against ADMIN_SECRET_KEY */
+  if (!verifyAdminKey(request.headers.get("x-admin-key"))) {
     return NextResponse.json({ error: "Nicht autorisiert." }, { status: 401 });
   }
 

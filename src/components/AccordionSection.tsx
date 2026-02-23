@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useId, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* ─── Single Accordion Item ─── */
@@ -11,6 +11,7 @@ function AccordionItem({
   onToggle,
   accent = "#0A2540",
   index,
+  baseId,
 }: {
   title: ReactNode;
   children: ReactNode;
@@ -18,9 +19,10 @@ function AccordionItem({
   onToggle: () => void;
   accent?: string;
   index: number;
+  baseId: string;
 }) {
-  const panelId = `accordion-panel-${index}`;
-  const headingId = `accordion-heading-${index}`;
+  const panelId = `${baseId}-panel-${index}`;
+  const headingId = `${baseId}-heading-${index}`;
 
   return (
     <div className="border border-[#d8dff0] rounded-2xl overflow-hidden transition-all duration-300 hover:border-[#b8c4e0]">
@@ -88,6 +90,7 @@ export default function AccordionSection({
   accent?: string;
   allowMultiple?: boolean;
 }) {
+  const baseId = useId();
   const [openItems, setOpenItems] = useState<Set<number>>(new Set());
 
   const toggle = (index: number) => {
@@ -113,6 +116,7 @@ export default function AccordionSection({
           onToggle={() => toggle(i)}
           accent={accent}
           index={i}
+          baseId={baseId}
         >
           {item.content}
         </AccordionItem>

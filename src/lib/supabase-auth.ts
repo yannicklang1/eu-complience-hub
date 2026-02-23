@@ -13,8 +13,18 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { NextRequest, NextResponse } from "next/server";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+function getEnvOrThrow(key: string): string {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(
+      `Missing environment variable: ${key}. Check your .env.local file.`,
+    );
+  }
+  return value;
+}
+
+const supabaseUrl = getEnvOrThrow("NEXT_PUBLIC_SUPABASE_URL");
+const supabaseAnonKey = getEnvOrThrow("NEXT_PUBLIC_SUPABASE_ANON_KEY");
 
 /* ── Server-side client (Server Components, Route Handlers, Server Actions) ── */
 

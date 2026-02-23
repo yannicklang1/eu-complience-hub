@@ -16,8 +16,8 @@ export default function UpdatePasswordPage() {
   // Guard: only allow if user arrived via a password-reset email link
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
-    supabase.auth.getSession().then(({ data: { session } }: { data: { session: unknown } }) => {
-      if (!session) {
+    supabase.auth.getUser().then(({ data: { user } }: { data: { user: unknown } }) => {
+      if (!user) {
         router.replace("/auth/reset-password");
         return;
       }

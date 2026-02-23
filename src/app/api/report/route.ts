@@ -77,14 +77,25 @@ export async function POST(request: NextRequest) {
       companySize,
       branche: sanitize(body.branche, 100) ?? "Sonstige",
       annualRevenue: sanitize(body.annualRevenue, 50) ?? undefined,
-      sectors: Array.isArray(body.sectors) ? body.sectors.filter((s: unknown) => typeof s === "string").slice(0, 15) : [],
-      dataTypes: Array.isArray(body.dataTypes) ? body.dataTypes.filter((d: unknown) => typeof d === "string").slice(0, 10) : [],
-      activities: Array.isArray(body.activities) ? body.activities.filter((a: unknown) => typeof a === "string").slice(0, 15) : [],
-      locations: Array.isArray(body.locations) ? body.locations.filter((l: unknown) => typeof l === "string").slice(0, 10) : [],
+      sectors: Array.isArray(body.sectors)
+        ? body.sectors.filter((s: unknown) => typeof s === "string" && s.length <= 100).slice(0, 15)
+        : [],
+      dataTypes: Array.isArray(body.dataTypes)
+        ? body.dataTypes.filter((d: unknown) => typeof d === "string" && d.length <= 100).slice(0, 10)
+        : [],
+      activities: Array.isArray(body.activities)
+        ? body.activities.filter((a: unknown) => typeof a === "string" && a.length <= 200).slice(0, 15)
+        : [],
+      locations: Array.isArray(body.locations)
+        ? body.locations.filter((l: unknown) => typeof l === "string" && l.length <= 100).slice(0, 10)
+        : [],
       maturityAnswers: Array.isArray(body.maturityAnswers)
         ? body.maturityAnswers.filter(
-            (a: unknown): a is QuickMaturityAnswer =>
-              typeof a === "object" && a !== null && "category" in a && "level" in a,
+            (a: unknown): a is QuickMaturityAnswer => {
+              if (typeof a !== "object" || a === null || !("category" in a) || !("level" in a)) return false;
+              const level = (a as Record<string, unknown>).level;
+              return typeof level === "number" && level >= 0 && level <= 3;
+            },
           ).slice(0, 5)
         : [],
       urgency: sanitize(body.urgency, 50) ?? "exploring",

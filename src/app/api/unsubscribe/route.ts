@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
   const { data: subscriber, error: fetchError } = await supabase
     .from("subscribers")
-    .select("id, status, email")
+    .select("id, status")
     .eq("unsubscribe_token", token)
     .single();
 
@@ -35,10 +35,7 @@ export async function GET(request: NextRequest) {
 
   if (subscriber.status === "unsubscribed") {
     return NextResponse.json(
-      {
-        message: "Sie sind bereits abgemeldet.",
-        email: subscriber.email,
-      },
+      { message: "Sie sind bereits abgemeldet." },
       { status: 200 },
     );
   }
@@ -64,7 +61,6 @@ export async function GET(request: NextRequest) {
     {
       message:
         "Sie wurden erfolgreich abgemeldet. Sie erhalten keine weiteren E-Mails vom Compliance-Briefing.",
-      email: subscriber.email,
     },
     { status: 200 },
   );

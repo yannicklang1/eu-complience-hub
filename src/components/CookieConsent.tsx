@@ -33,9 +33,8 @@ export default function CookieConsent() {
 
   return (
     <div
-      role="dialog"
+      role="region"
       aria-label={t("cookies.title")}
-      aria-modal="false"
       className="fixed bottom-0 left-0 right-0 z-[100] p-4 sm:p-6 animate-slide-up-sm"
     >
       <div

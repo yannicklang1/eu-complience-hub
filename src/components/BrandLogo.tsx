@@ -28,6 +28,8 @@
 interface LogoProps {
   size?: number;
   className?: string;
+  /** Prefix for SVG gradient IDs to avoid collisions with multiple instances. */
+  idPrefix?: string;
 }
 
 /**
@@ -40,7 +42,13 @@ interface LogoProps {
  * via Google Fonts in layout.tsx). Fallback stack: Georgia, Times,
  * serif — all of which render an excellent §.
  */
-export function BrandLogo({ size = 36, className = "" }: LogoProps) {
+export function BrandLogo({ size = 36, className = "", idPrefix = "ech" }: LogoProps) {
+  const g1 = `${idPrefix}-g1`;
+  const g2 = `${idPrefix}-g2`;
+  const g3 = `${idPrefix}-g3`;
+  const g4 = `${idPrefix}-g4`;
+  const g5 = `${idPrefix}-g5`;
+
   return (
     <svg
       viewBox="0 0 64 64"
@@ -54,28 +62,28 @@ export function BrandLogo({ size = 36, className = "" }: LogoProps) {
     >
       <defs>
         {/* Shield body: lighter navy at top, deeper at bottom */}
-        <linearGradient id="ech-g1" x1="32" y1="4" x2="32" y2="60" gradientUnits="userSpaceOnUse">
+        <linearGradient id={g1} x1="32" y1="4" x2="32" y2="60" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#0F2D58" />
           <stop offset="1" stopColor="#0A2540" />
         </linearGradient>
         {/* Inner field: darker for contrast */}
-        <linearGradient id="ech-g2" x1="32" y1="12" x2="32" y2="54" gradientUnits="userSpaceOnUse">
+        <linearGradient id={g2} x1="32" y1="12" x2="32" y2="54" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#0B2245" />
           <stop offset="1" stopColor="#071B33" />
         </linearGradient>
         {/* Edge glow: gold fading diagonally */}
-        <linearGradient id="ech-g3" x1="10" y1="4" x2="54" y2="58" gradientUnits="userSpaceOnUse">
+        <linearGradient id={g3} x1="10" y1="4" x2="54" y2="58" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#FACC15" stopOpacity="0.55" />
           <stop offset="0.45" stopColor="#FACC15" stopOpacity="0.2" />
           <stop offset="1" stopColor="#FACC15" stopOpacity="0.05" />
         </linearGradient>
         {/* Gold gradient for § symbol */}
-        <linearGradient id="ech-g4" x1="28" y1="16" x2="36" y2="52" gradientUnits="userSpaceOnUse">
+        <linearGradient id={g4} x1="28" y1="16" x2="36" y2="52" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#FACC15" />
           <stop offset="1" stopColor="#EAB308" />
         </linearGradient>
         {/* Top-light sheen for 3D depth */}
-        <linearGradient id="ech-g5" x1="32" y1="6" x2="32" y2="30" gradientUnits="userSpaceOnUse">
+        <linearGradient id={g5} x1="32" y1="6" x2="32" y2="30" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#ffffff" stopOpacity="0.07" />
           <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
         </linearGradient>
@@ -87,13 +95,13 @@ export function BrandLogo({ size = 36, className = "" }: LogoProps) {
           Width: 46 units. Height: 56 units. */}
       <path
         d="M32 4 L55 14.5 V30 C55 44 45 54 32 60 C19 54 9 44 9 30 V14.5 Z"
-        fill="url(#ech-g1)"
+        fill={`url(#${g1})`}
       />
       {/* Gold edge glow */}
       <path
         d="M32 4 L55 14.5 V30 C55 44 45 54 32 60 C19 54 9 44 9 30 V14.5 Z"
         fill="none"
-        stroke="url(#ech-g3)"
+        stroke={`url(#${g3})`}
         strokeWidth="1.2"
       />
 
@@ -102,7 +110,7 @@ export function BrandLogo({ size = 36, className = "" }: LogoProps) {
           The gap between layers = the "frame" effect. */}
       <path
         d="M32 10 L50 18.5 V30 C50 42 42 50 32 55 C22 50 14 42 14 30 V18.5 Z"
-        fill="url(#ech-g2)"
+        fill={`url(#${g2})`}
       />
       {/* Subtle inner edge */}
       <path
@@ -115,7 +123,7 @@ export function BrandLogo({ size = 36, className = "" }: LogoProps) {
       {/* Light sheen overlay */}
       <path
         d="M32 10 L50 18.5 V30 C50 42 42 50 32 55 C22 50 14 42 14 30 V18.5 Z"
-        fill="url(#ech-g5)"
+        fill={`url(#${g5})`}
       />
 
       {/* ── LAYER 3: SECTION SYMBOL (§) ──
@@ -135,7 +143,7 @@ export function BrandLogo({ size = 36, className = "" }: LogoProps) {
         fontFamily="Syne, Georgia, 'Times New Roman', serif"
         fontWeight="700"
         fontSize="34"
-        fill="url(#ech-g4)"
+        fill={`url(#${g4})`}
         style={{ userSelect: "none" } as React.CSSProperties}
       >
         &#167;
@@ -160,6 +168,7 @@ export function BrandLogo({ size = 36, className = "" }: LogoProps) {
 export function BrandLogoFull({
   size = 36,
   className = "",
+  idPrefix = "ech-full",
   darkBackground = true,
 }: LogoProps & { darkBackground?: boolean }) {
   const textColor = darkBackground ? "#ffffff" : "#0A2540";
@@ -167,7 +176,7 @@ export function BrandLogoFull({
 
   return (
     <div className={`flex items-center gap-3 ${className}`}>
-      <BrandLogo size={size} />
+      <BrandLogo size={size} idPrefix={idPrefix} />
       <div className="flex flex-col">
         <span
           style={{

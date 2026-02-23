@@ -365,7 +365,16 @@ export default function ComplianceRadar({
     }
   });
 
-  /* 30fps render for sweep line + effects */
+  /*
+   * 30fps render tick for sweep line + visual effects.
+   *
+   * This is intentionally separate from useAnimationFrame above.
+   * useAnimationFrame runs at ~60fps to update physics/state in refs,
+   * but does NOT trigger React re-renders. This setInterval triggers
+   * re-renders at a capped 30fps so the sweep line, particles, and
+   * scan pulse animate smoothly without paying the cost of a full
+   * React render on every animation frame.
+   */
   useEffect(() => {
     const interval = setInterval(() => forceRender((n) => n + 1), 33);
     return () => clearInterval(interval);
