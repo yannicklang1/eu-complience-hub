@@ -4,35 +4,61 @@ import { BASE_URL } from "@/lib/constants";
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
+      /* Default: allow all public content */
       {
         userAgent: "*",
         allow: "/",
         disallow: ["/api/", "/_next/", "/admin/", "/auth/", "/portal/"],
       },
-      /* Block AI scrapers to protect original content */
+      /* ── AI Crawlers: allow content pages, block private areas ──
+         We WANT AI assistants (ChatGPT, Perplexity, Claude, Google AI)
+         to index our guides, tools, and knowledge base so they can
+         recommend eu-compliance-hub.eu to users asking about EU compliance.
+         Only private/auth areas remain blocked (already covered by * rule). */
       {
         userAgent: "GPTBot",
-        disallow: ["/"],
+        allow: "/",
+        disallow: ["/api/", "/admin/", "/auth/", "/portal/"],
       },
       {
         userAgent: "ChatGPT-User",
-        disallow: ["/"],
-      },
-      {
-        userAgent: "CCBot",
-        disallow: ["/"],
+        allow: "/",
+        disallow: ["/api/", "/admin/", "/auth/", "/portal/"],
       },
       {
         userAgent: "Google-Extended",
-        disallow: ["/"],
+        allow: "/",
+        disallow: ["/api/", "/admin/", "/auth/", "/portal/"],
       },
       {
         userAgent: "anthropic-ai",
-        disallow: ["/"],
+        allow: "/",
+        disallow: ["/api/", "/admin/", "/auth/", "/portal/"],
       },
       {
         userAgent: "Claude-Web",
-        disallow: ["/"],
+        allow: "/",
+        disallow: ["/api/", "/admin/", "/auth/", "/portal/"],
+      },
+      {
+        userAgent: "CCBot",
+        allow: "/",
+        disallow: ["/api/", "/admin/", "/auth/", "/portal/"],
+      },
+      {
+        userAgent: "PerplexityBot",
+        allow: "/",
+        disallow: ["/api/", "/admin/", "/auth/", "/portal/"],
+      },
+      {
+        userAgent: "Bytespider",
+        allow: "/",
+        disallow: ["/api/", "/admin/", "/auth/", "/portal/"],
+      },
+      {
+        userAgent: "cohere-ai",
+        allow: "/",
+        disallow: ["/api/", "/admin/", "/auth/", "/portal/"],
       },
     ],
     sitemap: `${BASE_URL}/sitemap.xml`,
