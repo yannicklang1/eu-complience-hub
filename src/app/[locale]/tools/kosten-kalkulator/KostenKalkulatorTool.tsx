@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
+import SaveEvaluationButton from "@/components/SaveEvaluationButton";
 import { useCountry } from "@/i18n/country-context";
 import { COUNTRY_META } from "@/i18n/country/index";
 import { useTranslations } from "@/i18n/use-translations";
@@ -494,6 +495,26 @@ export default function KostenKalkulatorTool() {
                         </Link>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Save Evaluation */}
+                  <div className="mt-4 flex justify-center">
+                    <SaveEvaluationButton
+                      toolId="kosten-kalkulator"
+                      toolName="Kosten-Kalkulator"
+                      inputs={{
+                        companySize: size,
+                        maturity,
+                        selectedRegulations: Array.from(selectedRegs),
+                        country: countryCode,
+                      }}
+                      results={{
+                        costEstimates: results.map((r) => ({ key: r.key, name: r.name, minCost: r.minCost, maxCost: r.maxCost })),
+                        totalMin,
+                        totalMax,
+                      }}
+                      summary={`${formatEuro(totalMin)} – ${formatEuro(totalMax)} geschätzt`}
+                    />
                   </div>
                 </motion.div>
               )}

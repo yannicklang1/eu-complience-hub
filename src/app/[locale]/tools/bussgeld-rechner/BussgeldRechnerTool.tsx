@@ -7,6 +7,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
+import SaveEvaluationButton from "@/components/SaveEvaluationButton";
 import { useCountry } from "@/i18n/country-context";
 import { COUNTRY_META } from "@/i18n/country/index";
 import { useTranslations } from "@/i18n/use-translations";
@@ -467,6 +468,23 @@ export default function BussgeldRechnerTool() {
                       currentTool="bussgeld-rechner"
                       dark={false}
                       subtext="Strafrahmen kennen Sie nun. Analysieren Sie Ihre Compliance-Situation weiter:"
+                    />
+                  </div>
+
+                  {/* Save Evaluation */}
+                  <div className="mb-6 flex justify-center">
+                    <SaveEvaluationButton
+                      toolId="bussgeld-rechner"
+                      toolName="Bußgeld-Rechner"
+                      inputs={{
+                        revenue,
+                        selectedRegulations: selectedRegs,
+                      }}
+                      results={{
+                        totalRisk,
+                        perRegulation: activeFines.map((f) => ({ name: f.name, fine: f.fine })),
+                      }}
+                      summary={`${formatEuro(totalRisk)} Gesamtrisiko`}
                     />
                   </div>
 

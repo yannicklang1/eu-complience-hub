@@ -7,6 +7,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
+import SaveEvaluationButton from "@/components/SaveEvaluationButton";
 import { useCountry } from "@/i18n/country-context";
 import { COUNTRY_META } from "@/i18n/country/index";
 import { useTranslations } from "@/i18n/use-translations";
@@ -655,6 +656,29 @@ export default function HaftungsPrueferTool() {
                       currentTool="haftungs-pruefer"
                       dark={false}
                       subtext="Haftungsrisiken kennen Sie nun. Analysieren Sie Ihre Compliance-Situation weiter:"
+                    />
+                  </div>
+
+                  {/* Save Evaluation */}
+                  <div className="mb-6 flex justify-center">
+                    <SaveEvaluationButton
+                      toolId="haftungs-pruefer"
+                      toolName="Haftungs-Prüfer"
+                      inputs={{
+                        selectedRegulations: selectedRegs,
+                        riskAnswers: answers,
+                      }}
+                      results={{
+                        level: assessment.level,
+                        score: assessment.score,
+                        title: assessment.title,
+                        recommendations: assessment.recommendations,
+                        perRegulation: assessment.perRegulation.map((pr) => ({
+                          name: pr.regulation.name,
+                          riskLevel: pr.riskLevel,
+                        })),
+                      }}
+                      summary={`${assessment.title} (${assessment.score}/100)`}
                     />
                   </div>
 

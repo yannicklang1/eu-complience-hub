@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
+import SaveEvaluationButton from "@/components/SaveEvaluationButton";
 import { useCountry } from "@/i18n/country-context";
 import { COUNTRY_META } from "@/i18n/country/index";
 import { useTranslations } from "@/i18n/use-translations";
@@ -691,6 +692,25 @@ export default function RegulierungFinderTool() {
                     >
                       Zur Compliance-Checkliste
                     </Link>
+                  </div>
+
+                  {/* Save Evaluation */}
+                  <div className="mt-4 flex justify-center">
+                    <SaveEvaluationButton
+                      toolId="regulierung-finder"
+                      toolName="Regulierung-Finder"
+                      inputs={{
+                        size: answers.find((a) => a.questionId === "size")?.values ?? [],
+                        sector: answers.find((a) => a.questionId === "sector")?.values ?? [],
+                        data: answers.find((a) => a.questionId === "data")?.values ?? [],
+                        activities: answers.find((a) => a.questionId === "activities")?.values ?? [],
+                        location: answers.find((a) => a.questionId === "location")?.values ?? [],
+                      }}
+                      results={{
+                        regulations: results.map((r) => ({ key: r.key, name: r.name, relevance: r.relevance })),
+                      }}
+                      summary={`${results.length} Regulierungen identifiziert (${results.filter((r) => r.relevance === "hoch").length} hoch relevant)`}
+                    />
                   </div>
 
                   {/* Next Steps — Cross-links to other tools */}

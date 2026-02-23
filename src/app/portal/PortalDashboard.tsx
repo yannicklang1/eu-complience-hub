@@ -33,6 +33,16 @@ interface CostEstimate {
   totalMax: number;
 }
 
+interface Evaluation {
+  id: string;
+  tool_id: string;
+  tool_name: string;
+  summary: string | null;
+  inputs: Record<string, unknown>;
+  results: Record<string, unknown>;
+  created_at: string;
+}
+
 interface Profile {
   full_name: string | null;
   company_name: string | null;
@@ -51,6 +61,16 @@ const GRADE_STYLES: Record<string, { bg: string; text: string; label: string }> 
   E: { bg: "rgba(239,68,68,0.10)", text: "#f87171", label: "Kritisch" },
 };
 
+const TOOL_URLS: Record<string, string> = {
+  "regulierung-finder": "/de/tools/regulierung-finder",
+  "compliance-checkliste": "/de/tools/compliance-checkliste",
+  "kosten-kalkulator": "/de/tools/kosten-kalkulator",
+  "reifegrad-check": "/de/tools/reifegrad-check",
+  "nis2-betroffenheits-check": "/de/tools/nis2-betroffenheits-check",
+  "haftungs-pruefer": "/de/tools/haftungs-pruefer",
+  "bussgeld-rechner": "/de/tools/bussgeld-rechner",
+};
+
 /* ═══════════════════════════════════════════════════════════
    COMPONENT
    ═══════════════════════════════════════════════════════════ */
@@ -66,6 +86,7 @@ export default function PortalDashboard({
   const supabase = createSupabaseBrowserClient();
 
   const [reports, setReports] = useState<Report[]>([]);
+  const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -74,9 +95,10 @@ export default function PortalDashboard({
     setLoading(true);
     setError("");
     try {
-      const [reportsRes, profileRes] = await Promise.all([
+      const [reportsRes, profileRes, evalsRes] = await Promise.all([
         fetch("/api/portal/reports"),
         fetch("/api/portal/profile"),
+        fetch("/api/portal/evaluations"),
       ]);
 
       if (!reportsRes.ok || !profileRes.ok) {
@@ -85,8 +107,10 @@ export default function PortalDashboard({
 
       const reportsData = await reportsRes.json();
       const profileData = await profileRes.json();
+      const evalsData = evalsRes.ok ? await evalsRes.json() : { evaluations: [] };
 
       setReports(reportsData.reports ?? []);
+      setEvaluations(evalsData.evaluations ?? []);
       setProfile(profileData.profile ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Verbindungsfehler");
@@ -104,6 +128,11 @@ export default function PortalDashboard({
     router.replace("/auth/login");
   }
 
+  async function handleDeleteEvaluation(id: string) {
+    setEvaluations((prev) => prev.filter((e) => e.id !== id));
+    await fetch(`/api/portal/evaluations?id=${id}`, { method: "DELETE" });
+  }
+
   const displayName =
     profile?.full_name || profile?.company_name || userEmail.split("@")[0];
   const initials = displayName
@@ -115,10 +144,6 @@ export default function PortalDashboard({
 
   const totalReports = reports.length;
   const latestReport = reports[0];
-  const highRelevanceCount = reports.reduce((sum, r) => {
-    const regs = r.evaluated_regulations ?? [];
-    return sum + regs.filter((reg) => reg.relevance === "high").length;
-  }, 0);
 
   return (
     <div className="min-h-screen bg-[#05090f] relative overflow-hidden">
@@ -239,10 +264,10 @@ export default function PortalDashboard({
 
               <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4">
                 <div className="text-[11px] font-medium text-white/25 uppercase tracking-wider mb-2">
-                  Hoch relevant
+                  Evaluierungen
                 </div>
                 <div className="text-[22px] font-[600] text-yellow-400/90 tabular-nums">
-                  {highRelevanceCount}
+                  {evaluations.length}
                 </div>
               </div>
             </div>
@@ -433,6 +458,69 @@ export default function PortalDashboard({
                     />
                   </svg>
                 </Link>
+              </div>
+            )}
+
+            {/* Evaluations */}
+            {evaluations.length > 0 && (
+              <div className="mt-6 rounded-lg border border-white/[0.06] bg-white/[0.02] overflow-hidden">
+                <div className="px-4 py-3 border-b border-white/[0.06] flex items-center justify-between">
+                  <h2 className="text-[13px] font-semibold text-white/70">
+                    Gespeicherte Evaluierungen
+                  </h2>
+                  <span className="text-[11px] text-white/20 tabular-nums">
+                    {evaluations.length} {evaluations.length === 1 ? "Ergebnis" : "Ergebnisse"}
+                  </span>
+                </div>
+
+                <div className="divide-y divide-white/[0.03]">
+                  {evaluations.map((ev) => (
+                    <div
+                      key={ev.id}
+                      className="px-4 py-3 flex items-center justify-between gap-3 hover:bg-white/[0.015] transition-colors duration-150"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-7 h-7 rounded-md bg-white/[0.04] flex items-center justify-center shrink-0">
+                          <svg className="w-3.5 h-3.5 text-white/25" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
+                          </svg>
+                        </div>
+                        <div className="min-w-0">
+                          <Link
+                            href={TOOL_URLS[ev.tool_id] ?? "/de/tools"}
+                            className="text-[13px] text-white/70 font-medium hover:text-white/90 transition-colors"
+                          >
+                            {ev.tool_name}
+                          </Link>
+                          {ev.summary && (
+                            <p className="text-[11px] text-white/25 truncate mt-0.5">
+                              {ev.summary}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-[11px] text-white/20 tabular-nums hidden sm:inline">
+                          {new Date(ev.created_at).toLocaleDateString("de-AT", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "2-digit",
+                          })}
+                        </span>
+                        <button
+                          onClick={() => handleDeleteEvaluation(ev.id)}
+                          className="p-1 rounded text-white/15 hover:text-red-400/60 hover:bg-red-400/[0.06] transition-all duration-200"
+                          title="Löschen"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
+import SaveEvaluationButton from "@/components/SaveEvaluationButton";
 import { useTranslations } from "@/i18n/use-translations";
 import { useCountry } from "@/i18n/country-context";
 import { COUNTRY_META } from "@/i18n/country";
@@ -540,6 +541,23 @@ export default function ChecklistTool() {
                         </svg>
                       </Link>
                     </div>
+                  </div>
+
+                  {/* Save Evaluation */}
+                  <div className="mt-4 flex justify-center">
+                    <SaveEvaluationButton
+                      toolId="compliance-checkliste"
+                      toolName="Compliance-Checkliste"
+                      inputs={{
+                        trackedRegulations: REGULATIONS.map((r) => r.key),
+                      }}
+                      results={{
+                        checkedItems: Array.from(checkedItems),
+                        progress: regStats.map((s) => ({ key: s.key, checked: s.checked, total: s.total, percent: s.percent })),
+                        overallPercent,
+                      }}
+                      summary={`${overallPercent}% abgeschlossen (${checkedCount}/${totalItems} Punkte)`}
+                    />
                   </div>
                 </div>
               </motion.div>

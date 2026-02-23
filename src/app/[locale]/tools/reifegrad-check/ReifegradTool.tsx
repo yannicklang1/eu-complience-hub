@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
+import SaveEvaluationButton from "@/components/SaveEvaluationButton";
 import { useTranslations } from "@/i18n/use-translations";
 import { useCountry } from "@/i18n/country-context";
 import { COUNTRY_META } from "@/i18n/country";
@@ -342,7 +343,7 @@ export default function ReifegradTool() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                <div className="flex flex-col sm:flex-row gap-3 mb-4">
                   <button
                     onClick={() => { setShowResults(false); setActiveCat(0); }}
                     className="flex-1 py-3 rounded-xl border border-white/10 text-sm font-semibold text-slate-300 hover:bg-white/[0.04] transition cursor-pointer"
@@ -356,6 +357,23 @@ export default function ReifegradTool() {
                   >
                     Compliance-Report erstellen
                   </Link>
+                </div>
+
+                {/* Save Evaluation */}
+                <div className="mb-6 flex justify-center">
+                  <SaveEvaluationButton
+                    toolId="reifegrad-check"
+                    toolName="Compliance-Reifegrad"
+                    inputs={{
+                      ratings,
+                    }}
+                    results={{
+                      overallPercentage,
+                      grade: grade.label,
+                      categoryScores: results.map((r) => ({ id: r.id, title: r.title, percentage: r.percentage, score: r.score, maxScore: r.maxScore })),
+                    }}
+                    summary={`Note ${grade.label} (${overallPercentage}%)`}
+                  />
                 </div>
 
                 {/* Cross-links */}

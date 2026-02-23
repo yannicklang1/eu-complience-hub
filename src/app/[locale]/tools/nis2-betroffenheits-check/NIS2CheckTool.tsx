@@ -7,6 +7,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ToolNextSteps from "@/components/ToolNextSteps";
+import SaveEvaluationButton from "@/components/SaveEvaluationButton";
 import { useCountry } from "@/i18n/country-context";
 import { COUNTRY_META } from "@/i18n/country/index";
 import { useTranslations } from "@/i18n/use-translations";
@@ -897,6 +898,28 @@ export default function NIS2CheckTool() {
                       currentTool="nis2-check"
                       dark={false}
                       subtext="Analysieren Sie Ihre Compliance-Situation weiter mit unseren interaktiven Tools."
+                    />
+                  </div>
+
+                  {/* Save Evaluation */}
+                  <div className="mb-6 flex justify-center">
+                    <SaveEvaluationButton
+                      toolId="nis2-betroffenheits-check"
+                      toolName="NIS2 Betroffenheits-Check"
+                      inputs={{
+                        sector: selectedSector,
+                        companySize: selectedSize,
+                        isKritis,
+                        isDigitalService,
+                      }}
+                      results={{
+                        result: assessment.result,
+                        title: assessment.title,
+                        obligations: assessment.obligations,
+                        maxFine: assessment.maxFine,
+                        deadline: assessment.deadline,
+                      }}
+                      summary={`${assessment.result === "wesentlich" ? "Wesentliche Einrichtung" : assessment.result === "wichtig" ? "Wichtige Einrichtung" : assessment.result === "nicht_betroffen" ? "Nicht betroffen" : "Prüfung empfohlen"} — ${assessment.title}`}
                     />
                   </div>
 
