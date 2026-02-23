@@ -6,35 +6,11 @@ import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 /* ═══════════════════════════════════════════════════════════
-   AuthForm — Login / Register with Email + OAuth (Google, Apple)
+   AuthForm — Premium Login / Register
    ═══════════════════════════════════════════════════════════ */
 
 type AuthMode = "login" | "register";
 type AuthState = "idle" | "loading" | "success" | "error";
-
-const PROVIDER_CONFIG = [
-  {
-    id: "google" as const,
-    label: "Google",
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none">
-        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
-        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-      </svg>
-    ),
-  },
-  {
-    id: "apple" as const,
-    label: "Apple",
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-        <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-      </svg>
-    ),
-  },
-];
 
 export default function AuthForm() {
   const router = useRouter();
@@ -47,44 +23,38 @@ export default function AuthForm() {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Form fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
 
   const supabase = createSupabaseBrowserClient();
 
-  // Check if already logged in
   useEffect(() => {
     supabase.auth.getUser().then(({ data }: { data: { user: unknown } }) => {
       if (data.user) router.replace(next);
     });
   }, [supabase, router, next]);
 
-  // Show URL error (initial state, not a reactive effect)
-  const urlErrorMessage = urlError === "auth_callback_failed"
-    ? "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut."
-    : "";
+  const urlErrorMessage =
+    urlError === "auth_callback_failed"
+      ? "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut."
+      : "";
 
-  /* ── OAuth Sign-In ── */
   async function handleOAuth(provider: "google" | "apple") {
     setAuthState("loading");
     setError("");
-
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
         redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
       },
     });
-
     if (oauthError) {
       setError(oauthError.message);
       setAuthState("error");
     }
   }
 
-  /* ── Email/Password Submit ── */
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setAuthState("loading");
@@ -96,7 +66,6 @@ export default function AuthForm() {
       setAuthState("error");
       return;
     }
-
     if (password.length < 6) {
       setError("Passwort muss mindestens 6 Zeichen lang sein.");
       setAuthState("error");
@@ -112,56 +81,61 @@ export default function AuthForm() {
           emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
         },
       });
-
       if (signUpError) {
         setError(signUpError.message);
         setAuthState("error");
         return;
       }
-
-      setSuccessMessage("Registrierung erfolgreich! Bitte bestätigen Sie Ihre E-Mail-Adresse.");
+      setSuccessMessage(
+        "Registrierung erfolgreich! Bitte bestätigen Sie Ihre E-Mail-Adresse.",
+      );
       setAuthState("success");
     } else {
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-
       if (signInError) {
-        if (signInError.message.includes("Invalid login")) {
-          setError("Ungültige E-Mail oder Passwort.");
-        } else {
-          setError(signInError.message);
-        }
+        setError(
+          signInError.message.includes("Invalid login")
+            ? "Ungültige E-Mail oder Passwort."
+            : signInError.message,
+        );
         setAuthState("error");
         return;
       }
-
       router.replace(next);
     }
   }
 
+  const isLoading = authState === "loading";
+
   return (
-    <div className="min-h-screen bg-[#060c1a] flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
-        {/* Logo / Brand */}
-        <div className="text-center mb-8">
-          <Link href="/de" className="inline-block">
-            <h2 className="font-[Syne] font-extrabold text-xl text-white">
-              EU Compliance Hub
-            </h2>
+    <div className="min-h-screen bg-[#05090f] flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Subtle ambient glow */}
+      <div
+        className="absolute top-[-40%] left-[50%] -translate-x-1/2 w-[600px] h-[600px] rounded-full opacity-[0.04] pointer-events-none"
+        style={{ background: "radial-gradient(circle, #FACC15 0%, transparent 70%)" }}
+        aria-hidden="true"
+      />
+
+      <div className="w-full max-w-[380px] relative z-10">
+        {/* Brand */}
+        <div className="text-center mb-10">
+          <Link href="/de" className="inline-flex items-center gap-2 group">
+            <div className="w-7 h-7 rounded-md bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center">
+              <span className="text-[10px] font-black text-[#0A2540]">EU</span>
+            </div>
+            <span className="font-[Syne] font-[800] text-[15px] text-white/90 tracking-tight">
+              Compliance Hub
+            </span>
           </Link>
-          <p className="text-sm text-slate-400 mt-2">
-            {mode === "login"
-              ? "Melden Sie sich an, um auf Ihre Reports zuzugreifen."
-              : "Erstellen Sie ein Konto, um Ihre Reports zu verwalten."}
-          </p>
         </div>
 
         {/* Card */}
-        <div className="rounded-2xl border border-white/5 bg-slate-900/60 p-8">
-          {/* Tab Toggle */}
-          <div className="flex rounded-xl bg-white/5 p-1 mb-6">
+        <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] backdrop-blur-sm">
+          {/* Tab */}
+          <div className="flex border-b border-white/[0.06]">
             {(["login", "register"] as const).map((m) => (
               <button
                 key={m}
@@ -171,161 +145,204 @@ export default function AuthForm() {
                   setSuccessMessage("");
                   setAuthState("idle");
                 }}
-                className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                className={`flex-1 py-3.5 text-[13px] font-medium transition-all relative ${
                   mode === m
-                    ? "bg-yellow-400 text-[#0A2540] shadow-sm"
-                    : "text-slate-400 hover:text-white"
+                    ? "text-white"
+                    : "text-white/30 hover:text-white/50"
                 }`}
               >
                 {m === "login" ? "Anmelden" : "Registrieren"}
+                {mode === m && (
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[2px] bg-yellow-400 rounded-full" />
+                )}
               </button>
             ))}
           </div>
 
-          {/* OAuth Buttons */}
-          <div className="space-y-3 mb-6">
-            {PROVIDER_CONFIG.map((provider) => (
-              <button
-                key={provider.id}
-                onClick={() => handleOAuth(provider.id)}
-                disabled={authState === "loading"}
-                className="w-full flex items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white hover:bg-white/10 disabled:opacity-50 transition-colors"
-              >
-                {provider.icon}
-                <span>
-                  Mit {provider.label} {mode === "login" ? "anmelden" : "registrieren"}
-                </span>
-              </button>
-            ))}
-          </div>
+          <div className="p-6">
+            {/* Google OAuth */}
+            <button
+              onClick={() => handleOAuth("google")}
+              disabled={isLoading}
+              className="w-full flex items-center justify-center gap-2.5 rounded-md border border-white/[0.08] bg-white/[0.03] px-4 py-2.5 text-[13px] font-medium text-white/80 hover:bg-white/[0.06] hover:border-white/[0.12] disabled:opacity-40 transition-all duration-200"
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" aria-hidden="true">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+              </svg>
+              Mit Google fortfahren
+            </button>
 
-          {/* Divider */}
-          <div className="flex items-center gap-3 mb-6">
-            <div className="flex-1 h-px bg-white/10" />
-            <span className="text-xs text-slate-500 font-medium">oder</span>
-            <div className="flex-1 h-px bg-white/10" />
-          </div>
+            {/* Divider */}
+            <div className="flex items-center gap-3 my-5">
+              <div className="flex-1 h-px bg-white/[0.06]" />
+              <span className="text-[11px] text-white/20 font-mono uppercase tracking-widest">
+                oder
+              </span>
+              <div className="flex-1 h-px bg-white/[0.06]" />
+            </div>
 
-          {/* Email/Password Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {mode === "register" && (
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-3">
+              {mode === "register" && (
+                <div>
+                  <label
+                    htmlFor="full-name"
+                    className="block text-[11px] font-medium text-white/30 mb-1.5 tracking-wide uppercase"
+                  >
+                    Name
+                  </label>
+                  <input
+                    id="full-name"
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full rounded-md border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-[13px] text-white placeholder:text-white/15 outline-none focus:border-yellow-400/40 focus:bg-white/[0.04] transition-all duration-200"
+                    placeholder="Max Mustermann"
+                    autoComplete="name"
+                  />
+                </div>
+              )}
+
               <div>
-                <label htmlFor="full-name" className="block text-xs font-medium text-slate-400 mb-1.5">
-                  Name
+                <label
+                  htmlFor="email"
+                  className="block text-[11px] font-medium text-white/30 mb-1.5 tracking-wide uppercase"
+                >
+                  E-Mail
                 </label>
                 <input
-                  id="full-name"
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-600 outline-none focus:border-yellow-400/30 transition-colors"
-                  placeholder="Max Mustermann"
-                  autoComplete="name"
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-md border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-[13px] text-white placeholder:text-white/15 outline-none focus:border-yellow-400/40 focus:bg-white/[0.04] transition-all duration-200"
+                  placeholder="name@unternehmen.at"
+                  autoComplete="email"
+                  required
                 />
               </div>
-            )}
 
-            <div>
-              <label htmlFor="email" className="block text-xs font-medium text-slate-400 mb-1.5">
-                E-Mail
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-600 outline-none focus:border-yellow-400/30 transition-colors"
-                placeholder="ihre@email.at"
-                autoComplete="email"
-                required
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label htmlFor="password" className="block text-xs font-medium text-slate-400">
-                  Passwort
-                </label>
-                {mode === "login" && (
-                  <Link
-                    href="/auth/reset-password"
-                    className="text-xs text-yellow-400/70 hover:text-yellow-400 transition-colors"
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label
+                    htmlFor="password"
+                    className="block text-[11px] font-medium text-white/30 tracking-wide uppercase"
                   >
-                    Passwort vergessen?
-                  </Link>
-                )}
+                    Passwort
+                  </label>
+                  {mode === "login" && (
+                    <Link
+                      href="/auth/reset-password"
+                      className="text-[11px] text-white/20 hover:text-yellow-400/70 transition-colors"
+                    >
+                      Vergessen?
+                    </Link>
+                  )}
+                </div>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-md border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-[13px] text-white placeholder:text-white/15 outline-none focus:border-yellow-400/40 focus:bg-white/[0.04] transition-all duration-200"
+                  placeholder={mode === "register" ? "Mind. 6 Zeichen" : "••••••••"}
+                  autoComplete={
+                    mode === "register" ? "new-password" : "current-password"
+                  }
+                  required
+                  minLength={6}
+                />
               </div>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-600 outline-none focus:border-yellow-400/30 transition-colors"
-                placeholder={mode === "register" ? "Mind. 6 Zeichen" : "••••••••"}
-                autoComplete={mode === "register" ? "new-password" : "current-password"}
-                required
-                minLength={6}
-              />
-            </div>
 
-            {/* Error */}
-            {(error || urlErrorMessage) && (
-              <p className="text-sm text-red-400 bg-red-400/10 rounded-lg px-3 py-2" role="alert">
-                {error || urlErrorMessage}
-              </p>
-            )}
+              {/* Error */}
+              {(error || urlErrorMessage) && (
+                <div
+                  className="flex items-start gap-2 text-[12px] text-red-400/90 bg-red-400/[0.06] border border-red-400/[0.08] rounded-md px-3 py-2"
+                  role="alert"
+                >
+                  <svg className="w-3.5 h-3.5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                  </svg>
+                  {error || urlErrorMessage}
+                </div>
+              )}
 
-            {/* Success */}
-            {successMessage && (
-              <p className="text-sm text-green-400 bg-green-400/10 rounded-lg px-3 py-2" role="alert">
-                {successMessage}
-              </p>
-            )}
+              {/* Success */}
+              {successMessage && (
+                <div
+                  className="flex items-start gap-2 text-[12px] text-emerald-400/90 bg-emerald-400/[0.06] border border-emerald-400/[0.08] rounded-md px-3 py-2"
+                  role="alert"
+                >
+                  <svg className="w-3.5 h-3.5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                  </svg>
+                  {successMessage}
+                </div>
+              )}
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={authState === "loading"}
-              className="w-full rounded-xl py-3.5 text-sm font-[Syne] font-bold text-[#0A2540] disabled:opacity-50 transition-all hover:brightness-110"
-              style={{
-                background: "linear-gradient(135deg, #FACC15, #EAB308)",
-              }}
-            >
-              {authState === "loading"
-                ? "Wird geladen…"
-                : mode === "login"
-                  ? "Anmelden"
-                  : "Konto erstellen"}
-            </button>
-          </form>
+              {/* Submit */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full mt-1 rounded-md py-2.5 text-[13px] font-semibold text-[#0A2540] disabled:opacity-40 transition-all duration-200 hover:shadow-[0_0_20px_rgba(250,204,21,0.15)]"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #FACC15 0%, #EAB308 100%)",
+                }}
+              >
+                {isLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Wird verarbeitet…
+                  </span>
+                ) : mode === "login" ? (
+                  "Anmelden"
+                ) : (
+                  "Konto erstellen"
+                )}
+              </button>
+            </form>
+          </div>
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-slate-500 mt-6">
-          {mode === "login"
-            ? "Noch kein Konto? "
-            : "Bereits ein Konto? "}
-          <button
-            onClick={() => {
-              setMode(mode === "login" ? "register" : "login");
-              setError("");
-              setSuccessMessage("");
-            }}
-            className="text-yellow-400/70 hover:text-yellow-400 transition-colors"
-          >
-            {mode === "login" ? "Jetzt registrieren" : "Jetzt anmelden"}
-          </button>
-        </p>
+        <div className="mt-6 text-center">
+          <p className="text-[12px] text-white/25">
+            {mode === "login" ? "Noch kein Konto? " : "Bereits ein Konto? "}
+            <button
+              onClick={() => {
+                setMode(mode === "login" ? "register" : "login");
+                setError("");
+                setSuccessMessage("");
+              }}
+              className="text-white/40 hover:text-yellow-400/70 transition-colors"
+            >
+              {mode === "login" ? "Registrieren" : "Anmelden"}
+            </button>
+          </p>
 
-        <p className="text-center text-xs text-slate-600 mt-4">
-          <Link href="/de/datenschutz" className="hover:text-slate-400 transition-colors">
-            Datenschutz
-          </Link>
-          {" · "}
-          <Link href="/de/impressum" className="hover:text-slate-400 transition-colors">
-            Impressum
-          </Link>
-        </p>
+          <div className="flex items-center justify-center gap-3 mt-4">
+            <Link
+              href="/de/datenschutz"
+              className="text-[11px] text-white/15 hover:text-white/30 transition-colors"
+            >
+              Datenschutz
+            </Link>
+            <span className="text-white/10 text-[11px]">·</span>
+            <Link
+              href="/de/impressum"
+              className="text-[11px] text-white/15 hover:text-white/30 transition-colors"
+            >
+              Impressum
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );
