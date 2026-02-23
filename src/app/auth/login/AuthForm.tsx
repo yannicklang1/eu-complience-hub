@@ -122,7 +122,7 @@ export default function AuthForm() {
       <div className="w-full max-w-[380px] relative z-10">
         {/* Brand */}
         <div className="text-center mb-10">
-          <Link href="/de" className="inline-flex items-center gap-2 group">
+          <Link href="/" className="inline-flex items-center gap-2 group">
             <div className="w-7 h-7 rounded-md bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center">
               <span className="text-[10px] font-black text-[#0A2540]">EU</span>
             </div>
@@ -329,14 +329,14 @@ export default function AuthForm() {
 
           <div className="flex items-center justify-center gap-3 mt-4">
             <Link
-              href="/de/datenschutz"
+              href="/datenschutz"
               className="text-[11px] text-white/15 hover:text-white/30 transition-colors"
             >
               Datenschutz
             </Link>
             <span className="text-white/10 text-[11px]">·</span>
             <Link
-              href="/de/impressum"
+              href="/impressum"
               className="text-[11px] text-white/15 hover:text-white/30 transition-colors"
             >
               Impressum

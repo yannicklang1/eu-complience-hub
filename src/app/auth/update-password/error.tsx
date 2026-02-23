@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-export default function AuthError({ reset }: { reset: () => void }) {
+export default function UpdatePasswordError({ reset }: { reset: () => void }) {
   return (
     <div className="min-h-screen bg-[#05090f] flex items-center justify-center p-6">
       <div className="text-center max-w-sm">
@@ -24,10 +24,10 @@ export default function AuthError({ reset }: { reset: () => void }) {
             Erneut versuchen
           </button>
           <Link
-            href="/"
+            href="/auth/login"
             className="px-4 py-2 rounded-md text-[13px] font-medium text-white/40 border border-white/[0.08] hover:text-white/60 hover:border-white/[0.15] transition-all duration-200"
           >
-            Zur Startseite
+            Zur Anmeldung
           </Link>
         </div>
       </div>

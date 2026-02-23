@@ -62,13 +62,13 @@ const GRADE_STYLES: Record<string, { bg: string; text: string; label: string }> 
 };
 
 const TOOL_URLS: Record<string, string> = {
-  "regulierung-finder": "/de/tools/regulierung-finder",
-  "compliance-checkliste": "/de/tools/compliance-checkliste",
-  "kosten-kalkulator": "/de/tools/kosten-kalkulator",
-  "reifegrad-check": "/de/tools/reifegrad-check",
-  "nis2-betroffenheits-check": "/de/tools/nis2-betroffenheits-check",
-  "haftungs-pruefer": "/de/tools/haftungs-pruefer",
-  "bussgeld-rechner": "/de/tools/bussgeld-rechner",
+  "regulierung-finder": "/tools/regulierung-finder",
+  "compliance-checkliste": "/tools/compliance-checkliste",
+  "kosten-kalkulator": "/tools/kosten-kalkulator",
+  "reifegrad-check": "/tools/reifegrad-check",
+  "nis2-betroffenheits-check": "/tools/nis2-betroffenheits-check",
+  "haftungs-pruefer": "/tools/haftungs-pruefer",
+  "bussgeld-rechner": "/tools/bussgeld-rechner",
 };
 
 /* ═══════════════════════════════════════════════════════════
@@ -76,10 +76,8 @@ const TOOL_URLS: Record<string, string> = {
    ═══════════════════════════════════════════════════════════ */
 
 export default function PortalDashboard({
-  userId,
   userEmail,
 }: {
-  userId: string;
   userEmail: string;
 }) {
   const router = useRouter();
@@ -129,8 +127,17 @@ export default function PortalDashboard({
   }
 
   async function handleDeleteEvaluation(id: string) {
-    setEvaluations((prev) => prev.filter((e) => e.id !== id));
-    await fetch(`/api/portal/evaluations?id=${id}`, { method: "DELETE" });
+    const prev = evaluations;
+    setEvaluations((current) => current.filter((e) => e.id !== id));
+
+    try {
+      const res = await fetch(`/api/portal/evaluations?id=${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        setEvaluations(prev);
+      }
+    } catch {
+      setEvaluations(prev);
+    }
   }
 
   const displayName =
@@ -158,7 +165,7 @@ export default function PortalDashboard({
       <header className="border-b border-white/[0.06] bg-white/[0.01] backdrop-blur-sm relative z-10">
         <div className="max-w-5xl mx-auto px-6 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/de" className="inline-flex items-center gap-2 group">
+            <Link href="/" className="inline-flex items-center gap-2 group">
               <div className="w-6 h-6 rounded-[5px] bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center">
                 <span className="text-[8px] font-black text-[#0A2540]">EU</span>
               </div>
@@ -436,7 +443,7 @@ export default function PortalDashboard({
                   regulatorischen Anforderungen zu analysieren.
                 </p>
                 <Link
-                  href="/de/tools/reifegrad-check"
+                  href="/tools/reifegrad-check"
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-md text-[13px] font-semibold text-[#0A2540] hover:shadow-[0_0_20px_rgba(250,204,21,0.12)] transition-all duration-200"
                   style={{
                     background: "linear-gradient(135deg, #FACC15, #EAB308)",
@@ -487,7 +494,7 @@ export default function PortalDashboard({
                         </div>
                         <div className="min-w-0">
                           <Link
-                            href={TOOL_URLS[ev.tool_id] ?? "/de/tools"}
+                            href={TOOL_URLS[ev.tool_id] ?? "/tools"}
                             className="text-[13px] text-white/70 font-medium hover:text-white/90 transition-colors"
                           >
                             {ev.tool_name}
@@ -511,6 +518,7 @@ export default function PortalDashboard({
                         <button
                           onClick={() => handleDeleteEvaluation(ev.id)}
                           className="p-1 rounded text-white/15 hover:text-red-400/60 hover:bg-red-400/[0.06] transition-all duration-200"
+                          aria-label={`${ev.tool_name} Evaluierung löschen`}
                           title="Löschen"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
@@ -527,7 +535,7 @@ export default function PortalDashboard({
             {/* Quick Actions */}
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Link
-                href="/de/tools"
+                href="/tools"
                 className="group rounded-lg border border-white/[0.06] bg-white/[0.02] p-4 hover:border-white/[0.10] hover:bg-white/[0.03] transition-all duration-200"
               >
                 <div className="flex items-center gap-3">
@@ -548,7 +556,7 @@ export default function PortalDashboard({
               </Link>
 
               <Link
-                href="/de/faq"
+                href="/faq"
                 className="group rounded-lg border border-white/[0.06] bg-white/[0.02] p-4 hover:border-white/[0.10] hover:bg-white/[0.03] transition-all duration-200"
               >
                 <div className="flex items-center gap-3">
@@ -593,10 +601,6 @@ export default function PortalDashboard({
                     <span className="text-white/50">{profile.company_name}</span>
                   </div>
                 )}
-                <div className="flex items-center gap-2 text-[12px]">
-                  <span className="text-white/20 shrink-0">ID</span>
-                  <span className="text-white/15 font-mono text-[10px] truncate">{userId}</span>
-                </div>
               </div>
             </div>
           </>

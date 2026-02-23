@@ -2,13 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-auth";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { log } from "@/lib/logger";
+import { createRateLimiter, getClientIp } from "@/lib/rate-limit";
 
 /* ══════════════════════════════════════════════════════════════
    GET /api/portal/profile — Current user's profile
    ══════════════════════════════════════════════════════════════ */
 
-export async function GET() {
+const portalLimiter = createRateLimiter({ windowMs: 60_000, max: 20 });
+
+export async function GET(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    if (portalLimiter.isLimited(ip)) {
+      return NextResponse.json({ error: "Zu viele Anfragen." }, { status: 429 });
+    }
+
     const supabase = await createSupabaseServerClient();
     const {
       data: { user },
@@ -65,6 +73,11 @@ export async function GET() {
 
 export async function PATCH(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    if (portalLimiter.isLimited(ip)) {
+      return NextResponse.json({ error: "Zu viele Anfragen." }, { status: 429 });
+    }
+
     const supabase = await createSupabaseServerClient();
     const {
       data: { user },

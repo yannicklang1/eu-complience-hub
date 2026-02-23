@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
@@ -11,6 +11,19 @@ export default function UpdatePasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [state, setState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [error, setError] = useState("");
+  const [hasSession, setHasSession] = useState<boolean | null>(null);
+
+  // Guard: only allow if user arrived via a password-reset email link
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: unknown } }) => {
+      if (!session) {
+        router.replace("/auth/reset-password");
+        return;
+      }
+      setHasSession(true);
+    });
+  }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -42,6 +55,15 @@ export default function UpdatePasswordPage() {
     setTimeout(() => router.replace("/portal"), 2000);
   }
 
+  // Show nothing while checking session (prevents flash)
+  if (hasSession === null) {
+    return (
+      <div className="min-h-screen bg-[#05090f] flex items-center justify-center">
+        <div className="w-5 h-5 border-[1.5px] border-yellow-400/60 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#05090f] flex items-center justify-center p-6 relative overflow-hidden">
       {/* Subtle ambient glow */}
@@ -54,7 +76,7 @@ export default function UpdatePasswordPage() {
       <div className="w-full max-w-[380px] relative z-10">
         {/* Brand */}
         <div className="text-center mb-10">
-          <Link href="/de" className="inline-flex items-center gap-2 group">
+          <Link href="/" className="inline-flex items-center gap-2 group">
             <div className="w-7 h-7 rounded-md bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center">
               <span className="text-[10px] font-black text-[#0A2540]">EU</span>
             </div>
@@ -165,14 +187,14 @@ export default function UpdatePasswordPage() {
         {/* Footer */}
         <div className="flex items-center justify-center gap-3 mt-6">
           <Link
-            href="/de/datenschutz"
+            href="/datenschutz"
             className="text-[11px] text-white/15 hover:text-white/30 transition-colors"
           >
             Datenschutz
           </Link>
           <span className="text-white/10 text-[11px]">·</span>
           <Link
-            href="/de/impressum"
+            href="/impressum"
             className="text-[11px] text-white/15 hover:text-white/30 transition-colors"
           >
             Impressum

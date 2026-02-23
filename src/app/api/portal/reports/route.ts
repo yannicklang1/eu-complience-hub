@@ -1,14 +1,22 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase-auth";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { log } from "@/lib/logger";
+import { createRateLimiter, getClientIp } from "@/lib/rate-limit";
 
 /* ══════════════════════════════════════════════════════════════
    GET /api/portal/reports — Authenticated user's reports
    ══════════════════════════════════════════════════════════════ */
 
-export async function GET() {
+const portalLimiter = createRateLimiter({ windowMs: 60_000, max: 20 });
+
+export async function GET(request: NextRequest) {
   try {
+    const ip = getClientIp(request);
+    if (portalLimiter.isLimited(ip)) {
+      return NextResponse.json({ error: "Zu viele Anfragen." }, { status: 429 });
+    }
+
     /* --- Auth --- */
     const supabase = await createSupabaseServerClient();
     const {

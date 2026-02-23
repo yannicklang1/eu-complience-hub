@@ -10,5 +10,5 @@ export default async function PortalPage() {
 
   if (!user) redirect("/auth/login?next=/portal");
 
-  return <PortalDashboard userId={user.id} userEmail={user.email ?? ""} />;
+  return <PortalDashboard userEmail={user.email ?? ""} />;
 }

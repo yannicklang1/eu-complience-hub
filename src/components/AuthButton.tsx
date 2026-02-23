@@ -15,7 +15,8 @@ interface AuthButtonProps {
 }
 
 export default function AuthButton({ scrolled, variant = "desktop" }: AuthButtonProps) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // Initialize as null to prevent flash of wrong state
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const [initials, setInitials] = useState("");
 
   useEffect(() => {
@@ -34,6 +35,8 @@ export default function AuthButton({ scrolled, variant = "desktop" }: AuthButton
             .toUpperCase()
             .slice(0, 2) || "U",
         );
+      } else {
+        setIsLoggedIn(false);
       }
     });
 
@@ -58,6 +61,9 @@ export default function AuthButton({ scrolled, variant = "desktop" }: AuthButton
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Don't render until auth check completes (prevents flash)
+  if (isLoggedIn === null) return null;
 
   if (variant === "mobile") {
     if (isLoggedIn) {
