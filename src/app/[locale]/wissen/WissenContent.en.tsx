@@ -54,7 +54,6 @@ const TOOLS: ResourceCard[] = [
   { title: "Regulation Finder", description: "Quiz: Which EU regulations affect your company?", href: "/tools/regulierung-finder", icon: "\uD83E\uDDED", accent: "#FACC15", badge: "New", keywords: ["which regulation", "affected"] },
   { title: "NIS2 Applicability Check", description: "Find out in 2 minutes whether your company falls under NIS2", href: "/tools/nis2-betroffenheits-check", icon: "\u2705", accent: "#3b82f6", keywords: ["NIS2", "applicability", "check"] },
   { title: "Compliance Checklist", description: "Check your compliance status for all EU regulations", href: "/tools/compliance-checkliste", icon: "\uD83D\uDCCB", accent: "#FACC15", keywords: ["checklist", "status", "review"] },
-  { title: "Cost Calculator", description: "Estimate the costs for implementing EU compliance", href: "/tools/kosten-kalkulator", icon: "\uD83D\uDCB0", accent: "#FACC15", badge: "New", keywords: ["costs", "budget", "estimate"] },
   { title: "Maturity Check", description: "Assess your compliance maturity across 5 categories", href: "/tools/reifegrad-check", icon: "\uD83D\uDCCA", accent: "#6366f1", badge: "New", keywords: ["maturity", "assessment"] },
   { title: "Liability Assessor", description: "Assess your personal liability risk as a managing director", href: "/tools/haftungs-pruefer", icon: "\u2696\uFE0F", accent: "#0A2540", keywords: ["liability", "managing director", "risk"] },
   { title: "Fine Calculator", description: "Calculate the penalty range for violations of EU regulations", href: "/tools/bussgeld-rechner", icon: "\uD83D\uDCB0", accent: "#ef4444", keywords: ["fine", "penalty", "sanction"] },
@@ -62,7 +61,6 @@ const TOOLS: ResourceCard[] = [
 ];
 
 const RESOURCES: ResourceCard[] = [
-  { title: "News", description: "Compliance news, legislative changes and upcoming deadlines", href: "/aktuelles", icon: "\uD83D\uDCF0", accent: "#FACC15", badge: "New", keywords: ["news", "current"] },
   { title: "Regulation Comparison", description: "Compare EU regulations side by side", href: "/vergleich", icon: "\uD83D\uDD00", accent: "#FACC15", badge: "New", keywords: ["comparison", "matrix"] },
   { title: "Deadline Radar", description: "All EU compliance deadlines at a glance", href: "/fristen-radar", icon: "\u23F0", accent: "#FACC15", keywords: ["deadlines", "dates"] },
   { title: "Compliance Timeline", description: "Chronological overview of all deadlines 2025\u20132027", href: "/timeline", icon: "\uD83D\uDCC5", accent: "#3b82f6", keywords: ["timeline", "chronology"] },

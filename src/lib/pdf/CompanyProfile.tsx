@@ -129,6 +129,53 @@ const cpStyles = StyleSheet.create({
   },
 });
 
+/** Label maps for the new personalization signals */
+const CERT_LABELS: Record<string, string> = {
+  "iso-27001": "ISO/IEC 27001",
+  "iso-27701": "ISO/IEC 27701",
+  "iso-9001": "ISO 9001",
+  "soc2": "SOC 2 Type II",
+  "tisax": "TISAX",
+  "vds": "VdS 10000/10010",
+  "bsi": "BSI IT-Grundschutz",
+  "c5": "BSI C5",
+  "nen-7510": "NEN 7510",
+  "none": "Keine",
+};
+
+const IT_STACK_LABELS: Record<string, string> = {
+  "aws": "AWS",
+  "azure": "Microsoft Azure",
+  "gcp": "Google Cloud (GCP)",
+  "m365": "Microsoft 365",
+  "google-workspace": "Google Workspace",
+  "saas-heavy": "10+ SaaS-Apps",
+  "on-premise": "On-Premise",
+  "hybrid": "Hybrid",
+  "eu-cloud": "EU-Only Cloud",
+};
+
+const EXPORT_LABELS: Record<string, string> = {
+  "no-export": "Kein Drittlandstransfer",
+  "us": "USA",
+  "uk": "UK (Adequacy)",
+  "ch": "Schweiz (Adequacy)",
+  "india": "Indien",
+  "china": "China",
+  "other-third": "Andere Drittländer",
+};
+
+const INCIDENT_LABELS: Record<string, string> = {
+  "no-incidents": "Keine Vorfälle",
+  "data-breach": "Datenschutzvorfall",
+  "ransomware": "Ransomware",
+  "phishing": "Phishing-Angriff",
+  "insider": "Insider-Bedrohung",
+  "supply-chain": "Lieferketten-Vorfall",
+  "audit-finding": "Kritische Audit-Feststellung",
+  "dsb-complaint": "Beschwerde bei DSB",
+};
+
 export default function CompanyProfile({
   input,
   totalRegulations,
@@ -216,6 +263,85 @@ export default function CompanyProfile({
             {input.dataTypes.map((d) => (
               <View key={d} style={cpStyles.tag}>
                 <Text style={cpStyles.tagText}>{t.profile.dataLabels[d] ?? d}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+
+      {/* Certifications */}
+      {(input.certifications ?? []).filter((c) => c !== "none").length > 0 && (
+        <View style={cpStyles.scopeSection}>
+          <Text style={cpStyles.scopeTitle}>Bestehende Zertifizierungen</Text>
+          <View style={cpStyles.tagRow}>
+            {(input.certifications ?? []).filter((c) => c !== "none").map((c) => (
+              <View key={c} style={[cpStyles.tag, { backgroundColor: "#ecfdf5", borderColor: "#a7f3d0" }]}>
+                <Text style={[cpStyles.tagText, { color: "#047857", fontWeight: 700 }]}>
+                  {CERT_LABELS[c] ?? c}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+
+      {/* IT Stack */}
+      {(input.itStack ?? []).length > 0 && (
+        <View style={cpStyles.scopeSection}>
+          <Text style={cpStyles.scopeTitle}>IT-Umgebung</Text>
+          <View style={cpStyles.tagRow}>
+            {(input.itStack ?? []).map((s) => (
+              <View key={s} style={cpStyles.tag}>
+                <Text style={cpStyles.tagText}>{IT_STACK_LABELS[s] ?? s}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+
+      {/* Data Export Countries */}
+      {(input.dataExportCountries ?? []).length > 0 && (
+        <View style={cpStyles.scopeSection}>
+          <Text style={cpStyles.scopeTitle}>Datenexport außerhalb EU/EWR</Text>
+          <View style={cpStyles.tagRow}>
+            {(input.dataExportCountries ?? []).map((c) => (
+              <View
+                key={c}
+                style={
+                  c === "no-export"
+                    ? cpStyles.tag
+                    : ["us", "india", "china", "other-third"].includes(c)
+                    ? [cpStyles.tag, { backgroundColor: "#fef2f2", borderColor: "#fecaca" }]
+                    : [cpStyles.tag, { backgroundColor: "#fef3c7", borderColor: "#fde68a" }]
+                }
+              >
+                <Text
+                  style={
+                    c === "no-export"
+                      ? cpStyles.tagText
+                      : ["us", "india", "china", "other-third"].includes(c)
+                      ? [cpStyles.tagText, { color: "#991b1b", fontWeight: 700 }]
+                      : [cpStyles.tagText, { color: "#92400e", fontWeight: 700 }]
+                  }
+                >
+                  {EXPORT_LABELS[c] ?? c}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+
+      {/* Incident History */}
+      {(input.incidentHistory ?? []).filter((i) => i !== "no-incidents").length > 0 && (
+        <View style={cpStyles.scopeSection}>
+          <Text style={cpStyles.scopeTitle}>Vorfälle (letzte 24 Monate)</Text>
+          <View style={cpStyles.tagRow}>
+            {(input.incidentHistory ?? []).filter((i) => i !== "no-incidents").map((i) => (
+              <View key={i} style={[cpStyles.tag, { backgroundColor: "#fef2f2", borderColor: "#fecaca" }]}>
+                <Text style={[cpStyles.tagText, { color: "#991b1b", fontWeight: 700 }]}>
+                  {INCIDENT_LABELS[i] ?? i}
+                </Text>
               </View>
             ))}
           </View>

@@ -81,7 +81,6 @@ export const toolsDropdown: NavDropdown = {
         { label: "Compliance-Checkliste", href: "/tools/compliance-checkliste", description: "Alle Pflichten prüfen", badge: "Neu" },
         { label: "Haftungs-Prüfer", href: "/tools/haftungs-pruefer", description: "Persönliches Risiko" },
         { label: "Bußgeld-Rechner", href: "/tools/bussgeld-rechner", description: "Strafrahmen berechnen" },
-        { label: "Kosten-Kalkulator", href: "/tools/kosten-kalkulator", description: "Compliance-Budget planen", badge: "Neu" },
         { label: "Reifegrad-Check", href: "/tools/reifegrad-check", description: "Compliance-Reifegrad messen", badge: "Neu" },
       ],
     },

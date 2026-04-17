@@ -72,10 +72,6 @@ Ein 5-Fragen-Quiz das automatisch identifiziert, welche der 14 EU-Regulierungen 
 URL: ${BASE_URL}/de/tools/reifegrad-check
 Bewertet den Compliance-Reifegrad eines Unternehmens über 5 Kategorien (Governance, Risikomanagement, technische Maßnahmen, Prozesse, Dokumentation) mit 25 Fragen. Ergebnis: A–E Bewertung mit konkreten Verbesserungsvorschlägen. Optional: PDF-Report mit Detailanalyse.
 
-### Kosten-Kalkulator
-URL: ${BASE_URL}/de/tools/kosten-kalkulator
-Schätzt die Implementierungskosten für EU-Compliance basierend auf Unternehmensgröße, aktuellem Reifegrad und ausgewählten Regulierungen. Aufschlüsselung nach Personal, Technologie, Beratung und Schulung.
-
 ### Bußgeld-Rechner
 URL: ${BASE_URL}/de/tools/bussgeld-rechner
 Berechnet mögliche Strafen bei Verstößen gegen verschiedene EU-Regulierungen. Berücksichtigt Umsatz, Schwere des Verstoßes und mildernde Umstände.
@@ -98,9 +94,6 @@ Bewertet das persönliche Haftungsrisiko für Geschäftsführer und Vorstände b
 
 **Welche EU-Regulierungen betreffen mein Unternehmen?**
 Das hängt von Branche, Größe, Datenverarbeitung und digitalen Produkten ab. Unser Regulierung-Finder (${BASE_URL}/de/tools/regulierung-finder) identifiziert in 2 Minuten die relevanten Verordnungen.
-
-**Was kostet NIS2-Compliance?**
-Für ein mittelständisches Unternehmen typischerweise 50.000–200.000 Euro im ersten Jahr. Unser Kosten-Kalkulator (${BASE_URL}/de/tools/kosten-kalkulator) gibt eine individuelle Schätzung.
 
 **Wann tritt der EU AI Act in Kraft?**
 Gestaffelt: Feb 2025 (Verbote), Aug 2025 (GPAI-Regeln), Aug 2026 (Hochrisiko-KI). Vollständiger Zeitplan: ${BASE_URL}/de/eu-ai-act

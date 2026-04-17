@@ -97,14 +97,6 @@ export default function Header() {
           >
             {t("nav.knowledge")}
           </Link>
-          <Link
-            href={`/${locale}/aktuelles`}
-            className={`px-4 py-2 rounded-xl text-[13px] font-[Syne] font-semibold tracking-[-0.01em] transition-all duration-200 ${
-              scrolled ? "text-[#3a4a6b] hover:text-[#0A2540] hover:bg-[#0A2540]/[0.04]" : "text-white/80 hover:text-white hover:bg-white/[0.08]"
-            }`}
-          >
-            {t("nav.news")}
-          </Link>
         </nav>
 
         {/* CTA */}
@@ -177,15 +169,6 @@ export default function Header() {
             onClick={closeMobileMenu}
           >
             <span className="text-sm font-medium">{t("nav.knowledge")}</span>
-          </Link>
-
-          {/* Aktuelles (direct link) */}
-          <Link
-            href={`/${locale}/aktuelles`}
-            className="flex items-center justify-between py-3 border-b border-[#0A2540]/[0.04] text-[#3a4a6b]"
-            onClick={closeMobileMenu}
-          >
-            <span className="text-sm font-medium">{t("nav.news")}</span>
           </Link>
 
           {/* Tools Hub (direct link) */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
@@ -25,11 +25,25 @@ interface FormData {
   employeeCount: string;
   annualRevenue: string;
   companySize: string; // derived from employees + revenue
+  /** Börsennotiert / Public Interest Entity (für CSRD & Prospekt-VO) */
+  isListed: boolean;
   branche: string;
   sectors: string[];
   dataTypes: string[];
   activities: string[];
   locations: string[];
+  /** Produktkategorien (für DPP/ESPR, BaFG, CRA) */
+  productCategories: string[];
+  /** Marketing-Claims (für Green Claims / Empowering Consumers) */
+  marketingClaims: string[];
+  /** Certifications & standards already in place (ISO 27001, SOC 2, etc.) */
+  certifications: string[];
+  /** Cloud/IT stack — influences DSGVO third-country transfers, DORA TPRM */
+  itStack: string[];
+  /** Data export countries (for DSGVO Chapter V analysis) */
+  dataExportCountries: string[];
+  /** Incident history last 24 months */
+  incidentHistory: string[];
   maturityAnswers: { category: string; level: number }[];
   urgency: string;
   message: string;
@@ -37,7 +51,33 @@ interface FormData {
   commercialConsent: boolean;
 }
 
-type SubmitStatus = "idle" | "submitting" | "success" | "error";
+type SubmitStatus = "idle" | "submitting" | "preview" | "purchasing" | "success" | "error";
+
+/* Preview data returned from /api/report/preview */
+interface PreviewData {
+  reportToken: string;
+  regulations: {
+    key: string;
+    name: string;
+    subtitle?: string;
+    href?: string;
+    relevance: string;
+    color: string;
+    reason?: string;
+  }[];
+  regulationsCount: number;
+  highCount: number;
+  mediumCount: number;
+  maturityGrade: string;
+  topActions?: {
+    phaseLabel: string;
+    action: string;
+    regulationName: string;
+    effort: string;
+    color: string;
+  }[];
+  nextDeadline: { label: string; date: string; daysUntil: number } | null;
+}
 
 /* Derive company size from employee count + revenue */
 function deriveCompanySize(employees: string, revenue: string): string {
@@ -61,11 +101,18 @@ const INITIAL_FORM: FormData = {
   employeeCount: "",
   annualRevenue: "",
   companySize: "",
+  isListed: false,
   branche: "",
   sectors: [],
   dataTypes: [],
   activities: [],
   locations: [],
+  productCategories: [],
+  marketingClaims: [],
+  certifications: [],
+  itStack: [],
+  dataExportCountries: [],
+  incidentHistory: [],
   maturityAnswers: [
     { category: "governance", level: 0 },
     { category: "datenschutz", level: 0 },
@@ -127,15 +174,15 @@ const DATA_TYPES = [
 ] as const;
 
 const ACTIVITIES = [
-  { value: "ai", label: "Einsatz oder Entwicklung von KI-Systemen" },
-  { value: "software", label: "Software-/Hardware-Produkte mit digitalen Elementen" },
-  { value: "critical-infra", label: "Betrieb kritischer Infrastruktur" },
-  { value: "online-platform", label: "Online-Plattform / Marktplatz" },
-  { value: "esg", label: "Nachhaltigkeitsberichterstattung / ESG" },
-  { value: "crypto", label: "Krypto-Assets / Blockchain" },
-  { value: "cross-border", label: "Grenz\u00FCberschreitender Datenverkehr" },
-  { value: "ecommerce", label: "Elektronischer Gesch\u00E4ftsverkehr" },
-  { value: "eid", label: "Elektronische Identifizierung" },
+  { value: "ai", label: "Einsatz oder Entwicklung von KI-Systemen", desc: "z.B. Chatbots, ML-Modelle, Bewerber-Screening, Recommendation Engines" },
+  { value: "software", label: "Entwicklung von Software-/Hardware-Produkten", desc: "Produkte mit digitalen Elementen — Apps, Plugins, IoT-Geräte, Firmware" },
+  { value: "critical-infra", label: "Betrieb kritischer Infrastruktur", desc: "Energie, Wasser, Gesundheit, Transport, digitale Infrastruktur" },
+  { value: "online-platform", label: "Online-Plattform / Marktplatz / Soziales Netzwerk", desc: "Nutzer stellen Inhalte bereit oder handeln untereinander" },
+  { value: "esg", label: "Nachhaltigkeitsberichterstattung / ESG", desc: "Sie erstellen oder planen einen Nachhaltigkeitsbericht" },
+  { value: "crypto", label: "Krypto-Assets / Blockchain / DeFi", desc: "Token-Emission, Custody, Handel, Beratung" },
+  { value: "cross-border", label: "Internationale Datenübertragungen", desc: "Daten werden regelmäßig in Drittländer übermittelt (z.B. USA, Indien)" },
+  { value: "ecommerce", label: "E-Commerce / Online-Verkauf an Verbraucher", desc: "Webshop, Online-Bestellung, digitale Verträge mit Konsumenten" },
+  { value: "eid", label: "Vertrauensdienste / E-Signaturen", desc: "Qualifizierte elektronische Signaturen, Zeitstempel, EUDI-Wallet" },
 ] as const;
 
 const LOCATIONS = [
@@ -143,6 +190,78 @@ const LOCATIONS = [
   { value: "de", label: "Deutschland" },
   { value: "eu", label: "Anderer EU-/EWR-Staat" },
   { value: "non-eu", label: "Au\u00DFerhalb der EU (mit EU-Kunden)" },
+] as const;
+
+const PRODUCT_CATEGORIES = [
+  { value: "none", label: "Keine physischen Produkte", desc: "Reines Dienstleistungs- oder Softwareunternehmen" },
+  { value: "hardware-consumer", label: "Consumer-Hardware", desc: "IoT-Geräte, Smart Home, Wearables" },
+  { value: "hardware-b2b", label: "B2B-Hardware/IT-Produkte", desc: "Server, Netzwerk, Industrie-Komponenten" },
+  { value: "batteries", label: "Batterien & Akkus", desc: "DPP ab Feb 2027 verpflichtend" },
+  { value: "textiles", label: "Textilien & Bekleidung", desc: "DPP ab 2027/2028" },
+  { value: "electronics", label: "Elektronikgeräte", desc: "DPP + CE-Kennzeichnung" },
+  { value: "furniture", label: "Möbel", desc: "ESPR-relevant" },
+  { value: "building", label: "Bauprodukte", desc: "BauPVO + ESPR" },
+  { value: "chemicals", label: "Chemikalien & Kunststoffe", desc: "REACH + ESPR" },
+  { value: "ebooks", label: "E-Books / Digitale Medien", desc: "BaFG Barrierefreiheit" },
+  { value: "terminals", label: "Self-Service-/Zahlungsterminals", desc: "BaFG Barrierefreiheit" },
+  { value: "medical", label: "Medizinprodukte", desc: "MDR + AI Act Annex I" },
+  { value: "software-product", label: "Software-Produkte (SaaS, Apps, Plugins)", desc: "CRA + PLD" },
+] as const;
+
+const MARKETING_CLAIMS = [
+  { value: "none", label: "Keine werblichen Umweltaussagen", desc: null },
+  { value: "climate-neutral", label: "\u201EKlimaneutral\u201C / \u201ECO\u2082-neutral\u201C", desc: "Green Claims: wissenschaftlicher Nachweis erforderlich" },
+  { value: "sustainable", label: "\u201ENachhaltig\u201C / \u201E\u00D6kologisch\u201C", desc: "Green Claims: Beleg zwingend" },
+  { value: "green", label: "\u201EGr\u00FCn\u201C / \u201EUmweltfreundlich\u201C", desc: "ECD: verboten ohne Nachweis" },
+  { value: "recyclable", label: "\u201ERecycelbar\u201C / \u201ERecycling-Anteil X%\u201C", desc: "Nachweispflicht" },
+  { value: "eco-labels", label: "Eigene \u00D6ko-Labels / Nachhaltigkeits-Siegel", desc: "Regulierte Labels n\u00F6tig (EU Ecolabel etc.)" },
+  { value: "offset", label: "CO\u2082-Kompensation beworben", desc: "ab 2026 nicht mehr als Alleinstellung zul\u00E4ssig" },
+];
+
+const CERTIFICATIONS = [
+  { value: "iso-27001", label: "ISO/IEC 27001", desc: "Informationssicherheits-Managementsystem" },
+  { value: "iso-27701", label: "ISO/IEC 27701", desc: "Datenschutz-Erweiterung zu 27001" },
+  { value: "iso-9001", label: "ISO 9001", desc: "Qualit\u00E4tsmanagement" },
+  { value: "soc2", label: "SOC 2 Type II", desc: "US-Trust-Service-Kriterien" },
+  { value: "tisax", label: "TISAX", desc: "Automotive-Informationssicherheit" },
+  { value: "vds", label: "VdS 10000 / 10010", desc: "KMU-Cyber-Standard" },
+  { value: "bsi", label: "BSI IT-Grundschutz", desc: "Deutscher Beh\u00F6rden-Standard" },
+  { value: "c5", label: "BSI C5", desc: "Cloud-Computing-Compliance" },
+  { value: "nen-7510", label: "NEN 7510", desc: "Health-Informationssicherheit (NL)" },
+  { value: "none", label: "Keine Zertifizierungen", desc: null },
+] as const;
+
+const IT_STACK = [
+  { value: "aws", label: "AWS", desc: "Amazon Web Services" },
+  { value: "azure", label: "Microsoft Azure", desc: "inkl. M365 / Entra ID" },
+  { value: "gcp", label: "Google Cloud (GCP)", desc: null },
+  { value: "m365", label: "Microsoft 365 / Office 365", desc: null },
+  { value: "google-workspace", label: "Google Workspace", desc: null },
+  { value: "saas-heavy", label: "Mehrheitlich SaaS", desc: "10+ Drittanbieter-Apps" },
+  { value: "on-premise", label: "On-Premise / eigenes RZ", desc: null },
+  { value: "hybrid", label: "Hybrid-Umgebung", desc: "Mix aus Cloud und On-Premise" },
+  { value: "eu-cloud", label: "EU-Only Cloud (OVH, Hetzner, IONOS)", desc: null },
+] as const;
+
+const DATA_EXPORT_COUNTRIES = [
+  { value: "no-export", label: "Kein Datenexport au\u00DFerhalb EU/EWR", desc: null },
+  { value: "us", label: "USA", desc: "DSGVO Kap. V / EU-US DPF erforderlich" },
+  { value: "uk", label: "UK", desc: "Adequacy-Beschluss vorhanden" },
+  { value: "ch", label: "Schweiz", desc: "Adequacy-Beschluss vorhanden" },
+  { value: "india", label: "Indien", desc: "Ohne Adequacy \u2014 SCC n\u00F6tig" },
+  { value: "china", label: "China", desc: "Ohne Adequacy \u2014 TIA zwingend" },
+  { value: "other-third", label: "Andere Drittl\u00E4nder", desc: null },
+] as const;
+
+const INCIDENT_HISTORY = [
+  { value: "no-incidents", label: "Keine Vorf\u00E4lle", desc: "in den letzten 24 Monaten" },
+  { value: "data-breach", label: "Datenschutzvorfall", desc: "Mit/ohne Meldung an DSB" },
+  { value: "ransomware", label: "Ransomware / Malware-Vorfall", desc: null },
+  { value: "phishing", label: "Erfolgreicher Phishing-Angriff", desc: null },
+  { value: "insider", label: "Insider-Bedrohung", desc: "z.B. Datendiebstahl durch MA" },
+  { value: "supply-chain", label: "Lieferketten-Vorfall", desc: "Betroffener Dienstleister" },
+  { value: "audit-finding", label: "Kritische Audit-Feststellung", desc: "Extern oder intern" },
+  { value: "dsb-complaint", label: "Beschwerde bei Datenschutzbeh\u00F6rde", desc: null },
 ] as const;
 
 const MATURITY_QUESTIONS = [
@@ -171,11 +290,13 @@ const STEP_TITLES = [
   "Unternehmensprofil",
   "Gr\u00F6\u00DFe & Branche",
   "Aktivit\u00E4ten & Daten",
+  "IT-Kontext & Vorf\u00E4lle",
   "Reifegrad-Schnellcheck",
   "Zusammenfassung",
+  "Ergebnisse",
 ] as const;
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 7;
 
 /* ── Animation variants ── */
 const stepVariants = {
@@ -186,14 +307,75 @@ const stepVariants = {
 
 /* ══════════════════════════ Component ══════════════════════════ */
 
+/** localStorage key for wizard autosave */
+const AUTOSAVE_KEY = "eu-hub-compliance-report-draft";
+
+/**
+ * Load autosaved draft from localStorage, or return initial state.
+ * Used as lazy initializer for useState to avoid SSR/hydration mismatches.
+ */
+function loadDraftOrInitial(): { form: FormData; step: number; restored: boolean } {
+  if (typeof window === "undefined") {
+    return { form: INITIAL_FORM, step: 0, restored: false };
+  }
+  try {
+    const raw = window.localStorage.getItem(AUTOSAVE_KEY);
+    if (raw) {
+      const saved = JSON.parse(raw) as { form: FormData; step: number; ts: number };
+      // Only restore if saved within last 7 days
+      if (saved.ts && Date.now() - saved.ts < 7 * 24 * 60 * 60 * 1000 && saved.form?.companyName) {
+        return {
+          form: { ...INITIAL_FORM, ...saved.form, gdprConsent: false, commercialConsent: false },
+          step: Math.min(saved.step ?? 0, 5),
+          restored: true,
+        };
+      }
+    }
+  } catch {
+    // localStorage unavailable or corrupt — ignore
+  }
+  return { form: INITIAL_FORM, step: 0, restored: false };
+}
+
 export default function KontaktContent() {
   const { locale } = useTranslations();
   const { countryCode } = useCountry();
   const countryMeta = COUNTRY_META[countryCode];
-  const [step, setStep] = useState(0);
-  const [form, setForm] = useState<FormData>(INITIAL_FORM);
+  const [draft] = useState(loadDraftOrInitial);
+  const [step, setStep] = useState(draft.step);
+  const [form, setForm] = useState<FormData>(draft.form);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [previewData, setPreviewData] = useState<PreviewData | null>(null);
+  const [autosaveRestored, setAutosaveRestored] = useState(draft.restored);
+
+  /* ── Autosave: persist on every form/step change (throttled) ── */
+  useEffect(() => {
+    if (submitStatus === "success" || submitStatus === "preview") {
+      // After successful submission, clear the draft
+      try { localStorage.removeItem(AUTOSAVE_KEY); } catch { /* ignore */ }
+      return;
+    }
+    const handle = setTimeout(() => {
+      try {
+        localStorage.setItem(
+          AUTOSAVE_KEY,
+          JSON.stringify({ form, step, ts: Date.now() }),
+        );
+      } catch {
+        // localStorage full or disabled — ignore
+      }
+    }, 500);
+    return () => clearTimeout(handle);
+  }, [form, step, submitStatus]);
+
+  /* ── Reset draft (after restore banner dismiss) ── */
+  const resetDraft = useCallback(() => {
+    try { localStorage.removeItem(AUTOSAVE_KEY); } catch { /* ignore */ }
+    setForm(INITIAL_FORM);
+    setStep(0);
+    setAutosaveRestored(false);
+  }, []);
 
   const progress = Math.round(((step + 1) / TOTAL_STEPS) * 100);
 
@@ -206,7 +388,7 @@ export default function KontaktContent() {
   );
 
   const toggleArrayValue = useCallback(
-    (key: "sectors" | "dataTypes" | "activities" | "locations", value: string) => {
+    (key: "sectors" | "dataTypes" | "activities" | "locations" | "certifications" | "itStack" | "dataExportCountries" | "incidentHistory" | "productCategories" | "marketingClaims", value: string) => {
       setForm((prev) => {
         const arr = prev[key];
         return {
@@ -249,11 +431,15 @@ export default function KontaktContent() {
       case 1:
         return form.employeeCount.length > 0 && form.branche.length > 0;
       case 2:
-        return true; // all optional, but user can proceed
+        return true; // activities/data optional, user can proceed
       case 3:
-        return true; // maturity defaults are set, urgency optional
+        return true; // IT context / incidents optional
       case 4:
+        return true; // maturity defaults are set
+      case 5:
         return form.gdprConsent;
+      case 6:
+        return true; // preview step, no validation needed
       default:
         return false;
     }
@@ -294,15 +480,32 @@ export default function KontaktContent() {
       { questionId: "location", values: form.locations },
     ];
 
-    return evaluateRegulations(answers);
-  }, [form.companySize, form.branche, form.dataTypes, form.activities, form.locations]);
+    return evaluateRegulations(answers, {
+      certifications: form.certifications,
+      itStack: form.itStack,
+      dataExportCountries: form.dataExportCountries,
+      incidentHistory: form.incidentHistory,
+      productCategories: form.productCategories,
+      marketingClaims: form.marketingClaims,
+      isListed: form.isListed,
+    });
+  }, [
+    form.companySize,
+    form.branche,
+    form.dataTypes,
+    form.activities,
+    form.locations,
+    form.certifications,
+    form.itStack,
+    form.dataExportCountries,
+    form.incidentHistory,
+    form.productCategories,
+    form.marketingClaims,
+    form.isListed,
+  ]);
 
-  /* ── Submit ── */
-  const handleSubmit = useCallback(async () => {
-    if (!canProceed) return;
-    setSubmitStatus("submitting");
-    setErrorMessage("");
-
+  /* ── Build payload (shared between preview + submit) ── */
+  const buildPayload = useCallback(() => {
     const urgencyLabels: Record<string, string> = {
       dringend: "Dringend (n\u00E4chste 4 Wochen)",
       bald: "Bald (1-3 Monate)",
@@ -314,7 +517,6 @@ export default function KontaktContent() {
       ? `[Zeitrahmen: ${urgencyLabels[form.urgency] ?? form.urgency}] ${form.message}`
       : form.message;
 
-    // Map branche to sectors for the evaluation engine
     const brancheToSectors: Record<string, string[]> = {
       "IT / Software": ["it"],
       "Finanzwesen": ["finance"],
@@ -324,13 +526,13 @@ export default function KontaktContent() {
       "Transport / Logistik": ["transport"],
       "Handel / E-Commerce": ["retail"],
       "Telekommunikation": ["telecom"],
-      "Öffentlicher Sektor": ["public"],
+      "\u00D6ffentlicher Sektor": ["public"],
       "Chemie & Pharma": ["manufacturing", "health"],
     };
     const brancheSectors = brancheToSectors[form.branche] ?? [];
     const allSectors = [...new Set([...form.sectors, ...brancheSectors])];
 
-    const payload = {
+    return {
       email: form.email,
       contactName: form.contactName,
       companyName: form.companyName,
@@ -344,34 +546,83 @@ export default function KontaktContent() {
       dataTypes: form.dataTypes,
       activities: form.activities,
       locations: form.locations,
+      certifications: form.certifications,
+      itStack: form.itStack,
+      dataExportCountries: form.dataExportCountries,
+      incidentHistory: form.incidentHistory,
+      productCategories: form.productCategories,
+      marketingClaims: form.marketingClaims,
+      isListed: form.isListed,
       maturityAnswers: form.maturityAnswers,
       urgency: form.urgency,
       message: messageWithUrgency,
       gdprConsent: form.gdprConsent,
       commercialConsent: form.commercialConsent,
     };
+  }, [form, countryCode, countryMeta]);
+
+  /* ── Submit → Free Preview ── */
+  const handleSubmit = useCallback(async () => {
+    if (!canProceed) return;
+    setSubmitStatus("submitting");
+    setErrorMessage("");
 
     try {
-      const res = await fetch("/api/report", {
+      const res = await fetch("/api/report/preview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(buildPayload()),
       });
 
       const result = await res.json();
 
       if (!res.ok) {
-        setErrorMessage(result.error ?? "Ein Fehler ist aufgetreten.");
+        if (result.loginRequired) {
+          setErrorMessage("Bitte melden Sie sich an, um einen Report zu erstellen.");
+        } else {
+          setErrorMessage(result.error ?? "Ein Fehler ist aufgetreten.");
+        }
         setSubmitStatus("error");
         return;
       }
 
-      setSubmitStatus("success");
+      setPreviewData(result);
+      setSubmitStatus("preview");
+      setStep(6); // advance to results preview step
     } catch {
       setErrorMessage("Verbindungsfehler. Bitte versuchen Sie es erneut.");
       setSubmitStatus("error");
     }
-  }, [canProceed, form, countryCode, countryMeta]);
+  }, [canProceed, buildPayload]);
+
+  /* ── Purchase PDF ── */
+  const handlePurchase = useCallback(async () => {
+    if (!previewData?.reportToken) return;
+    setSubmitStatus("purchasing");
+    setErrorMessage("");
+
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reportToken: previewData.reportToken }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        setErrorMessage(result.error ?? "Checkout fehlgeschlagen.");
+        setSubmitStatus("preview"); // stay on preview
+        return;
+      }
+
+      // Redirect to LemonSqueezy hosted checkout
+      window.location.href = result.checkoutUrl;
+    } catch {
+      setErrorMessage("Verbindungsfehler. Bitte versuchen Sie es erneut.");
+      setSubmitStatus("preview");
+    }
+  }, [previewData]);
 
   /* ── Summary label helpers ── */
   const sizeLabel = COMPANY_SIZES.find((s) => s.value === form.companySize)?.label ?? "-";
@@ -401,7 +652,7 @@ export default function KontaktContent() {
                 <svg className="w-3.5 h-3.5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
                 </svg>
-                <span className="text-xs font-semibold text-yellow-400">Kostenloser Compliance-Report</span>
+                <span className="text-xs font-semibold text-yellow-400">Compliance-Report</span>
               </div>
               {countryMeta && (
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10">
@@ -417,17 +668,50 @@ export default function KontaktContent() {
               </span>
             </h1>
             <p className="text-slate-400 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
-              In 5 Schritten analysieren wir, welche EU-Regulierungen f{"\u00FC"}r Ihr
-              Unternehmen relevant sind und wie gut Sie aufgestellt sind.
+              In 6 Schritten analysieren wir kostenlos, welche EU-Regulierungen f{"\u00FC"}r Ihr
+              Unternehmen relevant sind und welche konkreten Ma{"\u00DF"}nahmen Sie umsetzen sollten.
+              Den vollst{"\u00E4"}ndigen PDF-Report erhalten Sie f{"\u00FC"}r 149{"\u00A0"}{"\u20AC"}.
             </p>
           </div>
         </section>
 
+        {/* ── Autosave-Banner ── */}
+        {autosaveRestored && submitStatus === "idle" && (
+          <div className="max-w-2xl mx-auto px-6 mb-4">
+            <div className="rounded-xl bg-emerald-400/[0.06] border border-emerald-400/20 p-4 flex items-center gap-3">
+              <svg className="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-emerald-400">Entwurf wiederhergestellt</p>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Ihre vorherigen Angaben wurden automatisch geladen. Sie können genau dort weitermachen.
+                </p>
+              </div>
+              <button
+                onClick={resetDraft}
+                className="flex-shrink-0 text-xs text-slate-400 hover:text-white underline underline-offset-2 transition-colors cursor-pointer"
+              >
+                Neu beginnen
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* ── Progress Bar ── */}
-        {submitStatus !== "success" && (
+        {submitStatus !== "success" && submitStatus !== "preview" && submitStatus !== "purchasing" && (
           <div className="max-w-2xl mx-auto px-6 mb-6">
-            {/* Step indicators */}
-            <div className="flex items-center justify-between mb-3">
+            {/* Current step title (above indicators) */}
+            <div className="text-center mb-3">
+              <p className="text-xs font-mono uppercase tracking-widest text-slate-500 mb-1">
+                Schritt {step + 1} von {TOTAL_STEPS}
+              </p>
+              <p className="text-sm font-semibold text-white">
+                {STEP_TITLES[step]}
+              </p>
+            </div>
+            {/* Step indicators — dots only, no overlapping labels */}
+            <div className="flex items-center justify-between mb-3 gap-2">
               {STEP_TITLES.map((title, i) => (
                 <button
                   key={title}
@@ -436,7 +720,9 @@ export default function KontaktContent() {
                     if (i < step) setStep(i);
                   }}
                   disabled={i > step}
-                  className={`flex flex-col items-center gap-1 group transition-all ${
+                  aria-label={`Schritt ${i + 1}: ${title}`}
+                  title={title}
+                  className={`flex items-center justify-center group transition-all flex-shrink-0 ${
                     i > step ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
                   }`}
                 >
@@ -457,11 +743,7 @@ export default function KontaktContent() {
                       i + 1
                     )}
                   </div>
-                  <span className={`text-[10px] font-medium hidden sm:block ${
-                    i <= step ? "text-slate-300" : "text-slate-600"
-                  }`}>
-                    {title}
-                  </span>
+                  <span className="sr-only">{title}</span>
                 </button>
               ))}
             </div>
@@ -475,8 +757,7 @@ export default function KontaktContent() {
                 transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] as const }}
               />
             </div>
-            <div className="flex items-center justify-between text-[10px] text-slate-600 mt-1.5">
-              <span>Schritt {step + 1} von {TOTAL_STEPS}</span>
+            <div className="flex items-center justify-end text-[10px] text-slate-600 mt-1.5">
               <span>{progress}%</span>
             </div>
           </div>
@@ -486,8 +767,292 @@ export default function KontaktContent() {
         <section className="pb-20 px-6">
           <div className="max-w-2xl mx-auto">
             <AnimatePresence mode="wait">
-              {submitStatus === "success" ? (
-                /* ── Success State ── */
+              {submitStatus === "preview" || submitStatus === "purchasing" ? (
+                /* ── Step 6: Free Results Preview + Purchase CTA ── */
+                <motion.div
+                  key="preview"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="space-y-6"
+                >
+                  {/* Headline */}
+                  <div className="text-center">
+                    <motion.div
+                      className="w-16 h-16 rounded-full bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center mx-auto mb-5"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 200, damping: 12 }}
+                    >
+                      <span className="text-2xl font-black text-yellow-400">{previewData?.regulationsCount ?? 0}</span>
+                    </motion.div>
+                    <h2 className="font-[Syne] font-extrabold text-2xl sm:text-3xl text-white mb-2">
+                      {previewData?.regulationsCount ?? 0} von 14 Regulierungen betreffen Sie
+                    </h2>
+                    <p className="text-sm text-slate-400">
+                      Kostenlose Vorschau Ihrer Analyse — basierend auf Ihren Angaben
+                    </p>
+                  </div>
+
+                  {/* Regulation Badges */}
+                  {previewData && previewData.regulations.length > 0 && (
+                    <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6">
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                        Relevante Regulierungen
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {previewData.regulations.map((r) => (
+                          <span
+                            key={r.key}
+                            className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-semibold"
+                            style={{
+                              backgroundColor: `${r.color}12`,
+                              borderWidth: 1,
+                              borderColor: `${r.color}30`,
+                              color: r.color,
+                            }}
+                          >
+                            <span
+                              className="w-1.5 h-1.5 rounded-full"
+                              style={{ backgroundColor: r.color }}
+                            />
+                            {r.name}
+                            <span className="opacity-60 font-normal">
+                              ({r.relevance})
+                            </span>
+                          </span>
+                        ))}
+                      </div>
+                      <div className="mt-3 text-xs text-slate-500">
+                        {previewData.highCount} hoch, {previewData.mediumCount} mittel,{" "}
+                        {previewData.regulationsCount - previewData.highCount - previewData.mediumCount} niedrig relevante
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Was Sie beachten sollten: High-Priority-Regulierungen mit Begründung */}
+                  {previewData && previewData.regulations.filter(r => r.relevance === "hoch").length > 0 && (
+                    <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6">
+                      <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">
+                        Was Sie beachten sollten
+                      </h3>
+                      <div className="space-y-3">
+                        {previewData.regulations
+                          .filter(r => r.relevance === "hoch")
+                          .slice(0, 3)
+                          .map((r) => (
+                            <div
+                              key={r.key}
+                              className="rounded-xl p-4"
+                              style={{
+                                backgroundColor: `${r.color}08`,
+                                borderWidth: 1,
+                                borderColor: `${r.color}20`,
+                              }}
+                            >
+                              <div className="flex items-start gap-3">
+                                <span
+                                  className="mt-1 flex-shrink-0 w-2 h-2 rounded-full"
+                                  style={{ backgroundColor: r.color }}
+                                />
+                                <div className="min-w-0">
+                                  <div className="flex items-baseline gap-2 flex-wrap mb-1">
+                                    <span className="text-sm font-bold" style={{ color: r.color }}>
+                                      {r.name}
+                                    </span>
+                                    {r.subtitle && (
+                                      <span className="text-[11px] text-slate-500 font-normal">
+                                        {r.subtitle}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {r.reason && (
+                                    <p className="text-xs text-slate-300 leading-relaxed">
+                                      {r.reason}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                      <p className="mt-4 text-[11px] text-slate-500 italic">
+                        Vollständige Analyse für alle {previewData.regulationsCount} Regulierungen im PDF-Report.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Erste Schritte: Top-3-Roadmap-Aktionen */}
+                  {previewData && previewData.topActions && previewData.topActions.length > 0 && (
+                    <div className="rounded-2xl border border-yellow-400/15 bg-yellow-400/[0.02] p-6">
+                      <h3 className="text-xs font-semibold text-yellow-400/80 uppercase tracking-wider mb-4">
+                        Ihre ersten 3 Schritte
+                      </h3>
+                      <ol className="space-y-3">
+                        {previewData.topActions.map((a, i) => (
+                          <li key={i} className="flex items-start gap-3">
+                            <span
+                              className="flex-shrink-0 w-7 h-7 rounded-full bg-yellow-400/15 text-yellow-400 flex items-center justify-center text-xs font-bold"
+                            >
+                              {i + 1}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm text-white font-medium mb-0.5">
+                                {a.action}
+                              </div>
+                              <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+                                <span
+                                  className="px-1.5 py-0.5 rounded"
+                                  style={{ color: a.color, backgroundColor: `${a.color}10` }}
+                                >
+                                  {a.regulationName}
+                                </span>
+                                <span>•</span>
+                                <span className="uppercase tracking-wider">{a.phaseLabel}</span>
+                                <span>•</span>
+                                <span>Aufwand: {a.effort}</span>
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
+
+                  {/* Key Metrics Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Maturity Grade */}
+                    <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-5 text-center">
+                      <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">Reifegrad</p>
+                      <div className="text-4xl font-black text-yellow-400 mb-1">{previewData?.maturityGrade ?? "–"}</div>
+                      <p className="text-xs text-slate-500">
+                        {previewData?.maturityGrade === "A" ? "Sehr gut" :
+                         previewData?.maturityGrade === "B" ? "Gut" :
+                         previewData?.maturityGrade === "C" ? "Mittel" :
+                         previewData?.maturityGrade === "D" ? "Mangelhaft" :
+                         previewData?.maturityGrade === "E" ? "Kritisch" : "–"}
+                      </p>
+                    </div>
+
+                    {/* Next Deadline */}
+                    <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-5 text-center">
+                      <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-2">N{"\u00E4"}chste Frist</p>
+                      <div className="text-lg font-bold text-white mb-1">
+                        {previewData?.nextDeadline
+                          ? `${previewData.nextDeadline.daysUntil} Tage`
+                          : "–"}
+                      </div>
+                      <p className="text-xs text-slate-500 truncate">
+                        {previewData?.nextDeadline?.label ?? "Keine relevante Frist"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* What's included in PDF */}
+                  <div className="rounded-2xl border border-yellow-400/20 bg-yellow-400/[0.03] p-6 sm:p-8">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-xl bg-yellow-400/15 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-5 h-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="font-[Syne] font-bold text-lg text-white">
+                          Vollst{"\u00E4"}ndiger PDF-Report
+                        </h3>
+                        <p className="text-xs text-slate-400">
+                          Professionelle Detailanalyse f{"\u00FC"}r Ihr Unternehmen
+                        </p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-6">
+                      {[
+                        "Detailanalyse pro Regulierung",
+                        "Bu\u00DFgeld-Exposition & Risikoanalyse",
+                        "3-Phasen Compliance-Roadmap",
+                        "Konkrete Handlungsempfehlungen",
+                        "Compliance-Checklisten",
+                        "Empfohlene Umsetzungspartner",
+                        "L\u00E4nderspezifische Details",
+                        "Professionelles gebrandetes PDF",
+                      ].map((item) => (
+                        <div key={item} className="flex items-center gap-2">
+                          <svg className="w-4 h-4 text-yellow-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                          </svg>
+                          <span className="text-xs text-slate-300">{item}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Purchase button */}
+                    <button
+                      onClick={handlePurchase}
+                      disabled={submitStatus === "purchasing"}
+                      className="w-full py-4 rounded-xl font-bold text-base text-slate-900 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-3"
+                      style={{
+                        background: "linear-gradient(135deg, #FACC15, #EAB308)",
+                        boxShadow: submitStatus !== "purchasing"
+                          ? "0 8px 40px rgba(250,204,21,0.35), 0 2px 10px rgba(250,204,21,0.2)"
+                          : "none",
+                      }}
+                    >
+                      {submitStatus === "purchasing" ? (
+                        <>
+                          <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                          </svg>
+                          Weiterleitung zum Checkout...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                          </svg>
+                          Vollst{"\u00E4"}ndigen PDF-Report erstellen — 149{"\u00A0"}{"\u20AC"}
+                        </>
+                      )}
+                    </button>
+
+                    <p className="text-[11px] text-slate-500 text-center mt-3">
+                      Einmalzahlung. Sichere Abwicklung {"\u00FC"}ber LemonSqueezy. EU-USt. inklusive.
+                    </p>
+                  </div>
+
+                  {/* Error message */}
+                  {errorMessage && (
+                    <div className="rounded-xl bg-red-500/10 border border-red-500/20 px-5 py-4 flex items-center gap-3" role="alert">
+                      <svg className="w-5 h-5 text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                      </svg>
+                      <p className="text-sm text-red-400">{errorMessage}</p>
+                    </div>
+                  )}
+
+                  {/* Free alternative */}
+                  <div className="text-center">
+                    <p className="text-xs text-slate-500 mb-2">
+                      Unsere Guides, Tools und das Wissen bleiben kostenlos.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Link
+                        href={`/${locale}/tools`}
+                        className="px-5 py-2.5 rounded-xl border border-white/10 text-xs font-semibold text-slate-400 hover:bg-white/[0.04] transition-all"
+                      >
+                        Kostenlose Tools nutzen
+                      </Link>
+                      <Link
+                        href={`/${locale}/wissen`}
+                        className="px-5 py-2.5 rounded-xl border border-white/10 text-xs font-semibold text-slate-400 hover:bg-white/[0.04] transition-all"
+                      >
+                        Wissen-Hub erkunden
+                      </Link>
+                    </div>
+                  </div>
+                </motion.div>
+              ) : submitStatus === "success" ? (
+                /* ── Success State (after purchase redirect back) ── */
                 <motion.div
                   key="success"
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -527,30 +1092,29 @@ export default function KontaktContent() {
                   </h2>
                   <p className="text-sm text-slate-400 mb-2">
                     Basierend auf Ihren Angaben werden{" "}
-                    <span className="text-yellow-400 font-semibold">{regulationPreview.length} Regulierungen</span>{" "}
+                    <span className="text-yellow-400 font-semibold">{previewData?.regulationsCount ?? regulationPreview.length} Regulierungen</span>{" "}
                     analysiert.
                   </p>
                   <p className="text-sm text-slate-400 mb-8">
-                    Ihr personalisierter Compliance-Report wurde an{" "}
-                    <span className="text-white font-medium">{form.email}</span>{" "}
-                    gesendet.
+                    Sie erhalten den PDF-Report in K{"\u00FC"}rze per E-Mail an{" "}
+                    <span className="text-white font-medium">{form.email}</span>.
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Link
-                      href={`/${locale}/tools`}
-                      className="px-6 py-3 rounded-xl border border-white/10 text-sm font-semibold text-slate-300 hover:bg-white/[0.04] transition-all"
-                    >
-                      Alle Tools entdecken
-                    </Link>
-                    <Link
-                      href={`/${locale}`}
+                      href="/portal"
                       className="px-6 py-3 rounded-xl font-bold text-sm text-slate-900 text-center"
                       style={{
                         background: "linear-gradient(135deg, #FACC15, #EAB308)",
                         boxShadow: "0 8px 32px rgba(250,204,21,0.3)",
                       }}
                     >
-                      Zur Startseite
+                      Zum Portal
+                    </Link>
+                    <Link
+                      href={`/${locale}/tools`}
+                      className="px-6 py-3 rounded-xl border border-white/10 text-sm font-semibold text-slate-300 hover:bg-white/[0.04] transition-all"
+                    >
+                      Alle Tools entdecken
                     </Link>
                   </div>
                 </motion.div>
@@ -715,6 +1279,34 @@ export default function KontaktContent() {
                           </select>
                         </div>
                       </div>
+
+                      {/* Kapitalmarktorientierung */}
+                      <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 sm:p-8">
+                        <label className="flex items-start gap-3 cursor-pointer group">
+                          <div className="flex-shrink-0 mt-0.5">
+                            <input
+                              type="checkbox"
+                              checked={form.isListed}
+                              onChange={(e) => updateField("isListed", e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-5 h-5 rounded border-2 border-white/20 peer-checked:bg-yellow-400 peer-checked:border-yellow-400 transition-colors flex items-center justify-center">
+                              {form.isListed && (
+                                <svg className="w-3 h-3 text-slate-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                </svg>
+                              )}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-sm font-semibold text-white">Börsennotiert / Public Interest Entity</div>
+                            <div className="text-xs text-slate-500 mt-1">
+                              Kapitalmarktorientiert (geregelter Markt), Bank, Versicherung oder anderweitig PIE?
+                              Relevant für CSRD-Berichtspflicht und MAR/Prospekt-VO.
+                            </div>
+                          </div>
+                        </label>
+                      </div>
                     </div>
                   )}
 
@@ -772,6 +1364,59 @@ export default function KontaktContent() {
                               checked={form.activities.includes(act.value)}
                               onChange={() => toggleArrayValue("activities", act.value)}
                               label={act.label}
+                              description={act.desc}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Product Categories */}
+                      <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 sm:p-8">
+                        <div className="flex items-center gap-3 mb-5">
+                          <div className="w-10 h-10 rounded-xl bg-amber-400/10 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <h2 className="font-[Syne] font-bold text-lg text-white">Produkte</h2>
+                            <p className="text-xs text-slate-500">Welche Produkte/Kategorien stellen Sie her oder vertreiben Sie? (Relevant für DPP, CRA, BaFG, PLD)</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {PRODUCT_CATEGORIES.map((p) => (
+                            <CheckboxCard
+                              key={p.value}
+                              label={p.label}
+                              description={p.desc}
+                              checked={form.productCategories.includes(p.value)}
+                              onChange={() => toggleArrayValue("productCategories", p.value)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Marketing Claims */}
+                      <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 sm:p-8">
+                        <div className="flex items-center gap-3 mb-5">
+                          <div className="w-10 h-10 rounded-xl bg-green-400/10 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
+                            </svg>
+                          </div>
+                          <div>
+                            <h2 className="font-[Syne] font-bold text-lg text-white">Werbeaussagen zu Nachhaltigkeit</h2>
+                            <p className="text-xs text-slate-500">Nutzen Sie Umwelt- oder Nachhaltigkeitsclaims? (Relevant für Green Claims &amp; Empowering Consumers Directive)</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {MARKETING_CLAIMS.map((c) => (
+                            <CheckboxCard
+                              key={c.value}
+                              label={c.label}
+                              description={c.desc}
+                              checked={form.marketingClaims.includes(c.value)}
+                              onChange={() => toggleArrayValue("marketingClaims", c.value)}
                             />
                           ))}
                         </div>
@@ -806,8 +1451,117 @@ export default function KontaktContent() {
                     </div>
                   )}
 
-                  {/* ═══ Step 4: Reifegrad-Schnellcheck ═══ */}
+                  {/* ═══ Step 4: IT-Kontext & Vorfälle ═══ */}
                   {step === 3 && (
+                    <div className="space-y-6">
+                      {/* Certifications */}
+                      <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 sm:p-8">
+                        <div className="flex items-center gap-3 mb-5">
+                          <div className="w-10 h-10 rounded-xl bg-emerald-400/10 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <h2 className="font-[Syne] font-bold text-lg text-white">Zertifizierungen</h2>
+                            <p className="text-xs text-slate-500">Welche Standards sind bereits umgesetzt?</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {CERTIFICATIONS.map((c) => (
+                            <CheckboxCard
+                              key={c.value}
+                              label={c.label}
+                              description={c.desc}
+                              checked={form.certifications.includes(c.value)}
+                              onChange={() => toggleArrayValue("certifications", c.value)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* IT Stack */}
+                      <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 sm:p-8">
+                        <div className="flex items-center gap-3 mb-5">
+                          <div className="w-10 h-10 rounded-xl bg-sky-400/10 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <h2 className="font-[Syne] font-bold text-lg text-white">IT-Stack</h2>
+                            <p className="text-xs text-slate-500">Welche Cloud-/IT-Infrastruktur nutzen Sie? (Mehrfachauswahl)</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {IT_STACK.map((i) => (
+                            <CheckboxCard
+                              key={i.value}
+                              label={i.label}
+                              description={i.desc}
+                              checked={form.itStack.includes(i.value)}
+                              onChange={() => toggleArrayValue("itStack", i.value)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Data Export Countries */}
+                      <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 sm:p-8">
+                        <div className="flex items-center gap-3 mb-5">
+                          <div className="w-10 h-10 rounded-xl bg-violet-400/10 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                            </svg>
+                          </div>
+                          <div>
+                            <h2 className="font-[Syne] font-bold text-lg text-white">Datenexport-Länder</h2>
+                            <p className="text-xs text-slate-500">Werden Daten außerhalb EU/EWR übertragen? (DSGVO Kap. V)</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {DATA_EXPORT_COUNTRIES.map((c) => (
+                            <CheckboxCard
+                              key={c.value}
+                              label={c.label}
+                              description={c.desc}
+                              checked={form.dataExportCountries.includes(c.value)}
+                              onChange={() => toggleArrayValue("dataExportCountries", c.value)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Incident History */}
+                      <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 sm:p-8">
+                        <div className="flex items-center gap-3 mb-5">
+                          <div className="w-10 h-10 rounded-xl bg-red-400/10 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <h2 className="font-[Syne] font-bold text-lg text-white">Vorfall-Historie</h2>
+                            <p className="text-xs text-slate-500">Welche Vorfälle gab es in den letzten 24 Monaten?</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {INCIDENT_HISTORY.map((i) => (
+                            <CheckboxCard
+                              key={i.value}
+                              label={i.label}
+                              description={i.desc}
+                              checked={form.incidentHistory.includes(i.value)}
+                              onChange={() => toggleArrayValue("incidentHistory", i.value)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ═══ Step 5: Reifegrad-Schnellcheck ═══ */}
+                  {step === 4 && (
                     <div className="space-y-6">
                       <div className="rounded-2xl border border-white/5 bg-slate-900/40 p-6 sm:p-8">
                         <div className="flex items-center gap-3 mb-6">
@@ -903,8 +1657,8 @@ export default function KontaktContent() {
                     </div>
                   )}
 
-                  {/* ═══ Step 5: Zusammenfassung & Absenden ═══ */}
-                  {step === 4 && (
+                  {/* ═══ Step 6: Zusammenfassung & Absenden ═══ */}
+                  {step === 5 && (
                     <div className="space-y-6">
                       {/* Summary Card */}
                       <div className="rounded-2xl border border-white/5 bg-slate-900/40 overflow-hidden">
@@ -934,7 +1688,36 @@ export default function KontaktContent() {
                             <SummaryItem label="EU-Einstufung" value={sizeLabel} />
                             <SummaryItem label="Branche" value={form.branche || "-"} />
                             <SummaryItem label="Reifegrad" value={maturityLabel} />
+                            <SummaryItem label="Börsennotiert / PIE" value={form.isListed ? "Ja" : "Nein"} />
                           </div>
+
+                          {/* Products */}
+                          {form.productCategories.filter((p) => p !== "none").length > 0 && (
+                            <div className="mb-3">
+                              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Produkte</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {form.productCategories.filter((p) => p !== "none").map((p) => (
+                                  <span key={p} className="text-[11px] px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                                    {PRODUCT_CATEGORIES.find((x) => x.value === p)?.label ?? p}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Marketing Claims */}
+                          {form.marketingClaims.filter((c) => c !== "none").length > 0 && (
+                            <div className="mb-3">
+                              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Werbeaussagen (Nachhaltigkeit)</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {form.marketingClaims.filter((c) => c !== "none").map((c) => (
+                                  <span key={c} className="text-[11px] px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400">
+                                    {MARKETING_CLAIMS.find((x) => x.value === c)?.label ?? c}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
 
                           {/* Selected items */}
                           {form.dataTypes.length > 0 && (
@@ -970,6 +1753,58 @@ export default function KontaktContent() {
                                 {form.locations.map((loc) => (
                                   <span key={loc} className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
                                     {LOCATIONS.find((l) => l.value === loc)?.label ?? loc}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {form.certifications.filter((c) => c !== "none").length > 0 && (
+                            <div className="mb-3">
+                              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Zertifizierungen</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {form.certifications.filter((c) => c !== "none").map((c) => (
+                                  <span key={c} className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                                    {CERTIFICATIONS.find((x) => x.value === c)?.label ?? c}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {form.itStack.length > 0 && (
+                            <div className="mb-3">
+                              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">IT-Stack</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {form.itStack.map((s) => (
+                                  <span key={s} className="text-[11px] px-2 py-0.5 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400">
+                                    {IT_STACK.find((x) => x.value === s)?.label ?? s}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {form.dataExportCountries.length > 0 && (
+                            <div className="mb-3">
+                              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Datenexport</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {form.dataExportCountries.map((c) => (
+                                  <span key={c} className="text-[11px] px-2 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400">
+                                    {DATA_EXPORT_COUNTRIES.find((x) => x.value === c)?.label ?? c}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {form.incidentHistory.filter((i) => i !== "no-incidents").length > 0 && (
+                            <div className="mb-3">
+                              <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Vorfälle (24 Monate)</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {form.incidentHistory.filter((i) => i !== "no-incidents").map((i) => (
+                                  <span key={i} className="text-[11px] px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400">
+                                    {INCIDENT_HISTORY.find((x) => x.value === i)?.label ?? i}
                                   </span>
                                 ))}
                               </div>
@@ -1135,7 +1970,7 @@ export default function KontaktContent() {
                       <div />
                     )}
 
-                    {step < TOTAL_STEPS - 1 ? (
+                    {step < 5 ? (
                       <button
                         onClick={handleNext}
                         disabled={!canProceed}
@@ -1149,7 +1984,7 @@ export default function KontaktContent() {
                       >
                         Weiter
                       </button>
-                    ) : (
+                    ) : step === 5 ? (
                       <button
                         onClick={handleSubmit}
                         disabled={!canProceed || submitStatus === "submitting"}
@@ -1168,18 +2003,18 @@ export default function KontaktContent() {
                               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                             </svg>
-                            Report wird erstellt...
+                            Wird analysiert...
                           </>
                         ) : (
                           <>
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
                             </svg>
-                            Compliance-Report erstellen
+                            Kostenlose Analyse starten
                           </>
                         )}
                       </button>
-                    )}
+                    ) : null}
                   </div>
 
                   {/* Step-specific hints */}

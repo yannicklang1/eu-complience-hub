@@ -1,28 +1,26 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { pdf } from "@react-pdf/renderer";
-import React from "react";
 import { createRateLimiter, getClientIp } from "@/lib/rate-limit";
 import { validateEmail, sanitize } from "@/lib/validation";
 import { log } from "@/lib/logger";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { createSupabaseServerClient } from "@/lib/supabase-auth";
 import { generateReportData, type ReportInput } from "@/lib/report-engine";
-import { sendReportEmail } from "@/lib/resend";
-import ReportDocument from "@/lib/pdf/ReportDocument";
 import type { QuickMaturityAnswer } from "@/lib/maturity-scorer";
 import { COUNTRY_TO_LOCALE, type Locale, isValidLocale } from "@/i18n/config";
 import { getPDFMessages } from "@/i18n/pdf";
 
 /* ══════════════════════════════════════════════════════════════
-   POST /api/report — Generate personalized compliance report
+   POST /api/report/preview — Free preview (no PDF generation)
+   Saves report input + evaluates regulations.
+   Returns summary data for the on-screen preview.
    ══════════════════════════════════════════════════════════════ */
 
-const reportLimiter = createRateLimiter({ windowMs: 60_000, max: 3 });
+const previewLimiter = createRateLimiter({ windowMs: 60_000, max: 3 });
 
 export async function POST(request: NextRequest) {
   /* ── Rate limit ── */
   const ip = getClientIp(request);
-  if (reportLimiter.isLimited(ip)) {
+  if (previewLimiter.isLimited(ip)) {
     return NextResponse.json(
       { error: "Zu viele Anfragen. Bitte versuchen Sie es in einer Minute erneut." },
       { status: 429 },
@@ -30,7 +28,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    /* ── Auth check — require login for report generation ── */
+    /* ── Auth check ── */
     const authSupabase = await createSupabaseServerClient();
     const {
       data: { user },
@@ -66,7 +64,6 @@ export async function POST(request: NextRequest) {
 
     /* ── Build report input ── */
     const country = sanitize(body.country, 5) ?? undefined;
-    const countryName = sanitize(body.countryName, 100) ?? undefined;
 
     const input: ReportInput = {
       contactName,
@@ -121,10 +118,10 @@ export async function POST(request: NextRequest) {
       gdprConsent: true,
       commercialConsent: Boolean(body.commercialConsent),
       country,
-      countryName,
+      countryName: sanitize(body.countryName, 100) ?? undefined,
     };
 
-    /* ── Resolve locale: explicit param > country mapping > "de" fallback ── */
+    /* ── Resolve locale ── */
     const rawLocale = sanitize(body.locale, 5);
     const locale: Locale = rawLocale && isValidLocale(rawLocale)
       ? rawLocale
@@ -132,76 +129,22 @@ export async function POST(request: NextRequest) {
         ? COUNTRY_TO_LOCALE[country]!
         : "de";
 
-    /* ── Load PDF translations ── */
     const t = await getPDFMessages(locale);
 
-    /* ── Generate report data (loads full country regulation data internally) ── */
+    /* ── Generate report data (evaluation only, no PDF) ── */
     const reportData = await generateReportData(input, t);
 
-    log.info("[report]", "Report data generated", {
+    log.info("[report-preview]", "Preview generated", {
       email: email.replace(/(.{2}).*(@.*)/, "$1***$2"),
       regulations: reportData.regulations.length,
       grade: reportData.maturityGrade.letter,
-      country: country ?? "none",
-      locale,
     });
 
-    /* ── Generate PDF ── */
-    let pdfBuffer: Buffer | null = null;
-    try {
-      /* @react-pdf/renderer types expect Document element directly;
-         our wrapper component returns <Document> internally, so we cast. */
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const pdfElement = React.createElement(ReportDocument, { data: reportData, t }) as any;
-      const pdfStream = await pdf(pdfElement).toBuffer();
-
-      // toBuffer() may return Buffer or ReadableStream depending on version
-      if (Buffer.isBuffer(pdfStream)) {
-        pdfBuffer = pdfStream;
-      } else {
-        // ReadableStream → Buffer
-        const reader = (pdfStream as unknown as ReadableStream<Uint8Array>).getReader();
-        const chunks: Uint8Array[] = [];
-        let done = false;
-        while (!done) {
-          const result = await reader.read();
-          done = result.done;
-          if (result.value) chunks.push(result.value);
-        }
-        pdfBuffer = Buffer.concat(chunks);
-      }
-
-      log.info("[report]", "PDF generated", { sizeKB: Math.round(pdfBuffer.length / 1024) });
-    } catch (pdfErr) {
-      log.error("[report]", "PDF generation failed, continuing without PDF", {
-        error: pdfErr instanceof Error ? pdfErr.message : String(pdfErr),
-      });
-    }
-
-    /* ── Store report in Supabase (non-blocking — don't fail if DB not ready) ── */
+    /* ── Store in DB with payment_status='pending' ── */
     const reportToken = crypto.randomUUID();
-    let storagePath: string | null = null;
 
     try {
       const supabase = getSupabaseAdmin();
-
-      // Upload PDF to Supabase Storage (only if PDF was generated)
-      if (pdfBuffer) {
-        storagePath = `reports/${reportToken}.pdf`;
-        const { error: uploadError } = await supabase.storage
-          .from("reports")
-          .upload(storagePath, pdfBuffer, {
-            contentType: "application/pdf",
-            upsert: false,
-          });
-
-        if (uploadError) {
-          log.warn("[report]", "PDF storage upload failed", { error: uploadError.message });
-          storagePath = null;
-        }
-      }
-
-      // Insert report metadata (with user_id if authenticated)
       const { error: dbError } = await supabase.from("reports").insert({
         report_token: reportToken,
         email,
@@ -214,42 +157,58 @@ export async function POST(request: NextRequest) {
         evaluated_regulations: reportData.regulations,
         cost_estimate: null,
         maturity_grade: reportData.maturityGrade.letter,
-        pdf_storage_path: storagePath,
+        pdf_storage_path: null, // no PDF yet
         gdpr_consent: true,
         commercial_consent: input.commercialConsent,
         user_id: user.id,
+        payment_status: "pending",
+        report_input: input, // stored so webhook can re-generate
       });
 
       if (dbError) {
-        log.warn("[report]", "DB insert failed, continuing", { error: dbError.message });
+        log.warn("[report-preview]", "DB insert failed", { error: dbError.message });
       }
     } catch (dbErr) {
-      log.warn("[report]", "Supabase operations failed, continuing", {
+      log.warn("[report-preview]", "Supabase insert failed", {
         error: dbErr instanceof Error ? dbErr.message : String(dbErr),
       });
     }
 
-    /* ── Send email with PDF attachment ── */
-    let emailSent = false;
-    if (pdfBuffer) {
-      const emailResult = await sendReportEmail(email, contactName, companyName, reportData, pdfBuffer, locale);
-      emailSent = emailResult.success;
-      if (!emailResult.success) {
-        log.error("[report]", "Email send failed", { error: emailResult.error });
-      }
-    } else {
-      log.warn("[report]", "Skipping email — no PDF generated");
-    }
-
+    /* ── Return preview data (free) ── */
     return NextResponse.json({
       success: true,
       reportToken,
+      regulations: reportData.regulations.map((r) => ({
+        key: r.key,
+        name: r.name,
+        subtitle: r.subtitle,
+        href: r.href,
+        relevance: r.relevance,
+        color: r.color,
+        reason: r.reason,
+      })),
       regulationsCount: reportData.regulations.length,
+      highCount: reportData.highRelevanceCount,
+      mediumCount: reportData.mediumRelevanceCount,
       maturityGrade: reportData.maturityGrade.letter,
-      emailSent,
+      /** Top 3 roadmap actions — gives users concrete next-step guidance */
+      topActions: reportData.roadmapItems.slice(0, 3).map((r) => ({
+        phaseLabel: r.phaseLabel,
+        action: r.action,
+        regulationName: r.regulationName,
+        effort: r.effort,
+        color: r.color,
+      })),
+      nextDeadline: reportData.nextCriticalDeadline
+        ? {
+            label: reportData.nextCriticalDeadline.title,
+            date: reportData.nextCriticalDeadline.iso,
+            daysUntil: reportData.nextCriticalDeadline.daysLeft,
+          }
+        : null,
     });
   } catch (err) {
-    log.error("[report]", "Unexpected error", {
+    log.error("[report-preview]", "Unexpected error", {
       error: err instanceof Error ? err.message : String(err),
     });
     return NextResponse.json(

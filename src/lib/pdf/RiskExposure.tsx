@@ -12,8 +12,6 @@ import type { FineExposureResult } from "@/data/fine-data";
 interface RiskExposureProps {
   fineExposures: FineExposureResult[];
   totalFineExposure: number;
-  totalCostMin: number;
-  totalCostMax: number;
   estimatedRevenue: number;
   generatedAt: string;
   t: PDFMessages;
@@ -177,11 +175,6 @@ function formatFineEUR(amount: number, t: PDFMessages): string {
   return `${amount.toLocaleString(localeTag)} EUR`;
 }
 
-function formatCostRange(min: number, max: number): string {
-  const fmt = (n: number) => (n >= 1000 ? `${Math.round(n / 1000)}k` : String(n));
-  return `${fmt(min)} – ${fmt(max)} EUR`;
-}
-
 /** Color map for regulation keys */
 const REG_COLORS: Record<string, string> = {
   "ai-act": "#7c3aed",
@@ -198,14 +191,11 @@ const REG_COLORS: Record<string, string> = {
 export default function RiskExposure({
   fineExposures,
   totalFineExposure,
-  totalCostMin,
-  totalCostMax,
   estimatedRevenue,
   generatedAt,
   t,
 }: RiskExposureProps) {
   const maxFine = fineExposures.length > 0 ? fineExposures[0].maxFine : 1;
-  const roiMultiple = totalCostMax > 0 ? Math.round(totalFineExposure / totalCostMax) : 0;
 
   return (
     <Page size="A4" style={styles.page}>
@@ -224,14 +214,6 @@ export default function RiskExposure({
             <Text style={reStyles.totalLabel}>{t.risk.cumulativeFineRisk}</Text>
             <Text style={reStyles.totalValue}>{formatFineEUR(totalFineExposure, t)}</Text>
           </View>
-          {roiMultiple > 1 && (
-            <View style={reStyles.roiBox}>
-              <Text style={reStyles.roiLabel}>{t.risk.roiLabel}</Text>
-              <Text style={reStyles.roiValue}>
-                {tReplace(t.risk.roiValue, { multiple: roiMultiple })}
-              </Text>
-            </View>
-          )}
         </View>
       </View>
 
@@ -263,27 +245,6 @@ export default function RiskExposure({
         );
       })}
 
-      {/* Cost vs Fine Comparison */}
-      <View style={reStyles.comparisonSection}>
-        <View style={[reStyles.compBox, { borderColor: "#bbf7d0", backgroundColor: "#f0fdf4" }]}>
-          <Text style={[reStyles.compLabel, { color: "#166534" }]}>{t.risk.complianceInvestment}</Text>
-          <Text style={[reStyles.compValue, { color: "#16a34a" }]}>
-            {formatCostRange(totalCostMin, totalCostMax)}
-          </Text>
-          <Text style={[reStyles.compDetail, { color: "#15803d" }]}>
-            {t.risk.complianceInvestmentDesc}
-          </Text>
-        </View>
-        <View style={[reStyles.compBox, { borderColor: "#fecaca", backgroundColor: "#fef2f2" }]}>
-          <Text style={[reStyles.compLabel, { color: "#991b1b" }]}>{t.risk.fineRisk}</Text>
-          <Text style={[reStyles.compValue, { color: "#dc2626" }]}>
-            {formatFineEUR(totalFineExposure, t)}
-          </Text>
-          <Text style={[reStyles.compDetail, { color: "#b91c1c" }]}>
-            {t.risk.fineRiskDesc}
-          </Text>
-        </View>
-      </View>
 
       {/* Disclaimer */}
       <View style={reStyles.disclaimer}>

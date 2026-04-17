@@ -6,8 +6,12 @@
    ══════════════════════════════════════════════════════════════ */
 
 import { evaluateRegulations, type EvaluatedRegulation, type Answer } from "@/lib/regulation-evaluator";
-import { estimateCosts, type CompanySize, type MaturityLevel, type RegulationCost } from "@/lib/cost-estimator";
+/** EU SME classification (Recommendation 2003/361/EC) */
+export type CompanySize = "micro" | "small" | "medium" | "large";
 import { calculateQuickMaturity, type QuickMaturityAnswer, type MaturityGrade, type CategoryResult } from "@/lib/maturity-scorer";
+
+/** Local maturity inference level (kept local since cost-estimator.ts is removed) */
+type MaturityLevel = "none" | "basic" | "advanced";
 import { CHECKLIST_REGULATIONS, type RegulationChecklist } from "@/data/checklist-data";
 import { DEADLINES, daysUntil, type Deadline } from "@/data/deadlines";
 import { calculateFineExposure, resolveRevenue, formatFineAmount, FINE_RULES, type FineExposureResult } from "@/data/fine-data";
@@ -33,6 +37,14 @@ export interface ReportInput {
   dataTypes: string[];
   activities: string[];
   locations: string[];
+  /* NEW: Deeper personalization signals */
+  certifications?: string[];
+  itStack?: string[];
+  dataExportCountries?: string[];
+  incidentHistory?: string[];
+  productCategories?: string[];
+  marketingClaims?: string[];
+  isListed?: boolean;
   /* Maturity quick-check */
   maturityAnswers: QuickMaturityAnswer[];
   /* Meta */
@@ -98,10 +110,6 @@ export interface ReportData {
   highRelevanceCount: number;
   mediumRelevanceCount: number;
   lowRelevanceCount: number;
-  /* Cost estimation */
-  costs: RegulationCost[];
-  totalCostMin: number;
-  totalCostMax: number;
   /* Fine exposure */
   fineExposures: FineExposureResult[];
   totalFineExposure: number;
@@ -136,17 +144,19 @@ function inferMaturityLevel(answers: QuickMaturityAnswer[]): MaturityLevel {
   return "none";
 }
 
-/** Resolve country context synchronously using COUNTRY_META (server-safe) */
-function resolveCountryContext(
+/** Resolve country context with full per-regulation data (async, loads country module) */
+async function resolveCountryContext(
   countryCode: string | undefined,
-): ReportCountryContext | null {
+): Promise<ReportCountryContext | null> {
   if (!countryCode || !(countryCode in COUNTRY_META)) return null;
   const meta = COUNTRY_META[countryCode as EUCountryCode];
+  const { getCountryData } = await import("@/i18n/country");
+  const countryData = await getCountryData(countryCode as EUCountryCode);
   return {
     code: countryCode,
     nameDE: meta.nameDE,
     flag: meta.flag,
-    regulationData: {},
+    regulationData: (countryData?.regulations ?? {}) as Record<string, import("@/i18n/country/types").CountryRegulationData>,
   };
 }
 
@@ -265,6 +275,10 @@ const REG_NAMES: Record<string, string> = {
   eidas: "eIDAS 2.0",
   produkthaftung: "EU-Produkthaftung",
   ehds: "EHDS",
+  "green-claims": "Green Claims",
+  dpp: "Digitaler Produktpass / ESPR",
+  bafg: "BaFG",
+  hschg: "HSchG / HinSchG",
 };
 
 /** Localize regulation results: translate name, subtitle, and reason text */
@@ -378,6 +392,13 @@ function localizeRegulations(
         break;
       case "ehds":
         reason = tReplace(e.ehdsReason, { sizeLabel });
+        break;
+      case "green-claims":
+      case "dpp":
+      case "bafg":
+      case "hschg":
+        /* Keep evaluator-generated reason (already personalized per signals).
+           Full localization into t.eval is pending for these 4 keys. */
         break;
     }
 
@@ -585,7 +606,7 @@ function buildRoadmap(
 }
 
 /* ── Main aggregation (i18n-aware) ── */
-export function generateReportData(input: ReportInput, t: PDFMessages): ReportData {
+export async function generateReportData(input: ReportInput, t: PDFMessages): Promise<ReportData> {
   const generatedAt = new Date().toLocaleDateString(t.locale === "de" ? "de-AT" : t.locale, {
     day: "2-digit",
     month: "long",
@@ -593,7 +614,7 @@ export function generateReportData(input: ReportInput, t: PDFMessages): ReportDa
   });
   const reportId = generateReportId();
 
-  /* 1. Evaluate regulations */
+  /* 1. Evaluate regulations (with deep personalization signals) */
   const answers: Answer[] = [
     { questionId: "size", values: [input.companySize] },
     { questionId: "sector", values: input.sectors },
@@ -601,31 +622,24 @@ export function generateReportData(input: ReportInput, t: PDFMessages): ReportDa
     { questionId: "activities", values: input.activities },
     { questionId: "location", values: input.locations },
   ];
-  const rawRegulations = evaluateRegulations(answers);
+  const rawRegulations = evaluateRegulations(answers, {
+    certifications: input.certifications,
+    itStack: input.itStack,
+    dataExportCountries: input.dataExportCountries,
+    incidentHistory: input.incidentHistory,
+    productCategories: input.productCategories,
+    marketingClaims: input.marketingClaims,
+    isListed: input.isListed,
+  });
   const regulations = localizeRegulations(rawRegulations, input, t);
 
   const highRelevanceCount = regulations.filter((r) => r.relevance === "hoch").length;
   const mediumRelevanceCount = regulations.filter((r) => r.relevance === "mittel").length;
   const lowRelevanceCount = regulations.filter((r) => r.relevance === "niedrig").length;
 
-  /* 2. Estimate costs (only for hoch/mittel regulations with cost data) */
-  const costableKeys = ["dsgvo", "nis2", "ai-act", "dora", "cra", "csrd"];
-  const relevantCostKeys = regulations
-    .filter((r) => r.relevance !== "niedrig" && costableKeys.includes(r.key))
-    .map((r) => r.key);
+  /* 2. Derive maturity level (used by roadmap + checklist mapping) */
   const maturityLevel = inferMaturityLevel(input.maturityAnswers);
-  const rawCosts = estimateCosts(relevantCostKeys, input.companySize, maturityLevel);
-  // Localize cost breakdown item names and regulation names
-  const costs = rawCosts.map((cost) => ({
-    ...cost,
-    name: t.regNames[cost.key] ?? cost.name,
-    breakdown: cost.breakdown.map((item, idx) => ({
-      ...item,
-      item: t.cost.breakdownItems[`${cost.key}-${idx}`] ?? item.item,
-    })),
-  }));
-  const totalCostMin = costs.reduce((s, c) => s + c.minCost, 0);
-  const totalCostMax = costs.reduce((s, c) => s + c.maxCost, 0);
+  void maturityLevel; // Reserved for future use by downstream modules
 
   /* 3. Fine exposure calculation */
   const estimatedRevenue = resolveRevenue(input.annualRevenue);
@@ -733,12 +747,6 @@ export function generateReportData(input: ReportInput, t: PDFMessages): ReportDa
     );
   }
 
-  if (costs.length > 0 && totalCostMin > 0) {
-    topActions.push(
-      tReplace(t.engine.planBudget, { range: formatRange(totalCostMin, totalCostMax) }),
-    );
-  }
-
   if (topActions.length < 4) {
     topActions.push(t.engine.establishRegularReviews);
   }
@@ -751,8 +759,8 @@ export function generateReportData(input: ReportInput, t: PDFMessages): ReportDa
   const softwareRecommendations = getUniqueRecommendations(relevantRegKeysArr, 2)
     .slice(0, 8) as ReportSoftwareRec[];
 
-  /* 11. Resolve country context */
-  const countryContext = resolveCountryContext(input.country);
+  /* 11. Resolve country context (async — loads full regulation data) */
+  const countryContext = await resolveCountryContext(input.country);
 
   return {
     input,
@@ -762,9 +770,6 @@ export function generateReportData(input: ReportInput, t: PDFMessages): ReportDa
     highRelevanceCount,
     mediumRelevanceCount,
     lowRelevanceCount,
-    costs,
-    totalCostMin,
-    totalCostMax,
     fineExposures,
     totalFineExposure,
     estimatedRevenue,
@@ -781,11 +786,6 @@ export function generateReportData(input: ReportInput, t: PDFMessages): ReportDa
     softwareRecommendations,
     countryContext,
   };
-}
-
-function formatRange(min: number, max: number): string {
-  const fmtK = (n: number) => (n >= 1000 ? `${Math.round(n / 1000)}k` : String(n));
-  return `${fmtK(min)} – ${fmtK(max)} EUR`;
 }
 
 export { SIZE_LABELS, SECTOR_LABELS, REG_NAMES };

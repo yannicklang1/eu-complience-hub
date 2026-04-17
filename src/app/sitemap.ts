@@ -102,7 +102,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     localeEntry("tools/bussgeld-rechner", 0.85, "monthly", now),
     localeEntry("tools/compliance-checkliste", 0.9, "monthly", now),
     localeEntry("tools/regulierung-finder", 0.9, "monthly", now),
-    localeEntry("tools/kosten-kalkulator", 0.85, "monthly", now),
     localeEntry("tools/reifegrad-check", 0.85, "monthly", now),
 
     /* ── Wissen Hub ── */
@@ -125,9 +124,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     localeEntry("compliance-verzeichnis", 0.7, "monthly", now),
     localeEntry("fristen-radar", 0.9, "weekly", now),
     localeEntry("timeline", 0.8, "monthly", now),
-
-    /* ── Aktuelles ── */
-    localeEntry("aktuelles", 0.85, "weekly", now),
 
     /* ── Vergleich ── */
     localeEntry("vergleich", 0.85, "monthly", now),

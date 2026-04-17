@@ -213,7 +213,19 @@ export default function CoverPage({
         <View style={coverStyles.divider} />
 
         <Text style={coverStyles.preparedFor}>{t.cover.preparedFor}</Text>
-        <Text style={coverStyles.companyName}>{companyName}</Text>
+        <Text
+          style={[
+            coverStyles.companyName,
+            /* Scale font down for long company names to prevent overflow */
+            companyName.length > 40
+              ? { fontSize: 14 }
+              : companyName.length > 28
+              ? { fontSize: 17 }
+              : {},
+          ]}
+        >
+          {companyName}
+        </Text>
         <Text style={coverStyles.contactName}>{contactName}</Text>
 
         <View style={coverStyles.metaRow}>

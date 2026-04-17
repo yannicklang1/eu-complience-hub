@@ -310,9 +310,10 @@
     color: #333 !important;
   }
 
-  /* Fix dark-themed page printing */
-  .bg-\\[\\#060c1a\\],
-  .bg-slate-900\\/40 {
+  /* Fix dark-themed page printing —
+     Uses attribute selector to match Tailwind arbitrary-value classes
+     without needing escaped bracket selectors that break Turbopack. */
+  [class*="bg-[#"] {
     background: white !important;
     color: black !important;
   }

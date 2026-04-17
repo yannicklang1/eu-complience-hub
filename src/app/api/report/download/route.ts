@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-auth";
 import { log } from "@/lib/logger";
 import { createRateLimiter, getClientIp } from "@/lib/rate-limit";
 
@@ -24,17 +25,47 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    /* ── Auth: verify user is authenticated ── */
+    const authSupabase = await createSupabaseServerClient();
+    const {
+      data: { user },
+    } = await authSupabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Bitte melden Sie sich an, um den Report herunterzuladen.", loginRequired: true },
+        { status: 401 },
+      );
+    }
+
     const supabase = getSupabaseAdmin();
 
     /* ── Look up report ── */
     const { data: report, error: dbError } = await supabase
       .from("reports")
-      .select("pdf_storage_path, company_name, download_count")
+      .select("pdf_storage_path, company_name, download_count, payment_status, user_id")
       .eq("report_token", token)
       .single();
 
     if (dbError || !report) {
       return NextResponse.json({ error: "Report nicht gefunden." }, { status: 404 });
+    }
+
+    /* ── Authz: report must belong to the authenticated user ── */
+    if (report.user_id !== user.id) {
+      log.warn("[report-download]", "Unauthorized download attempt", {
+        token: token.slice(0, 8) + "***",
+        userId: user.id,
+      });
+      return NextResponse.json({ error: "Zugriff verweigert." }, { status: 403 });
+    }
+
+    /* ── Payment gate: only paid or legacy-free reports can be downloaded ── */
+    if (report.payment_status !== "paid" && report.payment_status !== "free") {
+      return NextResponse.json(
+        { error: "Report nicht bezahlt. Bitte erwerben Sie den PDF-Report." },
+        { status: 402 },
+      );
     }
 
     if (!report.pdf_storage_path) {

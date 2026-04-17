@@ -21,8 +21,6 @@ interface ExecutiveSummaryProps {
     color: string;
   };
   maturityPercentage: number;
-  totalCostMin: number;
-  totalCostMax: number;
   nextDeadline: {
     title: string;
     daysLeft: number;
@@ -279,20 +277,12 @@ function formatEuro(amount: number, t: PDFMessages): string {
   return amount.toLocaleString(t.locale === "de" ? "de-AT" : t.locale);
 }
 
-function formatCostRange(min: number, max: number): string {
-  const fmt = (n: number) =>
-    n >= 1000 ? `${Math.round(n / 1000)}k` : String(n);
-  return `${fmt(min)} – ${fmt(max)} EUR`;
-}
-
 export default function ExecutiveSummary({
   highCount,
   mediumCount,
   lowCount,
   maturityGrade,
   maturityPercentage,
-  totalCostMin,
-  totalCostMax,
   nextDeadline,
   topActions,
   generatedAt,
@@ -389,12 +379,17 @@ export default function ExecutiveSummary({
           </Text>
         </View>
         <View style={esStyles.miniStat}>
-          <Text style={esStyles.miniStatLabel}>{t.exec.costEstLabel}</Text>
-          <Text style={esStyles.miniStatValue}>
-            {formatCostRange(totalCostMin, totalCostMax)}
+          <Text style={esStyles.miniStatLabel}>{t.exec.maturityLabel}</Text>
+          <Text
+            style={[
+              esStyles.miniStatValue,
+              { color: maturityGrade.color },
+            ]}
+          >
+            {maturityGrade.letter}
           </Text>
           <Text style={esStyles.miniStatDetail}>
-            {t.exec.implementationCosts}
+            {maturityPercentage}%
           </Text>
         </View>
         <View style={esStyles.miniStat}>

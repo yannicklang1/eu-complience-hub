@@ -24,6 +24,9 @@ const EXCLUDED_PREFIXES = [
   "/opengraph-image",
 ];
 
+/** Secure cookie flag — only over HTTPS in production */
+const IS_PROD = process.env.NODE_ENV === "production";
+
 /** Static file extensions to skip */
 const STATIC_EXTENSIONS = /\.(ico|png|jpg|jpeg|gif|svg|webp|avif|woff2?|ttf|css|js|map|xml|txt|json)$/;
 
@@ -80,13 +83,22 @@ function detectLocale(request: NextRequest): Locale {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip excluded paths (except /auth/ and /portal/ which need session handling)
-  const needsAuth = pathname.startsWith("/portal") || pathname.startsWith("/auth/");
+  // Webhooks must be completely passthrough — no cookie/auth/locale handling
+  if (pathname.startsWith("/api/webhooks/")) {
+    return NextResponse.next();
+  }
+
+  // /admin/ UI pages need session protection (admin API routes protect via API key).
+  // /portal/ and /auth/ need session handling for login flow.
+  const needsAuth =
+    pathname.startsWith("/portal") ||
+    pathname.startsWith("/auth/") ||
+    (pathname.startsWith("/admin") && !pathname.startsWith("/admin/api"));
   if (shouldSkip(pathname) && !needsAuth) {
     return NextResponse.next();
   }
 
-  // ── Supabase session refresh for auth/portal routes ──
+  // ── Supabase session refresh for auth/portal/admin routes ──
   if (needsAuth) {
     const response = NextResponse.next({ request });
     const supabase = createSupabaseMiddlewareClient(request, response);
@@ -96,6 +108,14 @@ export async function middleware(request: NextRequest) {
 
     // Protect /portal/* — redirect to login if not authenticated
     if (pathname.startsWith("/portal") && !user) {
+      const loginUrl = new URL("/auth/login", request.url);
+      loginUrl.searchParams.set("next", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    // Protect /admin/* UI pages — require authentication.
+    // Finer admin-role check happens at API level via verifyAdminKey.
+    if (pathname.startsWith("/admin") && !user) {
       const loginUrl = new URL("/auth/login", request.url);
       loginUrl.searchParams.set("next", pathname);
       return NextResponse.redirect(loginUrl);
@@ -125,6 +145,7 @@ export async function middleware(request: NextRequest) {
       path: "/",
       maxAge: 60 * 60 * 24 * 365, // 1 year
       sameSite: "lax",
+      secure: IS_PROD,
     });
     return response;
   }
@@ -139,6 +160,7 @@ export async function middleware(request: NextRequest) {
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
     sameSite: "lax",
+    secure: IS_PROD,
   });
   return response;
 }

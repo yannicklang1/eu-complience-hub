@@ -21,6 +21,7 @@ interface Report {
   download_count: number;
   branche: string | null;
   created_at: string;
+  payment_status: "pending" | "paid" | "free" | null;
 }
 
 interface EvaluatedRegulation {
@@ -64,7 +65,6 @@ const GRADE_STYLES: Record<string, { bg: string; text: string; label: string }> 
 const TOOL_URLS: Record<string, string> = {
   "regulierung-finder": "/tools/regulierung-finder",
   "compliance-checkliste": "/tools/compliance-checkliste",
-  "kosten-kalkulator": "/tools/kosten-kalkulator",
   "reifegrad-check": "/tools/reifegrad-check",
   "nis2-betroffenheits-check": "/tools/nis2-betroffenheits-check",
   "haftungs-pruefer": "/tools/haftungs-pruefer",
@@ -308,7 +308,7 @@ export default function PortalDashboard({
                           Kosten
                         </th>
                         <th className="text-left px-4 py-2.5 text-[10px] font-medium text-white/20 tracking-wider uppercase">
-                          Datum
+                          Status
                         </th>
                         <th className="text-right px-4 py-2.5 text-[10px] font-medium text-white/20 tracking-wider uppercase">
                           &nbsp;
@@ -376,38 +376,46 @@ export default function PortalDashboard({
                             </td>
 
                             <td className="px-4 py-3">
-                              <span className="text-[12px] text-white/25 tabular-nums">
-                                {new Date(report.created_at).toLocaleDateString("de-AT", {
-                                  day: "2-digit",
-                                  month: "2-digit",
-                                  year: "2-digit",
-                                })}
-                              </span>
+                              {report.payment_status === "paid" || report.payment_status === "free" ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-400/10 text-emerald-400">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                                  {report.payment_status === "free" ? "Gratis" : "Bezahlt"}
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-yellow-400/10 text-yellow-400">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
+                                  Ausstehend
+                                </span>
+                              )}
                             </td>
 
                             <td className="px-4 py-3 text-right">
-                              <a
-                                href={`/api/report/download?token=${report.report_token}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium text-white/50 border border-white/[0.08] hover:border-white/[0.15] hover:text-white/80 transition-all duration-200"
-                              >
-                                <svg
-                                  className="w-3 h-3"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth={2}
-                                  stroke="currentColor"
-                                  aria-hidden="true"
+                              {report.payment_status === "paid" || report.payment_status === "free" ? (
+                                <a
+                                  href={`/api/report/download?token=${report.report_token}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium text-white/50 border border-white/[0.08] hover:border-white/[0.15] hover:text-white/80 transition-all duration-200"
                                 >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
-                                  />
-                                </svg>
-                                PDF
-                              </a>
+                                  <svg
+                                    className="w-3 h-3"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={2}
+                                    stroke="currentColor"
+                                    aria-hidden="true"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3"
+                                    />
+                                  </svg>
+                                  PDF
+                                </a>
+                              ) : (
+                                <PurchaseButton reportToken={report.report_token} />
+                              )}
                             </td>
                           </tr>
                         );
@@ -607,6 +615,48 @@ export default function PortalDashboard({
         )}
       </main>
     </div>
+  );
+}
+
+/* ── Purchase Button for unpaid reports ── */
+function PurchaseButton({ reportToken }: { reportToken: string }) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleClick() {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reportToken }),
+      });
+      const data = await res.json();
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      }
+    } catch {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <button
+      onClick={handleClick}
+      disabled={loading}
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold text-yellow-400 border border-yellow-400/20 hover:border-yellow-400/40 hover:bg-yellow-400/[0.06] transition-all duration-200 disabled:opacity-50 cursor-pointer"
+    >
+      {loading ? (
+        <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        </svg>
+      ) : (
+        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+        </svg>
+      )}
+      149 €
+    </button>
   );
 }
 

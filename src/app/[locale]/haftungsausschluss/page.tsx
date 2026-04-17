@@ -169,7 +169,7 @@ export default async function HaftungsausschlussPage({
         <p>
           Die auf dieser Website angebotenen interaktiven Tools (darunter
           Regulierung-Finder, NIS2-Betroffenheits-Check, Compliance-Checkliste,
-          Haftungs-Pr\u00fcfer, Bu\u00dfgeld-Rechner, Kosten-Kalkulator, Reifegrad-Check)
+          Haftungs-Pr\u00fcfer, Bu\u00dfgeld-Rechner, Reifegrad-Check)
           dienen ausschlie\u00dflich der unverbindlichen Erstorientierung.
         </p>
         <p>

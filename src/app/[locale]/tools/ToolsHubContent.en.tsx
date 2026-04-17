@@ -86,18 +86,6 @@ const TOOLS: Tool[] = [
     duration: "~2 min",
   },
   {
-    title: "Cost Calculator",
-    description:
-      "Estimate the compliance budget for your company \u2014 broken down by regulation and cost centre.",
-    href: "/tools/kosten-kalkulator",
-    icon: "\uD83D\uDCB0",
-    accent: "#16a34a",
-    badge: "New",
-    category: "calculator",
-    features: ["Budget planning", "Cost breakdown", "Synergies"],
-    duration: "~3 min",
-  },
-  {
     title: "Maturity Check",
     description:
       "Measure your company\u2019s compliance maturity across 5 categories and 25 questions \u2014 with A\u2013E grading.",

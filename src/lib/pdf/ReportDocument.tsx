@@ -14,9 +14,9 @@ import CoverPage from "./CoverPage";
 import TableOfContents from "./TableOfContents";
 import ExecutiveSummary from "./ExecutiveSummary";
 import CompanyProfile from "./CompanyProfile";
+import PersonalizedInsights from "./PersonalizedInsights";
 import RiskExposure from "./RiskExposure";
 import RegulationSection from "./RegulationSection";
-import CostEstimation from "./CostEstimation";
 import MaturityAssessment from "./MaturityAssessment";
 import DeadlineTimeline from "./DeadlineTimeline";
 import ActionRoadmap from "./ActionRoadmap";
@@ -39,9 +39,6 @@ export default function ReportDocument({ data, t }: ReportDocumentProps) {
     highRelevanceCount,
     mediumRelevanceCount,
     lowRelevanceCount,
-    costs,
-    totalCostMin,
-    totalCostMax,
     fineExposures,
     totalFineExposure,
     estimatedRevenue,
@@ -69,9 +66,6 @@ export default function ReportDocument({ data, t }: ReportDocumentProps) {
     .filter((r) => r.relevance === "hoch")
     .map((r) => r.name);
 
-  // Build relevant regulation names for cost page synergy text
-  const relevantRegulationNames = detailRegulations.map((r) => r.name);
-
   // Build regulation name lookup for software recommendations (use translated names)
   const regulationNames: Record<string, string> = { ...t.regNames };
 
@@ -79,17 +73,19 @@ export default function ReportDocument({ data, t }: ReportDocumentProps) {
   const tocItems: { number: string; title: string; description: string }[] = [
     { number: "01", title: t.tocSections.executiveSummary, description: t.tocSections.executiveSummaryDesc },
     { number: "02", title: t.tocSections.companyProfile, description: t.tocSections.companyProfileDesc },
+    {
+      number: "03",
+      title: t.locale === "de" ? "Personalisierte Lagebewertung" : t.locale === "en" ? "Personalized Risk Assessment" : t.locale === "fr" ? "Évaluation personnalisée" : t.locale === "es" ? "Evaluación personalizada" : "Valutazione personalizzata",
+      description: t.locale === "de" ? "Signale aus Zertifizierungen, IT-Stack, Datentransfers und Vorfällen" : t.locale === "en" ? "Signals from certifications, IT stack, data transfers and incidents" : t.locale === "fr" ? "Signaux des certifications, stack IT, transferts de données et incidents" : t.locale === "es" ? "Señales de certificaciones, stack IT, transferencias de datos e incidentes" : "Segnali da certificazioni, stack IT, trasferimenti dati e incidenti",
+    },
   ];
   if (fineExposures.length > 0) {
-    tocItems.push({ number: "03", title: t.tocSections.riskExposure, description: t.tocSections.riskExposureDesc });
+    tocItems.push({ number: String(tocItems.length + 1).padStart(2, "0"), title: t.tocSections.riskExposure, description: t.tocSections.riskExposureDesc });
   }
   if (detailRegulations.length > 0) {
     tocItems.push({ number: String(tocItems.length + 1).padStart(2, "0"), title: t.tocSections.regulationAnalysis, description: tReplace(t.tocSections.regulationAnalysisDesc, { count: detailRegulations.length }) });
   }
   tocItems.push({ number: String(tocItems.length + 1).padStart(2, "0"), title: t.tocSections.maturityAssessment, description: t.tocSections.maturityAssessmentDesc });
-  if (costs.length > 0) {
-    tocItems.push({ number: String(tocItems.length + 1).padStart(2, "0"), title: t.tocSections.costEstimation, description: t.tocSections.costEstimationDesc });
-  }
   tocItems.push({ number: String(tocItems.length + 1).padStart(2, "0"), title: t.tocSections.deadlineOverview, description: t.tocSections.deadlineOverviewDesc });
   if (roadmapItems.length > 0) {
     tocItems.push({ number: String(tocItems.length + 1).padStart(2, "0"), title: t.tocSections.actionPlan, description: t.tocSections.actionPlanDesc });
@@ -143,8 +139,6 @@ export default function ReportDocument({ data, t }: ReportDocumentProps) {
         lowCount={lowRelevanceCount}
         maturityGrade={maturityGrade}
         maturityPercentage={maturityPercentage}
-        totalCostMin={totalCostMin}
-        totalCostMax={totalCostMax}
         nextDeadline={nextCriticalDeadline}
         topActions={topActions}
         generatedAt={generatedAt}
@@ -167,14 +161,21 @@ export default function ReportDocument({ data, t }: ReportDocumentProps) {
         t={t}
       />
 
-      {/* 5. Risk Exposure */}
+      {/* 5. Personalized Insights — THE differentiator page */}
+      <PersonalizedInsights
+        input={input}
+        regulations={regulations}
+        maturityPercentage={maturityPercentage}
+        generatedAt={generatedAt}
+        t={t}
+      />
+
+      {/* 6. Risk Exposure */}
       {fineExposures.length > 0 && (
         <RiskExposure
           fineExposures={fineExposures}
           totalFineExposure={totalFineExposure}
           estimatedRevenue={estimatedRevenue}
-          totalCostMin={totalCostMin}
-          totalCostMax={totalCostMax}
           generatedAt={generatedAt}
           t={t}
         />
@@ -238,21 +239,7 @@ export default function ReportDocument({ data, t }: ReportDocumentProps) {
         t={t}
       />
 
-      {/* 8. Cost Estimation */}
-      {costs.length > 0 && (
-        <CostEstimation
-          costs={costs}
-          totalMin={totalCostMin}
-          totalMax={totalCostMax}
-          companySize={input.companySize}
-          generatedAt={generatedAt}
-          totalFineExposure={totalFineExposure}
-          relevantRegulationNames={relevantRegulationNames}
-          t={t}
-        />
-      )}
-
-      {/* 9. Deadline Timeline */}
+      {/* 8. Deadline Timeline */}
       <DeadlineTimeline
         deadlines={relevantDeadlines}
         generatedAt={generatedAt}

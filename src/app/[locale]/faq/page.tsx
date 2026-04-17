@@ -196,13 +196,6 @@ export const faqData: FAQItem[] = [
     category: "Haftung",
   },
 
-  /* ── Kosten ── */
-  {
-    question: "Was kostet Compliance-Umsetzung f\u00fcr ein KMU?",
-    answer: "Die Kosten variieren stark je nach Branche, Gr\u00f6\u00dfe und Reifegrad. Typische Bandbreiten f\u00fcr KMUs: DSGVO-Grundausstattung 5.000\u201320.000 \u20ac, NIS2-Umsetzung 30.000\u2013150.000 \u20ac, AI-Act-Konformit\u00e4t 10.000\u201350.000 \u20ac (als Deployer). Investitionen in Compliance zahlen sich aus \u2014 die Bu\u00dfgelder bei Verst\u00f6\u00dfen \u00fcbersteigen die Implementierungskosten meist um ein Vielfaches.",
-    category: "Allgemein",
-  },
-
   /* ── BaFG ── */
   {
     question: "Was fordert das Barrierefreiheitsst\u00e4rkungsgesetz (BaFG)?",
@@ -321,7 +314,7 @@ export const faqData: FAQItem[] = [
   },
   {
     question: "Welche interaktiven Tools bietet die Plattform?",
-    answer: "EU Compliance Hub bietet acht kostenlose Tools: Den Regulierung-Finder (ermittelt, welche EU-Gesetze f\u00fcr Sie gelten), die Compliance-Checkliste (interaktive Pflichten pro Regulierung), den Kosten-Kalkulator (sch\u00e4tzt Implementierungskosten), den Reifegrad-Check (bewertet Ihre Compliance-Reife), den NIS2-Betroffenheits-Check, den Haftungs-Pr\u00fcfer (pers\u00f6nliche Haftungsrisiken), den Bu\u00dfgeld-Rechner und den Regulierungsvergleich. Alle Tools sind ohne Registrierung nutzbar.",
+    answer: "EU Compliance Hub bietet kostenlose interaktive Tools: Den Regulierung-Finder (ermittelt, welche EU-Gesetze f\u00fcr Sie gelten), die Compliance-Checkliste (interaktive Pflichten pro Regulierung), den Reifegrad-Check (bewertet Ihre Compliance-Reife), den NIS2-Betroffenheits-Check, den Haftungs-Pr\u00fcfer (pers\u00f6nliche Haftungsrisiken), den Bu\u00dfgeld-Rechner und den Regulierungsvergleich. Alle Tools sind ohne Registrierung nutzbar.",
     category: "Plattform",
   },
 ];

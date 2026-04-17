@@ -86,18 +86,6 @@ const TOOLS: Tool[] = [
     duration: "~2 Min.",
   },
   {
-    title: "Kosten-Kalkulator",
-    description:
-      "Schätzen Sie das Compliance-Budget für Ihr Unternehmen — aufgeschlüsselt nach Regulierung und Kostenstelle.",
-    href: "/tools/kosten-kalkulator",
-    icon: "💰",
-    accent: "#16a34a",
-    badge: "Neu",
-    category: "calculator",
-    features: ["Budget-Planung", "Kosten-Aufschlüsselung", "Synergien"],
-    duration: "~3 Min.",
-  },
-  {
     title: "Reifegrad-Check",
     description:
       "Messen Sie den Compliance-Reifegrad Ihres Unternehmens über 5 Kategorien und 25 Fragen — mit A-E Bewertung.",

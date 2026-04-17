@@ -8,6 +8,6 @@ export default function Image() {
     title: "Compliance-Tools",
     subtitle: "Kostenlose interaktive Werkzeuge für Ihre EU-Compliance",
     accentColor: "#FACC15",
-    tags: ["Regulierung-Finder", "NIS2-Check", "Kosten-Kalkulator", "Reifegrad-Check"],
+    tags: ["Regulierung-Finder", "NIS2-Check", "Compliance-Checkliste", "Reifegrad-Check"],
   });
 }

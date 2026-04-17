@@ -33,7 +33,7 @@ const toolsMeta = [
   { href: "/tools/compliance-checkliste", icon: "list", accent: "#FACC15", accentLight: "#fef9e7" },
   { href: "/haftungs-check", icon: "scale", accent: "#0A2540", accentLight: "#e8eeff" },
   { href: "/fristen-radar", icon: "calendar", accent: "#1e40af", accentLight: "#e8ecff" },
-  { href: "/tools/kosten-kalkulator", icon: "coins", accent: "#16a34a", accentLight: "#f0fdf4" },
+  { href: "/tools/reifegrad-check", icon: "coins", accent: "#16a34a", accentLight: "#f0fdf4" },
   { href: "/glossar", icon: "book", accent: "#7c3aed", accentLight: "#f3f0ff" },
 ];
 
@@ -56,11 +56,8 @@ const secondaryRegMeta = [
 const quickStartMeta = [
   { step: "01", href: "/tools/regulierung-finder", accent: "#FACC15" },
   { step: "02", href: "/tools/compliance-checkliste", accent: "#10b981" },
-  { step: "03", href: "/tools/kosten-kalkulator", accent: "#3b82f6" },
+  { step: "03", href: "/tools/reifegrad-check", accent: "#3b82f6" },
 ];
-
-const newsColors = ["#1e40af", "#2563eb", "#16a34a"];
-const newsHrefs = ["/nisg-2026", "/bafg", "/csrd-esg"];
 
 const regListColors = [
   "#1e40af", "#7c3aed", "#059669", "#ea580c", "#7c3aed", "#16a34a",
@@ -357,19 +354,19 @@ export default function HomePage() {
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#040a18] to-transparent pointer-events-none" />
 
           {/* Content — flex-1 + overflow-hidden ensures scroll indicator always visible */}
-          <div className="relative z-10 flex-1 min-h-0 flex flex-col justify-center max-w-7xl mx-auto w-full px-6 sm:px-8 lg:px-12 pt-20 pb-0 overflow-hidden">
+          <div className="relative z-10 flex-1 min-h-0 flex flex-col justify-center max-w-7xl mx-auto w-full px-6 sm:px-8 lg:px-12 pt-28 sm:pt-24 md:pt-20 pb-0 overflow-hidden">
             {/* Overline */}
-            <div className="flex items-center gap-3 mb-5 animate-slide-up opacity-0 flex-shrink-0" style={{ animationDelay: "0.1s", animationFillMode: "forwards" }}>
-              <div className="h-px w-12 bg-gradient-to-r from-white/40 to-transparent" />
-              <span className="font-mono text-[11px] tracking-[0.25em] uppercase text-white/60 font-medium">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-5 animate-slide-up opacity-0 flex-shrink-0" style={{ animationDelay: "0.1s", animationFillMode: "forwards" }}>
+              <div className="hidden sm:block h-px w-12 bg-gradient-to-r from-white/40 to-transparent" />
+              <span className="hidden sm:inline font-mono text-[11px] tracking-[0.25em] uppercase text-white/60 font-medium">
                 eu-compliance-hub.eu
               </span>
-              <div className="flex items-center gap-1.5 ml-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1">
+              <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse-dot" />
                 <span className="font-mono text-[10px] text-emerald-400 font-medium">LIVE</span>
               </div>
               {countryMeta && (
-                <div className="flex items-center gap-1.5 ml-1 rounded-full bg-white/[0.06] border border-white/[0.1] px-2.5 py-1">
+                <div className="flex items-center gap-1.5 rounded-full bg-white/[0.06] border border-white/[0.1] px-2.5 py-1">
                   <span className="text-sm leading-none">{countryMeta.flag}</span>
                   <span className="font-mono text-[10px] text-white/60 font-medium">{countryMeta.nameDE}</span>
                 </div>
@@ -451,6 +448,64 @@ export default function HomePage() {
             <Stat value="35M" suffix="€" label={h.stats.maxFine} />
             <Stat value="27" suffix={h.stats.countries} label={h.stats.countryLabel} />
             <Stat value="2026" suffix="" label={h.stats.complianceYear} />
+          </div>
+        </section>
+
+        {/* ════════ SO FUNKTIONIERT ES ════════ */}
+        <section aria-label={h.howItWorks.aria} className="relative py-24 lg:py-32 overflow-hidden" style={{ background: "linear-gradient(180deg, #f4f6fc 0%, #eef1fa 100%)" }}>
+          <div className="absolute inset-0 pointer-events-none opacity-40" style={{ backgroundImage: "radial-gradient(circle, rgba(10,37,64,0.06) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+          <div className="relative max-w-6xl mx-auto px-6 sm:px-8 lg:px-12">
+            <Reveal>
+              <div className="text-center mb-14">
+                <SectionLabel>{h.howItWorks.sectionLabel}</SectionLabel>
+                <h2 className="font-[Syne] font-extrabold text-3xl md:text-4xl tracking-tight text-[#060c1a] leading-[1.1] mb-4 mt-2">
+                  {h.howItWorks.title}
+                </h2>
+                <p className="text-base lg:text-lg text-[#3a4a6b] max-w-2xl mx-auto leading-relaxed">
+                  {h.howItWorks.subtitle}
+                </p>
+              </div>
+            </Reveal>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+              {h.howItWorks.steps.map((step, i) => (
+                <Reveal key={step.title} delay={i * 100}>
+                  <div className="relative rounded-2xl bg-white border border-[#d8dff0] p-7 h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-900/[0.06] hover:border-[#b8c4e0]">
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center font-[Syne] font-bold text-sm" style={{ background: "#0A2540", color: "#FACC15" }}>
+                        {`0${i + 1}`}
+                      </div>
+                      <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-[#7a8db0]">
+                        {step.tag}
+                      </span>
+                    </div>
+                    <h3 className="font-[Syne] font-bold text-xl text-[#060c1a] mb-3 leading-tight">
+                      {step.title}
+                    </h3>
+                    <p className="text-sm text-[#3a4a6b] leading-relaxed mb-4">
+                      {step.desc}
+                    </p>
+                    <div className="pt-4 border-t border-[#e8ecf4]">
+                      <span className="text-[11px] font-semibold" style={{ color: step.priceColor ?? "#16a34a" }}>
+                        {step.price}
+                      </span>
+                    </div>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+
+            <Reveal>
+              <div className="mt-10 flex flex-wrap items-center justify-center gap-3 text-sm text-[#3a4a6b]">
+                <Link href={`/${locale}/tools`} className="inline-flex items-center gap-2 rounded-xl bg-[#0A2540] px-6 py-3 font-[Syne] font-bold text-white hover:-translate-y-0.5 transition-all">
+                  {h.howItWorks.ctaTools}
+                  <IconArrowRight className="w-4 h-4" />
+                </Link>
+                <Link href={`/${locale}/kontakt`} className="inline-flex items-center gap-2 rounded-xl border border-[#0A2540]/20 bg-white px-6 py-3 font-[Syne] font-semibold text-[#0A2540] hover:border-[#0A2540]/40 transition-all">
+                  {h.howItWorks.ctaReport}
+                </Link>
+              </div>
+            </Reveal>
           </div>
         </section>
 
@@ -830,60 +885,6 @@ export default function HomePage() {
                 </div>
               </Reveal>
             </div>
-          </div>
-        </section>
-
-        {/* ════════ NEWS PREVIEW ════════ */}
-        <section aria-label={h.aria.news} className="py-16 lg:py-20 relative overflow-hidden bg-[#f4f6fc]">
-          <div className="max-w-7xl mx-auto px-6 lg:px-12">
-            <Reveal>
-              <div className="text-center mb-10">
-                <h2 className="font-[Syne] font-extrabold text-3xl md:text-4xl text-[#060c1a] tracking-tight leading-tight mb-3">
-                  {h.news.title}
-                </h2>
-                <p className="text-[#7a8db0] text-base max-w-lg mx-auto">
-                  {h.news.subtitle}
-                </p>
-              </div>
-            </Reveal>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              {h.news.items.map((newsItem, idx) => {
-                const news = { ...newsItem, color: newsColors[idx], href: newsHrefs[idx] };
-                return news;
-              }).map((news) => (
-                <Reveal key={news.title}>
-                  <Link
-                    href={news.href}
-                    className="group block rounded-2xl bg-white border border-[#d8dff0] p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-900/[0.06] hover:border-[#b8c4e0] h-full"
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-[11px] font-mono text-[#7a8db0]">{news.date}</span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: `${news.color}15`, color: news.color }}>
-                        {news.label}
-                      </span>
-                    </div>
-                    <h3 className="font-[Syne] font-bold text-[15px] text-[#060c1a] group-hover:text-[#1e40af] transition-colors mb-1">
-                      {news.title}
-                    </h3>
-                    <p className="text-xs text-[#7a8db0]">{news.desc}</p>
-                  </Link>
-                </Reveal>
-              ))}
-            </div>
-
-            <Reveal>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link href={`/${locale}/aktuelles`} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-[Syne] font-bold text-sm text-white bg-[#0A2540] hover:-translate-y-0.5 transition-all">
-                  {h.news.ctaNews}
-                  <IconArrowRight className="w-4 h-4" />
-                </Link>
-                <Link href={`/${locale}/vergleich`} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-[Syne] font-semibold text-sm text-[#3a4a6b] border border-[#d8dff0] hover:bg-white hover:border-[#b8c4e0] transition-all">
-                  {h.news.ctaCompare}
-                  <IconArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </Reveal>
           </div>
         </section>
 

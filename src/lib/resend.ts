@@ -319,8 +319,6 @@ Abmelden: ${unsubscribeUrl}`;
 interface ReportEmailData {
   regulations: { name: string; relevance: string }[];
   maturityGrade: { letter: string; label: string };
-  totalCostMin: number;
-  totalCostMax: number;
 }
 
 /** Locale-aware report email strings */
@@ -486,11 +484,6 @@ export async function sendReportEmail(
   }
 }
 
-function formatCostRange(min: number, max: number): string {
-  const fmt = (n: number) => (n >= 1000 ? `${Math.round(n / 1000)}k` : String(n));
-  return `${fmt(min)} – ${fmt(max)} €`;
-}
-
 function buildReportHtml(
   contactName: string,
   companyName: string,
@@ -546,19 +539,12 @@ function buildReportHtml(
         </tr>
       </table>
 
-      ${data.totalCostMin > 0 ? `
-      <p style="margin:0 0 24px;font-size:14px;color:#cbd5e1;line-height:1.6">
-        <span style="color:#94a3b8">${s.estimatedCosts}</span> <strong style="color:#FACC15">${formatCostRange(data.totalCostMin, data.totalCostMax)}</strong>
-      </p>
-      ` : ""}
-
       <p style="margin:0 0 24px;font-size:14px;color:#cbd5e1;line-height:1.6">
         ${s.fullReportNote}
       </p>
 
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px">
         <tr><td style="padding:5px 0;font-size:13px;color:#cbd5e1"><span style="color:#FACC15;margin-right:8px">&#9679;</span> ${s.detailedAnalysis}</td></tr>
-        <tr><td style="padding:5px 0;font-size:13px;color:#cbd5e1"><span style="color:#FACC15;margin-right:8px">&#9679;</span> ${s.costBreakdown}</td></tr>
         <tr><td style="padding:5px 0;font-size:13px;color:#cbd5e1"><span style="color:#FACC15;margin-right:8px">&#9679;</span> ${s.maturityAndActions}</td></tr>
         <tr><td style="padding:5px 0;font-size:13px;color:#cbd5e1"><span style="color:#FACC15;margin-right:8px">&#9679;</span> ${s.deadlinesAndSoftware}</td></tr>
       </table>
@@ -604,12 +590,11 @@ ${s.intro.replace(/<[^>]*>/g, "").replace("{{company}}", companyName)}
 
 - ${totalCount} ${s.regsAnalyzed}
 - ${hochCount} ${s.highRelevance}
-- ${s.maturityGrade}: ${data.maturityGrade.label}${data.totalCostMin > 0 ? `\n- ${s.estimatedCosts} ${formatCostRange(data.totalCostMin, data.totalCostMax)}` : ""}
+- ${s.maturityGrade}: ${data.maturityGrade.label}
 
 ${s.fullReportNote}
 
 - ${s.detailedAnalysis}
-- ${s.costBreakdown}
 - ${s.maturityAndActions}
 - ${s.deadlinesAndSoftware}
 

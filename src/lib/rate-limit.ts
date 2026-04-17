@@ -70,13 +70,28 @@ export const publicFormLimiter = createRateLimiter({ windowMs: 60_000, max: 5 })
 export const adminLimiter = createRateLimiter({ windowMs: 60_000, max: 10 });
 
 /**
- * Extract client IP from request headers (Vercel / Cloudflare compatible).
+ * Extract client IP from request headers.
+ *
+ * Priority order (trusted → untrusted):
+ *   1. `x-vercel-forwarded-for` — set by Vercel's edge, client cannot forge
+ *   2. `x-real-ip` — set by reverse proxies (Nginx, Cloudflare), client cannot forge
+ *   3. `cf-connecting-ip` — Cloudflare
+ *   4. `x-forwarded-for` — FIRST entry only; on Vercel the edge overwrites this,
+ *       but in direct-access deployments it's client-controllable (spoofable).
+ *       Kept as last resort for non-Vercel environments.
+ *
+ * If only `x-forwarded-for` is available and no trusted header is set, we still
+ * use it but this is considered a weak identifier — callers should be aware
+ * that rate-limiting can be bypassed by header manipulation when the site is
+ * not deployed behind a trusted proxy.
  */
 export function getClientIp(request: Request): string {
   const headers = request.headers;
   return (
+    headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ??
+    headers.get("x-real-ip")?.trim() ??
+    headers.get("cf-connecting-ip")?.trim() ??
     headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    headers.get("x-real-ip") ??
     "unknown"
   );
 }

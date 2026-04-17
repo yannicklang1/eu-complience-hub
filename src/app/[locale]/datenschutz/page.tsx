@@ -184,7 +184,7 @@ export default async function DatenschutzPage({
         <h3>3.4 Interaktive Tools</h3>
         <p>
           Unsere interaktiven Compliance-Tools (Regulierung-Finder, NIS2-Check,
-          Bu\u00dfgeld-Rechner, Kosten-Kalkulator, Reifegrad-Check, Compliance-Checkliste,
+          Bu\u00dfgeld-Rechner, Reifegrad-Check, Compliance-Checkliste,
           Haftungs-Pr\u00fcfer) verarbeiten alle Eingaben ausschlie\u00dflich clientseitig in Ihrem
           Browser. Es werden keine Eingabedaten an unsere Server \u00fcbertragen, sofern
           Sie nicht das optionale Ergebnis-per-E-Mail-Formular nutzen.

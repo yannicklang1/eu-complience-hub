@@ -17,7 +17,7 @@ const LLMS_TXT = `# EU Compliance Hub
 
 EU Compliance Hub deckt 18 europäische Regulierungen ab und bietet:
 - Verständliche Erklärungen komplexer EU-Vorschriften auf Deutsch
-- 7 kostenlose interaktive Compliance-Tools (Regulierung-Finder, Reifegrad-Check, Kosten-Kalkulator, etc.)
+- Kostenlose interaktive Compliance-Tools (Regulierung-Finder, Reifegrad-Check, NIS2-Check, Checkliste, etc.)
 - Branchenspezifische Compliance-Guides für 17 Industrien
 - Aktuelle Fristen und Deadlines (2024–2030)
 - Glossar mit über 70 Fachbegriffen
@@ -56,7 +56,6 @@ Kostenlose Compliance-Werkzeuge — sofort nutzbar, keine Registrierung für Bas
 - [Reifegrad-Check](${BASE_URL}/de/tools/reifegrad-check): Compliance-Reifegrad-Bewertung über 5 Kategorien (25 Fragen, A–E Bewertung)
 - [Haftungs-Prüfer](${BASE_URL}/de/tools/haftungs-pruefer): Persönliches Haftungsrisiko für Geschäftsführer einschätzen
 - [Bußgeld-Rechner](${BASE_URL}/de/tools/bussgeld-rechner): Mögliche Strafen bei Compliance-Verstößen berechnen
-- [Kosten-Kalkulator](${BASE_URL}/de/tools/kosten-kalkulator): Compliance-Implementierungskosten schätzen (nach Größe, Reifegrad, Regulierungen)
 
 ## Wissen & Nachschlagewerke
 
@@ -66,7 +65,6 @@ Kostenlose Compliance-Werkzeuge — sofort nutzbar, keine Registrierung für Bas
 - [Regulierungsvergleich](${BASE_URL}/de/vergleich): 9 EU-Regulierungen im direkten Vergleich (8 Kriterien)
 - [Fristen-Radar](${BASE_URL}/de/fristen-radar): 24 Compliance-Deadlines von 2024 bis 2030
 - [Compliance-Timeline](${BASE_URL}/de/timeline): Chronologische Übersicht aller Fristen
-- [Aktuelles](${BASE_URL}/de/aktuelles): 28 aktuelle Regulatory-Updates
 
 ## Branchen-Compliance
 

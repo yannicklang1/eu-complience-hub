@@ -29,7 +29,7 @@ const META: Partial<Record<Locale, MetaStrings>> = {
   de: {
     title: "Compliance-Tools \u2013 Kostenlose interaktive Werkzeuge",
     description:
-      "Kostenlose EU-Compliance-Tools: Regulierung-Finder, NIS2-Check, Compliance-Checkliste, Bu\u00dfgeld-Rechner, Kosten-Kalkulator, Reifegrad-Check und mehr. Sofort nutzbar, keine Registrierung.",
+      "Kostenlose EU-Compliance-Tools: Regulierung-Finder, NIS2-Check, Compliance-Checkliste, Bu\u00dfgeld-Rechner, Reifegrad-Check und mehr. Sofort nutzbar, keine Registrierung.",
     ogDescription:
       "Kostenlose EU-Compliance-Tools: Sofort nutzbar, keine Registrierung n\u00f6tig.",
     keywords:
@@ -38,7 +38,7 @@ const META: Partial<Record<Locale, MetaStrings>> = {
   en: {
     title: "Compliance Tools \u2013 Free Interactive Tools",
     description:
-      "Free EU compliance tools: Regulation Finder, NIS2 Check, Compliance Checklist, Fine Calculator, Cost Calculator, Maturity Check and more. Available instantly, no registration.",
+      "Free EU compliance tools: Regulation Finder, NIS2 Check, Compliance Checklist, Fine Calculator, Maturity Check and more. Available instantly, no registration.",
     ogDescription:
       "Free EU compliance tools: Available instantly, no registration required.",
     keywords:
@@ -215,12 +215,6 @@ function buildJsonLd(locale: string) {
         {
           "@type": "ListItem",
           position: 6,
-          name: isEn ? "Cost Calculator" : "Kosten-Kalkulator",
-          url: `${BASE_URL}/${locale}/tools/kosten-kalkulator`,
-        },
-        {
-          "@type": "ListItem",
-          position: 7,
           name: isEn ? "Maturity Check" : "Reifegrad-Check",
           url: `${BASE_URL}/${locale}/tools/reifegrad-check`,
         },

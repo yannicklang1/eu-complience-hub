@@ -47,7 +47,6 @@ const SEARCH_INDEX: SearchItem[] = [
   { label: "Compliance-Checkliste", href: "/tools/compliance-checkliste", description: "Interaktive Pflichten-Checkliste", category: "Tools", keywords: ["checkliste", "pflichten", "todo"] },
   { label: "Haftungs-Prüfer", href: "/tools/haftungs-pruefer", description: "Persönliche Haftungsrisiken prüfen", category: "Tools", keywords: ["haftung", "risiko", "geschäftsführer"] },
   { label: "Bußgeld-Rechner", href: "/tools/bussgeld-rechner", description: "Strafrahmen berechnen", category: "Tools", keywords: ["strafe", "bußgeld", "geld", "rechner"] },
-  { label: "Kosten-Kalkulator", href: "/tools/kosten-kalkulator", description: "Compliance-Budget planen", category: "Tools", keywords: ["kosten", "budget", "kalkulator", "preis"] },
   { label: "Reifegrad-Check", href: "/tools/reifegrad-check", description: "Compliance-Reifegrad messen", category: "Tools", keywords: ["reife", "maturity", "bewertung"] },
   { label: "Alle Tools", href: "/tools", description: "Übersicht aller interaktiven Tools", category: "Tools", keywords: ["übersicht", "alle"] },
 
@@ -58,7 +57,6 @@ const SEARCH_INDEX: SearchItem[] = [
   { label: "Fristen-Radar", href: "/fristen-radar", description: "Compliance-Deadlines im Blick", category: "Wissen", keywords: ["frist", "deadline", "termin", "radar"] },
   { label: "Compliance-Timeline", href: "/timeline", description: "Alle Fristen 2025–2030", category: "Wissen", keywords: ["timeline", "zeitstrahl", "chronologie"] },
   { label: "Regulierungsvergleich", href: "/vergleich", description: "EU-Regulierungen Seite an Seite", category: "Wissen", keywords: ["vergleich", "matrix", "gegenüber"] },
-  { label: "Aktuelles", href: "/aktuelles", description: "News und Updates zur EU-Regulierung", category: "Wissen", keywords: ["news", "aktuell", "neuigkeiten", "update"] },
   { label: "Quellen", href: "/quellen", description: "Amtliche Quellen und Rechtsgrundlagen", category: "Wissen", keywords: ["quelle", "gesetz", "amtsblatt", "eur-lex"] },
 
   /* ── Branchen ── */

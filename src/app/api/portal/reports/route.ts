@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     const { data: reports, error: queryError } = await adminClient
       .from("reports")
       .select(
-        "id, report_token, company_name, contact_name, maturity_grade, evaluated_regulations, cost_estimate, download_count, branche, created_at",
+        "id, report_token, company_name, contact_name, maturity_grade, evaluated_regulations, cost_estimate, download_count, branche, created_at, payment_status",
       )
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });

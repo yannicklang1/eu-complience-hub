@@ -54,7 +54,6 @@ const TOOLS: ResourceCard[] = [
   { title: "Regulierung-Finder", description: "Quiz: Welche EU-Regulierungen betreffen Ihr Unternehmen?", href: "/tools/regulierung-finder", icon: "\uD83E\uDDED", accent: "#FACC15", badge: "Neu", keywords: ["welche regulierung", "betroffen"] },
   { title: "NIS2 Betroffenheits-Check", description: "Finden Sie in 2 Minuten heraus, ob Ihr Unternehmen unter NIS2 fällt", href: "/tools/nis2-betroffenheits-check", icon: "\u2705", accent: "#3b82f6", keywords: ["NIS2", "betroffenheit", "check"] },
   { title: "Compliance-Checkliste", description: "Prüfen Sie Ihren Compliance-Status für alle EU-Regulierungen", href: "/tools/compliance-checkliste", icon: "\uD83D\uDCCB", accent: "#FACC15", keywords: ["checkliste", "status", "prüfung"] },
-  { title: "Kosten-Kalkulator", description: "Schätzen Sie die Kosten für die Umsetzung von EU-Compliance", href: "/tools/kosten-kalkulator", icon: "\uD83D\uDCB0", accent: "#FACC15", badge: "Neu", keywords: ["kosten", "budget", "schätzung"] },
   { title: "Reifegrad-Check", description: "Bewerten Sie Ihren Compliance-Reifegrad in 5 Kategorien", href: "/tools/reifegrad-check", icon: "\uD83D\uDCCA", accent: "#6366f1", badge: "Neu", keywords: ["reifegrad", "maturity", "bewertung"] },
   { title: "Haftungs-Prüfer", description: "Bewerten Sie Ihr persönliches Haftungsrisiko als Geschäftsführer", href: "/tools/haftungs-pruefer", icon: "\u2696\uFE0F", accent: "#0A2540", keywords: ["haftung", "geschäftsführer", "risiko"] },
   { title: "Bußgeld-Rechner", description: "Berechnen Sie den Strafrahmen bei Verstößen gegen EU-Regulierungen", href: "/tools/bussgeld-rechner", icon: "\uD83D\uDCB0", accent: "#ef4444", keywords: ["bußgeld", "strafe", "fine", "sanktion"] },
@@ -62,7 +61,6 @@ const TOOLS: ResourceCard[] = [
 ];
 
 const RESOURCES: ResourceCard[] = [
-  { title: "Aktuelles", description: "Compliance-News, Gesetzesänderungen und kommende Fristen", href: "/aktuelles", icon: "\uD83D\uDCF0", accent: "#FACC15", badge: "Neu", keywords: ["news", "nachrichten", "aktuell"] },
   { title: "Regulierungsvergleich", description: "EU-Regulierungen Seite an Seite vergleichen", href: "/vergleich", icon: "\uD83D\uDD00", accent: "#FACC15", badge: "Neu", keywords: ["vergleich", "matrix", "gegenüberstellung"] },
   { title: "Fristen-Radar", description: "Alle EU-Compliance-Deadlines auf einen Blick", href: "/fristen-radar", icon: "\u23F0", accent: "#FACC15", keywords: ["fristen", "deadline", "termin"] },
   { title: "Compliance-Timeline", description: "Chronologische Übersicht aller Fristen 2025\u20132027", href: "/timeline", icon: "\uD83D\uDCC5", accent: "#3b82f6", keywords: ["timeline", "chronologie", "zeitstrahl"] },

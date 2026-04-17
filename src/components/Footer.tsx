@@ -139,7 +139,6 @@ export default function Footer() {
           <div className="flex items-center gap-6 flex-wrap justify-center">
             {[
               { label: t("footer.aboutUs"), href: `/${locale}/ueber-uns` },
-              { label: t("footer.news"), href: `/${locale}/aktuelles` },
               { label: t("footer.faq"), href: `/${locale}/faq` },
               { label: t("footer.report"), href: `/${locale}/kontakt` },
               { label: t("footer.impressum"), href: `/${locale}/impressum` },

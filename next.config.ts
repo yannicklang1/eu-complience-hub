@@ -19,18 +19,19 @@ const securityHeaders = [
   {
     // Restrict browser features (camera, mic, etc.)
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), payment=()",
+    value: "camera=(), microphone=(), geolocation=(), payment=(self \"https://*.lemonsqueezy.com\")",
   },
   {
     // Content Security Policy — controls allowed resource origins
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://pagead2.googlesyndication.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.lemonsqueezy.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: https: blob:",
-      "connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://vitals.vercel-insights.com",
+      "connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://vitals.vercel-insights.com https://*.lemonsqueezy.com",
+      "frame-src 'self' https://*.lemonsqueezy.com",
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'",

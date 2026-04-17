@@ -295,7 +295,7 @@ export default function RegulationSection({
   const hasMaturityData = compliantCount > 0 || partialCount > 0;
 
   return (
-    <View style={secStyles.container} wrap={false}>
+    <View style={secStyles.container}>
       <View style={secStyles.innerWrapper}>
         <View
           style={[secStyles.leftBar, { backgroundColor: regulation.color }]}
@@ -422,20 +422,30 @@ export default function RegulationSection({
           {countryRegData && countryName && (
             <View style={secStyles.countryRow}>
               <View style={{ flex: 1 }}>
-                <Text style={secStyles.countryLabel}>{countryName}:</Text>
-                {countryRegData.authority && (
-                  <Text style={secStyles.countryValue}>
-                    {t.regulation.authorityLabel}{countryRegData.authority}
-                  </Text>
-                )}
+                <Text style={secStyles.countryLabel}>Nationale Umsetzung in {countryName}:</Text>
                 {countryRegData.nationalLawName && (
                   <Text style={secStyles.countryValue}>
                     {t.regulation.nationalLawLabel}{countryRegData.nationalLawName}
                   </Text>
                 )}
+                {countryRegData.authority && (
+                  <Text style={secStyles.countryValue}>
+                    {t.regulation.authorityLabel}{countryRegData.authority}
+                  </Text>
+                )}
+                {countryRegData.nationalDeadline && (
+                  <Text style={secStyles.countryValue}>
+                    Nationale Frist: {countryRegData.nationalDeadline}
+                  </Text>
+                )}
                 {countryRegData.nationalFines && (
                   <Text style={secStyles.countryValue}>
                     {t.regulation.nationalFinesLabel}{countryRegData.nationalFines}
+                  </Text>
+                )}
+                {countryRegData.nationalNotes && (
+                  <Text style={[secStyles.countryValue, { marginTop: 4, fontStyle: "italic" }]}>
+                    {countryRegData.nationalNotes}
                   </Text>
                 )}
               </View>

@@ -147,9 +147,8 @@ const siteNavJsonLd = {
     { "@type": "SiteNavigationElement", position: 4, name: "CRA", url: `${BASE_URL}/de/cra` },
     { "@type": "SiteNavigationElement", position: 5, name: "DSGVO", url: `${BASE_URL}/de/dsgvo` },
     { "@type": "SiteNavigationElement", position: 6, name: "Compliance-Tools", url: `${BASE_URL}/de/tools` },
-    { "@type": "SiteNavigationElement", position: 7, name: "Aktuelles", url: `${BASE_URL}/de/aktuelles` },
-    { "@type": "SiteNavigationElement", position: 8, name: "FAQ", url: `${BASE_URL}/de/faq` },
-    { "@type": "SiteNavigationElement", position: 9, name: "Kontakt", url: `${BASE_URL}/de/kontakt` },
+    { "@type": "SiteNavigationElement", position: 7, name: "FAQ", url: `${BASE_URL}/de/faq` },
+    { "@type": "SiteNavigationElement", position: 8, name: "Kontakt", url: `${BASE_URL}/de/kontakt` },
   ],
 };
 
