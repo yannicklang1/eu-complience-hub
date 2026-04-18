@@ -120,7 +120,6 @@ export default function ReportDocument({ data, t }: ReportDocumentProps) {
         generatedAt={generatedAt}
         countryName={countryContext?.nameDE}
         reportId={reportId}
-        countryFlag={countryContext?.flag}
         t={t}
       />
 
@@ -156,7 +155,6 @@ export default function ReportDocument({ data, t }: ReportDocumentProps) {
         lowCount={lowRelevanceCount}
         totalRegulations={regulations.length}
         countryName={countryContext?.nameDE}
-        countryFlag={countryContext?.flag}
         generatedAt={generatedAt}
         t={t}
       />

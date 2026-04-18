@@ -96,7 +96,6 @@ const piStyles = StyleSheet.create({
     fontFamily: "DMSans",
     fontSize: 8.5,
     color: COLORS.textSecondary,
-    fontStyle: "italic",
     paddingHorizontal: 10,
     paddingVertical: 6,
   },

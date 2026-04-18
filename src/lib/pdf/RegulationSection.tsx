@@ -39,10 +39,10 @@ const PRIORITY_COLORS: Record<string, { bg: string; text: string }> = {
   mittelfristig: { bg: "#f0fdf4", text: "#16a34a" },
 };
 
-const STATUS_SYMBOLS: Record<string, { char: string; color: string }> = {
-  compliant: { char: "\u2611", color: "#16a34a" },
-  partial: { char: "\u25D0", color: "#f59e0b" },
-  unchecked: { char: "\u2610", color: COLORS.textLight },
+const STATUS_STYLES: Record<string, { bg: string; border: string; fill?: string }> = {
+  compliant: { bg: "#16a34a", border: "#16a34a", fill: "#ffffff" },
+  partial: { bg: "#f59e0b", border: "#f59e0b" },
+  unchecked: { bg: "#ffffff", border: COLORS.textLight },
 };
 
 const secStyles = StyleSheet.create({
@@ -125,10 +125,21 @@ const secStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#fecaca",
   },
-  fineIcon: {
-    fontFamily: "DMSans",
-    fontSize: 10,
+  fineIconBadge: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#dc2626",
     marginRight: 6,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  fineIconText: {
+    fontFamily: "DMSans",
+    fontSize: 8,
+    fontWeight: 700,
+    color: "#ffffff",
+    lineHeight: 1,
   },
   fineText: {
     fontFamily: "DMSans",
@@ -155,11 +166,32 @@ const secStyles = StyleSheet.create({
     alignItems: "flex-start",
     marginBottom: 5,
   },
-  checkBullet: {
-    fontFamily: "DMSans",
-    fontSize: 10,
-    width: 16,
-    marginTop: 0,
+  checkBox: {
+    width: 9,
+    height: 9,
+    borderRadius: 2,
+    borderWidth: 1.2,
+    marginRight: 7,
+    marginTop: 2,
+  },
+  checkBoxInnerDash: {
+    width: 5,
+    height: 1.4,
+    backgroundColor: "#ffffff",
+    position: "absolute",
+    top: 3.3,
+    left: 1.5,
+  },
+  checkBoxInnerTick: {
+    width: 2,
+    height: 5,
+    borderRightWidth: 1.4,
+    borderBottomWidth: 1.4,
+    borderColor: "#ffffff",
+    position: "absolute",
+    top: 1.3,
+    left: 3,
+    transform: "rotate(45deg)",
   },
   checkText: {
     fontFamily: "DMSans",
@@ -193,10 +225,12 @@ const secStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#fde68a",
   },
-  factIcon: {
-    fontFamily: "DMSans",
-    fontSize: 10,
-    marginRight: 6,
+  factDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#d97706",
+    marginRight: 8,
   },
   factText: {
     fontFamily: "DMSans",
@@ -249,7 +283,32 @@ const secStyles = StyleSheet.create({
   legendItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 3,
+    gap: 4,
+  },
+  legendBox: {
+    width: 8,
+    height: 8,
+    borderRadius: 2,
+    borderWidth: 1,
+  },
+  legendTick: {
+    width: 2,
+    height: 4,
+    borderRightWidth: 1.2,
+    borderBottomWidth: 1.2,
+    borderColor: "#ffffff",
+    position: "absolute",
+    top: 0.8,
+    left: 2.4,
+    transform: "rotate(45deg)",
+  },
+  legendDash: {
+    width: 4,
+    height: 1.2,
+    backgroundColor: "#ffffff",
+    position: "absolute",
+    top: 2.8,
+    left: 1.2,
   },
   legendText: {
     fontFamily: "DMSans",
@@ -343,7 +402,9 @@ export default function RegulationSection({
           {/* Fine exposure */}
           {fineExposure && (
             <View style={secStyles.fineRow}>
-              <Text style={secStyles.fineIcon}>{"\u26A0"}</Text>
+              <View style={secStyles.fineIconBadge}>
+                <Text style={secStyles.fineIconText}>!</Text>
+              </View>
               <Text style={secStyles.fineText}>
                 {t.regulation.fineLabel}{fineExposure.calculation}
               </Text>
@@ -363,7 +424,7 @@ export default function RegulationSection({
                   : ""}
               </Text>
               {items.map((item) => {
-                const status = STATUS_SYMBOLS[item.status] ?? STATUS_SYMBOLS.unchecked;
+                const s = STATUS_STYLES[item.status] ?? STATUS_STYLES.unchecked;
                 const textStyle =
                   item.status === "compliant"
                     ? secStyles.checkTextCompliant
@@ -372,11 +433,15 @@ export default function RegulationSection({
                       : secStyles.checkText;
                 return (
                   <View key={item.id} style={secStyles.checkItem}>
-                    <Text
-                      style={[secStyles.checkBullet, { color: status.color }]}
+                    <View
+                      style={[
+                        secStyles.checkBox,
+                        { backgroundColor: s.bg, borderColor: s.border },
+                      ]}
                     >
-                      {status.char}
-                    </Text>
+                      {item.status === "compliant" && <View style={secStyles.checkBoxInnerTick} />}
+                      {item.status === "partial" && <View style={secStyles.checkBoxInnerDash} />}
+                    </View>
                     <Text style={textStyle}>{item.text}</Text>
                   </View>
                 );
@@ -386,21 +451,19 @@ export default function RegulationSection({
               {hasMaturityData && (
                 <View style={secStyles.maturityLegend}>
                   <View style={secStyles.legendItem}>
-                    <Text style={{ color: "#16a34a", fontSize: 9 }}>
-                      {"\u2611"}
-                    </Text>
+                    <View style={[secStyles.legendBox, { backgroundColor: "#16a34a", borderColor: "#16a34a" }]}>
+                      <View style={secStyles.legendTick} />
+                    </View>
                     <Text style={secStyles.legendText}>{t.regulation.legendCompliant}</Text>
                   </View>
                   <View style={secStyles.legendItem}>
-                    <Text style={{ color: "#f59e0b", fontSize: 9 }}>
-                      {"\u25D0"}
-                    </Text>
+                    <View style={[secStyles.legendBox, { backgroundColor: "#f59e0b", borderColor: "#f59e0b" }]}>
+                      <View style={secStyles.legendDash} />
+                    </View>
                     <Text style={secStyles.legendText}>{t.regulation.legendPartial}</Text>
                   </View>
                   <View style={secStyles.legendItem}>
-                    <Text style={{ color: COLORS.textLight, fontSize: 9 }}>
-                      {"\u2610"}
-                    </Text>
+                    <View style={[secStyles.legendBox, { backgroundColor: "#ffffff", borderColor: COLORS.textLight }]} />
                     <Text style={secStyles.legendText}>{t.regulation.legendOpen}</Text>
                   </View>
                 </View>
@@ -411,7 +474,7 @@ export default function RegulationSection({
           {/* Deadline */}
           {checklist?.deadline && (
             <View style={secStyles.factRow}>
-              <Text style={secStyles.factIcon}>{"\u23F0"}</Text>
+              <View style={secStyles.factDot} />
               <Text style={secStyles.factText}>
                 {t.regulation.deadlineLabel}{checklist.deadline}
               </Text>
@@ -444,7 +507,7 @@ export default function RegulationSection({
                   </Text>
                 )}
                 {countryRegData.nationalNotes && (
-                  <Text style={[secStyles.countryValue, { marginTop: 4, fontStyle: "italic" }]}>
+                  <Text style={[secStyles.countryValue, { marginTop: 4, color: COLORS.textSecondary }]}>
                     {countryRegData.nationalNotes}
                   </Text>
                 )}

@@ -51,7 +51,7 @@ const SIZE_LABELS: Record<string, string> = {
   micro: "Kleinstunternehmen (< 10 MA)",
   small: "Kleinunternehmen (10–49 MA)",
   medium: "Mittleres Unternehmen (50–249 MA)",
-  large: "Grossunternehmen (250+ MA)",
+  large: "Großunternehmen (250+ MA)",
 };
 
 const SECTOR_LABELS: Record<string, string> = {
@@ -63,16 +63,16 @@ const SECTOR_LABELS: Record<string, string> = {
   transport: "Transport/Logistik",
   retail: "Handel/E-Commerce",
   telecom: "Telekommunikation",
-  public: "Oeffentlicher Sektor",
+  public: "Öffentlicher Sektor",
   other: "Andere",
 };
 
 const DATA_LABELS: Record<string, string> = {
   personal: "personenbezogene Daten",
   sensitive: "besondere Datenkategorien (Gesundheit, Biometrie)",
-  children: "Daten von Minderjaehrigen",
+  children: "Daten von Minderjährigen",
   financial: "Finanzdaten",
-  b2b: "B2B-Geschaeftsdaten",
+  b2b: "B2B-Geschäftsdaten",
   iot: "IoT-/Sensordaten",
 };
 
@@ -226,9 +226,9 @@ export function evaluateRegulations(
     const hasSensitive = data.includes("sensitive") || data.includes("children");
     let reason = `Als ${sizeLabel} verarbeiten Sie ${formatDataTypes(relevantData)} mit EU-Bezug.`;
     if (hasSensitive) {
-      reason += ` Durch die Verarbeitung besonderer Datenkategorien gelten verschaerfte Pflichten (Art. 9 DSGVO), insbesondere Datenschutz-Folgenabschaetzungen.`;
+      reason += ` Durch die Verarbeitung besonderer Datenkategorien gelten verschärfte Pflichten (Art. 9 DSGVO), insbesondere Datenschutz-Folgenabschätzungen.`;
     } else {
-      reason += ` Dies umfasst Pflichten zu Verarbeitungsverzeichnis (Art. 30), Betroffenenrechte (Art. 15–22) und Datenschutz-Folgenabschaetzungen bei Hochrisiko-Verarbeitungen.`;
+      reason += ` Dies umfasst Pflichten zu Verarbeitungsverzeichnis (Art. 30), Betroffenenrechte (Art. 15–22) und Datenschutz-Folgenabschätzungen bei Hochrisiko-Verarbeitungen.`;
     }
     /* Personalize: US cloud + data export = Kapitel V kritisch */
     if (hasUSExport || hasUSCloud) {
@@ -264,12 +264,12 @@ export function evaluateRegulations(
   if ((isNis2Sector && isNis2Size) || isCriticalInfra) {
     let reason: string;
     if (isCriticalInfra) {
-      reason = `Als Betreiber kritischer Infrastruktur fallen Sie als "wesentliche Einrichtung" gemaess NIS2 Art. 3 unter die strengsten Pflichten.`;
+      reason = `Als Betreiber kritischer Infrastruktur fallen Sie als "wesentliche Einrichtung" gemäß NIS2 Art. 3 unter die strengsten Pflichten.`;
     } else {
       const category = size === "large" ? "wesentliche Einrichtung" : "wichtige Einrichtung";
       reason = `Als ${sizeLabel} im Sektor ${formatSectors(matchedNis2Sectors)} fallen Sie als "${category}" unter NIS2 Art. 3.`;
     }
-    reason += ` Dies umfasst Risikomanagement (Art. 21), Meldepflichten innerhalb 24h/72h (Art. 23) und persoenliche Verantwortung der Geschaeftsleitung (Art. 20).`;
+    reason += ` Dies umfasst Risikomanagement (Art. 21), Meldepflichten innerhalb 24h/72h (Art. 23) und persönliche Verantwortung der Geschäftsleitung (Art. 20).`;
     /* Personalize: certifications reduce effort, incidents increase priority */
     if (hasISO27001) {
       reason += ` Ihre ISO/IEC 27001-Zertifizierung deckt etwa 60–75% der NIS2 Art. 21-Maßnahmen ab — Lücken insbesondere bei Lieferantensicherheit (Art. 21 Abs. 2 lit. d) und GF-Schulung (Art. 20).`;
@@ -299,7 +299,7 @@ export function evaluateRegulations(
       href: "/nisg-2026",
       relevance: "niedrig",
       color: "#dc2626",
-      reason: `Ihr Sektor ${formatSectors(matchedNis2Sectors)} faellt unter NIS2, aber als ${sizeLabel} liegen Sie unter den Groessenschwellenwerten (50 MA / 10 Mio. EUR Umsatz). Beobachten Sie nationale Umsetzungsgesetze — einige Mitgliedstaaten koennen niedrigere Schwellenwerte festlegen.`,
+      reason: `Ihr Sektor ${formatSectors(matchedNis2Sectors)} fällt unter NIS2, aber als ${sizeLabel} liegen Sie unter den Größenschwellenwerten (50 MA / 10 Mio. EUR Umsatz). Beobachten Sie nationale Umsetzungsgesetze — einige Mitgliedstaaten können niedrigere Schwellenwerte festlegen.`,
     });
   }
 
@@ -308,7 +308,7 @@ export function evaluateRegulations(
     const hasSensitiveAI = data.includes("sensitive") || data.includes("children");
     let reason = `Als ${sizeLabel} setzen Sie KI-Systeme ein oder entwickeln solche. Die EU-KI-Verordnung verlangt eine Risikoklassifizierung aller KI-Systeme und stuft bestimmte Anwendungen als hochriskant ein.`;
     if (hasSensitiveAI) {
-      reason += ` Durch die Verarbeitung sensibler Daten sind erhoehte Transparenz- und Dokumentationspflichten wahrscheinlich.`;
+      reason += ` Durch die Verarbeitung sensibler Daten sind erhöhte Transparenz- und Dokumentationspflichten wahrscheinlich.`;
     }
     reason += ` Verbotene KI-Praktiken (Art. 5) gelten bereits seit Februar 2025.`;
     results.push({
@@ -327,9 +327,9 @@ export function evaluateRegulations(
     const isDirect = sectors.includes("finance");
     let reason: string;
     if (isDirect) {
-      reason = `Als ${sizeLabel} im Finanzsektor fallen Sie direkt unter DORA. Sie muessen ein IKT-Risikomanagement-Framework (Art. 6–16) aufbauen, Vorfaelle an die Aufsichtsbehoerde melden (Art. 17–23) und Threat-Led Penetration Tests durchfuehren.`;
+      reason = `Als ${sizeLabel} im Finanzsektor fallen Sie direkt unter DORA. Sie müssen ein IKT-Risikomanagement-Framework (Art. 6–16) aufbauen, Vorfälle an die Aufsichtsbehörde melden (Art. 17–23) und Threat-Led Penetration Tests durchführen.`;
     } else {
-      reason = `Als IT-Dienstleister mit Zugang zu Finanzdaten koennten Sie als "kritischer IKT-Drittanbieter" gemaess Art. 31 DORA gelten. Dies umfasst direkte Aufsicht durch europaeische Finanzbehoerden und strenge vertragliche Anforderungen.`;
+      reason = `Als IT-Dienstleister mit Zugang zu Finanzdaten könnten Sie als "kritischer IKT-Drittanbieter" gemäß Art. 31 DORA gelten. Dies umfasst direkte Aufsicht durch europäische Finanzbehörden und strenge vertragliche Anforderungen.`;
     }
     results.push({
       key: "dora",
@@ -384,9 +384,9 @@ export function evaluateRegulations(
         const trigger = isListed
           ? "Als börsennotiertes/PIE-Unternehmen fallen Sie unter erweiterte Offenlegungspflichten."
           : `Als ${sizeLabel} in der EU sind Sie potenziell direkt betroffen.`;
-        reason = `${trigger} Nach dem am 24. Februar 2026 final verabschiedeten EU-Omnibus-Paket gilt die CSRD-Berichtspflicht nur noch fuer Unternehmen mit > 1.000 Mitarbeitern und > 50 Mio. € Umsatz oder > 25 Mio. € Bilanzsumme. Pflichten: doppelte Wesentlichkeitsanalyse, ESRS-Berichterstattung, Scope-1/2/3-Emissionen, externe Pruefung.`;
+        reason = `${trigger} Nach dem am 24. Februar 2026 final verabschiedeten EU-Omnibus-Paket gilt die CSRD-Berichtspflicht nur noch für Unternehmen mit > 1.000 Mitarbeitern und > 50 Mio. € Umsatz oder > 25 Mio. € Bilanzsumme. Pflichten: doppelte Wesentlichkeitsanalyse, ESRS-Berichterstattung, Scope-1/2/3-Emissionen, externe Prüfung.`;
       } else {
-        reason = `Durch Ihre ESG-/Nachhaltigkeitsaktivitaeten als ${sizeLabel} kann die CSRD-Berichterstattung ueber die Lieferkette (VSME-Standard) relevant werden. Seit dem EU-Omnibus-Paket (Feb. 2026) sind boersennotierte KMU komplett vom Anwendungsbereich ausgenommen; Lieferkettenanfragen an geschuetzte KMU sind auf VSME-Informationen begrenzt.`;
+        reason = `Durch Ihre ESG-/Nachhaltigkeitsaktivitäten als ${sizeLabel} kann die CSRD-Berichterstattung über die Lieferkette (VSME-Standard) relevant werden. Seit dem EU-Omnibus-Paket (Feb. 2026) sind börsennotierte KMU komplett vom Anwendungsbereich ausgenommen; Lieferkettenanfragen an geschützte KMU sind auf VSME-Informationen begrenzt.`;
       }
       results.push({
         key: "csrd",
@@ -461,8 +461,8 @@ export function evaluateRegulations(
         relevance: isMicro && !hasBaFGProducts ? "mittel" : "hoch",
         color: "#2563eb",
         reason: isMicro && !hasBaFGProducts
-          ? `Das Barrierefreiheitsgesetz (EAA) gilt seit 28. Juni 2025. ${trigger} Als Kleinstunternehmen (< 10 MA / < 2 Mio. € Umsatz) sind Sie fuer Dienstleistungen ausgenommen — bei Produkten (Hardware/E-Books) gelten jedoch weiterhin Anforderungen an Barrierefreiheit (WCAG 2.1 AA / EN 301 549).`
-          : `Das Barrierefreiheitsgesetz (EAA) ist seit 28. Juni 2025 in Kraft. ${trigger} Als ${sizeLabel} muessen Sie eine Konformitaetserklaerung (EAA Annex II), technische Dokumentation und einen Barriere-Meldekanal bereithalten. Barrierefreiheit nach WCAG 2.1 AA / EN 301 549.`,
+          ? `Das Barrierefreiheitsgesetz (EAA) gilt seit 28. Juni 2025. ${trigger} Als Kleinstunternehmen (< 10 MA / < 2 Mio. € Umsatz) sind Sie für Dienstleistungen ausgenommen — bei Produkten (Hardware/E-Books) gelten jedoch weiterhin Anforderungen an Barrierefreiheit (WCAG 2.1 AA / EN 301 549).`
+          : `Das Barrierefreiheitsgesetz (EAA) ist seit 28. Juni 2025 in Kraft. ${trigger} Als ${sizeLabel} müssen Sie eine Konformitätserklärung (EAA Annex II), technische Dokumentation und einen Barriere-Meldekanal bereithalten. Barrierefreiheit nach WCAG 2.1 AA / EN 301 549.`,
       });
     }
   }
@@ -476,7 +476,7 @@ export function evaluateRegulations(
       href: "/hschg",
       relevance: size === "large" ? "hoch" : "mittel",
       color: "#a855f7",
-      reason: `Als ${sizeLabel} (ab 50 Mitarbeitern) muessen Sie gemaess HSchG (AT) / HinSchG (DE) einen internen Meldekanal fuer Hinweisgeber einrichten. Dies umfasst anonyme Meldemoeglichkeiten, Bearbeitung binnen 3 Monaten und Schutz vor Repressalien. Fuer 50–249 MA sind gemeinsame Meldestellen zulaessig. Strafen bis 40.000 € (AT) / 500.000 € (DE).`,
+      reason: `Als ${sizeLabel} (ab 50 Mitarbeitern) müssen Sie gemäß HSchG (AT) / HinSchG (DE) einen internen Meldekanal für Hinweisgeber einrichten. Dies umfasst anonyme Meldemöglichkeiten, Bearbeitung binnen 3 Monaten und Schutz vor Repressalien. Für 50–249 MA sind gemeinsame Meldestellen zulässig. Strafen bis 40.000 € (AT) / 500.000 € (DE).`,
     });
   }
 
@@ -489,7 +489,7 @@ export function evaluateRegulations(
       href: "/dsa",
       relevance: "hoch",
       color: "#6366f1",
-      reason: `Als Betreiber einer Online-Plattform bzw. eines Marktplatzes fallen Sie unter den DSA. Pflichten umfassen Transparenzberichte (Art. 15), ein Notice-and-Action-System fuer rechtswidrige Inhalte (Art. 16), Beschwerdeverfahren (Art. 20) und ein Verbot von Dark Patterns (Art. 25).`,
+      reason: `Als Betreiber einer Online-Plattform bzw. eines Marktplatzes fallen Sie unter den DSA. Pflichten umfassen Transparenzberichte (Art. 15), ein Notice-and-Action-System für rechtswidrige Inhalte (Art. 16), Beschwerdeverfahren (Art. 20) und ein Verbot von Dark Patterns (Art. 25).`,
     });
   }
 
@@ -502,7 +502,7 @@ export function evaluateRegulations(
       href: "/mica",
       relevance: "hoch",
       color: "#f59e0b",
-      reason: `Als ${sizeLabel} im Bereich Krypto-Assets/Blockchain muessen Sie gemaess MiCA eine Zulassung als CASP (Crypto-Asset Service Provider) beantragen, AML/KYC-Anforderungen erfuellen und die Travel Rule umsetzen. Whitepapers fuer Token-Emissionen sind genehmigungspflichtig.`,
+      reason: `Als ${sizeLabel} im Bereich Krypto-Assets/Blockchain müssen Sie gemäß MiCA eine Zulassung als CASP (Crypto-Asset Service Provider) beantragen, AML/KYC-Anforderungen erfüllen und die Travel Rule umsetzen. Whitepapers für Token-Emissionen sind genehmigungspflichtig.`,
     });
   }
 
@@ -511,9 +511,9 @@ export function evaluateRegulations(
     const isIoT = data.includes("iot");
     let reason: string;
     if (isIoT) {
-      reason = `Sie verarbeiten IoT-/Sensordaten und muessen gemaess Data Act (Art. 3–7) Nutzern Zugang zu den generierten Daten gewaehren. Dies umfasst standardisierte Datenformate, faire Vertragsbedingungen und ein Recht auf Datenweitergabe an Dritte.`;
+      reason = `Sie verarbeiten IoT-/Sensordaten und müssen gemäß Data Act (Art. 3–7) Nutzern Zugang zu den generierten Daten gewähren. Dies umfasst standardisierte Datenformate, faire Vertragsbedingungen und ein Recht auf Datenweitergabe an Dritte.`;
     } else {
-      reason = `Als Produkthersteller im Sektor ${formatSectors(sectors)} koennten Datenzugangspflichten gemaess dem Data Act auf Sie zukommen, insbesondere wenn Ihre Produkte Nutzungsdaten generieren.`;
+      reason = `Als Produkthersteller im Sektor ${formatSectors(sectors)} könnten Datenzugangspflichten gemäß dem Data Act auf Sie zukommen, insbesondere wenn Ihre Produkte Nutzungsdaten generieren.`;
     }
     results.push({
       key: "data-act",
@@ -537,7 +537,7 @@ export function evaluateRegulations(
       relevance: isDirectlyAffected ? "mittel" : "niedrig",
       color: "#8b5cf6",
       reason: isDirectlyAffected
-        ? `Als E-Commerce-Unternehmen gelten fuer Sie ePrivacy-Pflichten zu Cookies, Tracking und elektronischer Direktwerbung. Ein rechtskonformes Consent-Management (Cookie-Banner mit Opt-In) ist zwingend erforderlich.`
+        ? `Als E-Commerce-Unternehmen gelten für Sie ePrivacy-Pflichten zu Cookies, Tracking und elektronischer Direktwerbung. Ein rechtskonformes Consent-Management (Cookie-Banner mit Opt-In) ist zwingend erforderlich.`
         : `Die ePrivacy-Regelungen zu Cookies und Tracking betreffen auch Ihre Website. Ein DSGVO-konformes Cookie-Banner mit echtem Opt-In ist Pflicht.`,
     });
   }
@@ -553,8 +553,8 @@ export function evaluateRegulations(
       relevance: isEid ? "hoch" : "mittel",
       color: "#059669",
       reason: isEid
-        ? `Als Anbieter elektronischer Identifizierung oder Vertrauensdienste muessen Sie die eIDAS-2.0-Anforderungen erfuellen, einschliesslich der EU Digital Identity Wallet-Kompatibilitaet und qualifizierter elektronischer Signaturen.`
-        : `Im oeffentlichen Sektor wird die EU Digital Identity Wallet ab 2026 verpflichtend akzeptiert. Bereiten Sie Ihre Systeme auf eIDAS-2.0-konforme Identifizierung vor.`,
+        ? `Als Anbieter elektronischer Identifizierung oder Vertrauensdienste müssen Sie die eIDAS-2.0-Anforderungen erfüllen, einschließlich der EU Digital Identity Wallet-Kompatibilität und qualifizierter elektronischer Signaturen.`
+        : `Im öffentlichen Sektor wird die EU Digital Identity Wallet ab 2026 verpflichtend akzeptiert. Bereiten Sie Ihre Systeme auf eIDAS-2.0-konforme Identifizierung vor.`,
     });
   }
 
@@ -585,7 +585,7 @@ export function evaluateRegulations(
       href: "/ehds",
       relevance: "mittel",
       color: "#0ea5e9",
-      reason: `Als ${sizeLabel} im Gesundheitswesen wird der Europaeische Gesundheitsdatenraum (EHDS) relevant. Primaere Nutzung (Patientenportabilitaet) und sekundaere Nutzung (Forschungszugang) erfordern interoperable Systeme und FHIR-kompatible Datenformate.`,
+      reason: `Als ${sizeLabel} im Gesundheitswesen wird der Europäische Gesundheitsdatenraum (EHDS) relevant. Primäre Nutzung (Patientenportabilität) und sekundäre Nutzung (Forschungszugang) erfordern interoperable Systeme und FHIR-kompatible Datenformate.`,
     });
   }
 

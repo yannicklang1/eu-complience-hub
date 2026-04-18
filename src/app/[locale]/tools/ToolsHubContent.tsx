@@ -225,7 +225,6 @@ export default function ToolsHubContent() {
                         : "bg-white/[0.03] text-slate-400 border border-white/5 hover:bg-white/[0.06] hover:text-slate-300"
                     }`}
                   >
-                    <span>{cat.icon}</span>
                     {cat.label}
                   </button>
                 );
@@ -255,10 +254,14 @@ export default function ToolsHubContent() {
                       {/* Header */}
                       <div className="flex items-start gap-4 mb-4">
                         <div
-                          className="w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+                          className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                           style={{ background: `${tool.accent}15` }}
+                          aria-hidden="true"
                         >
-                          {tool.icon}
+                          <span
+                            className="w-3 h-3 rounded-full"
+                            style={{ background: tool.accent }}
+                          />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
@@ -338,17 +341,17 @@ export default function ToolsHubContent() {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {[
-                { title: "Compliance-Verzeichnis", description: "Auditoren & Berater finden", href: `/${locale}/compliance-verzeichnis`, icon: "📇" },
-                { title: "Fristen-Radar", description: "Alle Deadlines im Blick", href: `/${locale}/fristen-radar`, icon: "📅" },
-                { title: "Compliance-Timeline", description: "Fristen 2025–2027", href: `/${locale}/timeline`, icon: "🗓️" },
-                { title: "Compliance-Glossar", description: "Fachbegriffe erklärt", href: `/${locale}/glossar`, icon: "📚" },
+                { title: "Compliance-Verzeichnis", description: "Auditoren & Berater finden", href: `/${locale}/compliance-verzeichnis` },
+                { title: "Fristen-Radar", description: "Alle Deadlines im Blick", href: `/${locale}/fristen-radar` },
+                { title: "Compliance-Timeline", description: "Fristen 2025–2027", href: `/${locale}/timeline` },
+                { title: "Compliance-Glossar", description: "Fachbegriffe erklärt", href: `/${locale}/glossar` },
               ].map((res) => (
                 <Link
                   key={res.href}
                   href={res.href}
                   className="group flex items-center gap-3 px-4 py-3.5 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10 transition-all"
                 >
-                  <span className="text-lg">{res.icon}</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 flex-shrink-0" aria-hidden="true" />
                   <div>
                     <p className="text-sm font-semibold text-slate-300 group-hover:text-yellow-400 transition-colors">
                       {res.title}

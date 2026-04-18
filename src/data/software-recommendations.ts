@@ -20,7 +20,7 @@ export interface PDFToolRecommendation {
 export const SOFTWARE_RECOMMENDATIONS: Record<string, PDFToolRecommendation[]> = {
   nis2: [
     { name: "DataGuard", tagline: "ISMS + DSB aus Deutschland", priceRange: "ab 5.000 EUR/Jahr", targetSize: "KMU & Mittelstand", dachRelevance: 5 },
-    { name: "Secjur", tagline: "KI-gestuetztes ISMS aus Deutschland", priceRange: "ab 4.000 EUR/Jahr", targetSize: "KMU & Startups", dachRelevance: 5 },
+    { name: "Secjur", tagline: "KI-gestütztes ISMS aus Deutschland", priceRange: "ab 4.000 EUR/Jahr", targetSize: "KMU & Startups", dachRelevance: 5 },
     { name: "Vanta", tagline: "Automatisierte Compliance-Plattform", priceRange: "ab 10.000 EUR/Jahr", targetSize: "Startups & Mittelstand", dachRelevance: 3 },
   ],
   dora: [
@@ -40,18 +40,18 @@ export const SOFTWARE_RECOMMENDATIONS: Record<string, PDFToolRecommendation[]> =
   ],
   dsgvo: [
     { name: "DataGuard", tagline: "DSMS + externer DSB aus Deutschland", priceRange: "ab 5.000 EUR/Jahr", targetSize: "KMU & Mittelstand", dachRelevance: 5 },
-    { name: "heyData", tagline: "DSGVO-Komplettloesung fuer KMU", priceRange: "ab 2.400 EUR/Jahr", targetSize: "KMU & Startups", dachRelevance: 5 },
-    { name: "Secjur", tagline: "KI-gestuetzter Digital Compliance Office", priceRange: "ab 4.000 EUR/Jahr", targetSize: "KMU & Startups", dachRelevance: 5 },
+    { name: "heyData", tagline: "DSGVO-Komplettlösung für KMU", priceRange: "ab 2.400 EUR/Jahr", targetSize: "KMU & Startups", dachRelevance: 5 },
+    { name: "Secjur", tagline: "KI-gestützter Digital Compliance Office", priceRange: "ab 4.000 EUR/Jahr", targetSize: "KMU & Startups", dachRelevance: 5 },
   ],
   csrd: [
     { name: "Plan A", tagline: "Dekarbonisierung & ESG-Reporting aus Berlin", priceRange: "ab 5.000 EUR/Jahr", targetSize: "KMU & Mittelstand", dachRelevance: 5 },
     { name: "Sweep", tagline: "Carbon & ESG-Management", priceRange: "ab 8.000 EUR/Jahr", targetSize: "Mittelstand & Enterprise", dachRelevance: 5 },
-    { name: "Tanso", tagline: "Carbon Accounting fuer Industrie (DE)", priceRange: "Auf Anfrage", targetSize: "Mittelstand (Industrie)", dachRelevance: 5 },
+    { name: "Tanso", tagline: "Carbon Accounting für Industrie (DE)", priceRange: "Auf Anfrage", targetSize: "Mittelstand (Industrie)", dachRelevance: 5 },
   ],
   dsa: [
     { name: "DataGuard", tagline: "DSGVO + DSA Compliance Management", priceRange: "ab 5.000 EUR/Jahr", targetSize: "KMU & Mittelstand", dachRelevance: 5 },
     { name: "OneTrust", tagline: "Compliance & Transparency Reporting", priceRange: "ab 20.000 EUR/Jahr", targetSize: "Enterprise", dachRelevance: 4 },
-    { name: "Zendesk", tagline: "Beschwerdemanagement & Ticketing", priceRange: "ab 55 EUR/Agent/Monat", targetSize: "Alle Groessen", dachRelevance: 4 },
+    { name: "Zendesk", tagline: "Beschwerdemanagement & Ticketing", priceRange: "ab 55 EUR/Agent/Monat", targetSize: "Alle Größen", dachRelevance: 4 },
   ],
   mica: [
     { name: "Chainalysis", tagline: "Blockchain-Analyse & Travel Rule", priceRange: "ab 30.000 EUR/Jahr", targetSize: "Enterprise & Mittelstand", dachRelevance: 4 },
@@ -64,17 +64,17 @@ export const SOFTWARE_RECOMMENDATIONS: Record<string, PDFToolRecommendation[]> =
     { name: "Snowflake", tagline: "Cloud Data Platform & Data Sharing", priceRange: "ab 2 EUR/Credit", targetSize: "Mittelstand & Enterprise", dachRelevance: 4 },
   ],
   eprivacy: [
-    { name: "Usercentrics", tagline: "CMP-Marktfuehrer aus Muenchen", priceRange: "ab 60 EUR/Monat", targetSize: "KMU & Enterprise", dachRelevance: 5 },
+    { name: "Usercentrics", tagline: "CMP-Marktführer aus München", priceRange: "ab 60 EUR/Monat", targetSize: "KMU & Enterprise", dachRelevance: 5 },
     { name: "Cookiebot", tagline: "Automatischer Cookie-Scanner & CMP", priceRange: "ab 12 EUR/Monat", targetSize: "KMU & Startups", dachRelevance: 5 },
     { name: "JENTIS", tagline: "Server-Side-Tracking aus Oesterreich", priceRange: "ab 500 EUR/Monat", targetSize: "Mittelstand & Enterprise", dachRelevance: 5 },
   ],
   eidas: [
-    { name: "IDnow", tagline: "Identity Verification aus Muenchen", priceRange: "ab 2 EUR/Verifikation", targetSize: "KMU & Enterprise", dachRelevance: 5 },
+    { name: "IDnow", tagline: "Identity Verification aus München", priceRange: "ab 2 EUR/Verifikation", targetSize: "KMU & Enterprise", dachRelevance: 5 },
     { name: "Yousign", tagline: "EU-konforme eSignature (EIDAS)", priceRange: "ab 9 EUR/Monat", targetSize: "KMU & Startups", dachRelevance: 5 },
-    { name: "Veriff", tagline: "KI-gestuetzte Identitaetsverifikation", priceRange: "ab 1.50 EUR/Verifikation", targetSize: "Startups & Mittelstand", dachRelevance: 4 },
+    { name: "Veriff", tagline: "KI-gestützte Identitätsverifikation", priceRange: "ab 1.50 EUR/Verifikation", targetSize: "Startups & Mittelstand", dachRelevance: 4 },
   ],
   produkthaftung: [
-    { name: "exali", tagline: "Digitale Berufshaftpflicht fuer Tech (DE)", priceRange: "ab 133 EUR/Jahr", targetSize: "Freelancer & KMU", dachRelevance: 5 },
+    { name: "exali", tagline: "Digitale Berufshaftpflicht für Tech (DE)", priceRange: "ab 133 EUR/Jahr", targetSize: "Freelancer & KMU", dachRelevance: 5 },
     { name: "Hiscox", tagline: "Cyber- & Produkthaftpflicht", priceRange: "ab 1.200 EUR/Jahr", targetSize: "KMU & Mittelstand", dachRelevance: 5 },
     { name: "Vanta", tagline: "Continuous Compliance & Audit-Trail", priceRange: "ab 10.000 EUR/Jahr", targetSize: "Startups & Mittelstand", dachRelevance: 4 },
   ],
@@ -84,12 +84,12 @@ export const SOFTWARE_RECOMMENDATIONS: Record<string, PDFToolRecommendation[]> =
     { name: "InterSystems", tagline: "FHIR-native Gesundheitsdaten-Plattform", priceRange: "Auf Anfrage", targetSize: "Krankenhaeuser & Enterprise", dachRelevance: 4 },
   ],
   bafg: [
-    { name: "Eye-Able", tagline: "Barrierefreiheit aus Nuernberg", priceRange: "ab 1.200 EUR/Jahr", targetSize: "KMU & Mittelstand", dachRelevance: 5 },
+    { name: "Eye-Able", tagline: "Barrierefreiheit aus Nürnberg", priceRange: "ab 1.200 EUR/Jahr", targetSize: "KMU & Mittelstand", dachRelevance: 5 },
     { name: "Siteimprove", tagline: "Accessibility & Content Quality", priceRange: "ab 5.000 EUR/Jahr", targetSize: "Mittelstand & Enterprise", dachRelevance: 4 },
-    { name: "Deque (axe)", tagline: "Automatisierte WCAG-Tests fuer Entwickler", priceRange: "Kostenlos / Pro auf Anfrage", targetSize: "Entwicklerteams", dachRelevance: 3 },
+    { name: "Deque (axe)", tagline: "Automatisierte WCAG-Tests für Entwickler", priceRange: "Kostenlos / Pro auf Anfrage", targetSize: "Entwicklerteams", dachRelevance: 3 },
   ],
   hschg: [
-    { name: "EQS Integrity Line", tagline: "Marktfuehrer Hinweisgebersystem (DE)", priceRange: "ab 3.000 EUR/Jahr", targetSize: "Mittelstand & Enterprise", dachRelevance: 5 },
+    { name: "EQS Integrity Line", tagline: "Marktführer Hinweisgebersystem (DE)", priceRange: "ab 3.000 EUR/Jahr", targetSize: "Mittelstand & Enterprise", dachRelevance: 5 },
     { name: "Hintbox", tagline: "DSGVO-konformes Hinweisgebersystem (DE)", priceRange: "ab 1.500 EUR/Jahr", targetSize: "KMU & Mittelstand", dachRelevance: 5 },
     { name: "Whistly", tagline: "Oesterreichisches Hinweisgebersystem", priceRange: "ab 1.200 EUR/Jahr", targetSize: "KMU & Startups", dachRelevance: 5 },
   ],

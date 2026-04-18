@@ -27,16 +27,19 @@ export const COLORS = {
 Font.register({
   family: "DMSans",
   fonts: [
-    { src: "https://fonts.gstatic.com/s/dmsans/v15/rP2Hp2ywxg089UriCZOIHTWEBlw.ttf", fontWeight: 400 },
-    { src: "https://fonts.gstatic.com/s/dmsans/v15/rP2Cp2ywxg089UriASitCBimfzom.ttf", fontWeight: 700 },
+    { src: "https://fonts.gstatic.com/s/dmsans/v17/rP2tp2ywxg089UriI5-g4vlH9VoD8CmcqZG40F9JadbnoEwAopxhTg.ttf", fontWeight: 400 },
+    { src: "https://fonts.gstatic.com/s/dmsans/v17/rP2tp2ywxg089UriI5-g4vlH9VoD8CmcqZG40F9JadbnoEwARZthTg.ttf", fontWeight: 700 },
   ],
 });
+
+/* Disable hyphenation — leave line breaks to the browser/renderer. */
+Font.registerHyphenationCallback((word) => [word]);
 
 Font.register({
   family: "Syne",
   fonts: [
-    { src: "https://fonts.gstatic.com/s/syne/v22/8vIS7w4qzmVxp1eXCjOSyFZ8.ttf", fontWeight: 700 },
-    { src: "https://fonts.gstatic.com/s/syne/v22/8vIS7w4qzmVxp1ejDTOSyFZ8.ttf", fontWeight: 800 },
+    { src: "https://fonts.gstatic.com/s/syne/v24/8vIS7w4qzmVxsWxjBZRjr0FKM_3fvj6k.ttf", fontWeight: 700 },
+    { src: "https://fonts.gstatic.com/s/syne/v24/8vIS7w4qzmVxsWxjBZRjr0FKM_24vj6k.ttf", fontWeight: 800 },
   ],
 });
 

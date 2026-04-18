@@ -274,7 +274,13 @@ export default function ChecklistTool() {
                     className="w-full flex items-center gap-4 p-5 sm:p-6 text-left group cursor-pointer"
                     aria-expanded={isExpanded}
                   >
-                    <span className="text-2xl flex-shrink-0" aria-hidden="true">{reg.icon}</span>
+                    <span
+                      className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center font-[Syne] font-extrabold text-xs text-white"
+                      style={{ background: reg.accent }}
+                      aria-hidden="true"
+                    >
+                      {reg.shortTitle.slice(0, 4)}
+                    </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h2 className="font-[Syne] font-bold text-lg sm:text-xl text-white">
@@ -577,7 +583,7 @@ export default function ChecklistTool() {
                           }}
                         >
                           <div className="flex items-center gap-2 mb-3">
-                            <span className="text-lg">{reg.icon}</span>
+                            <span className="w-2 h-2 rounded-full" style={{ background: reg.accent }} aria-hidden="true" />
                             <span className="font-bold text-sm text-white">{reg.shortTitle}</span>
                             <span className="ml-auto text-xs font-mono" style={{ color: reg.accent }}>
                               {stats.percent}%
