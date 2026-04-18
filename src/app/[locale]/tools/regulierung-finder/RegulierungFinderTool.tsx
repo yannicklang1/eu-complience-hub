@@ -11,6 +11,98 @@ import { useCountry } from "@/i18n/country-context";
 import { COUNTRY_META } from "@/i18n/country/index";
 import { useTranslations } from "@/i18n/use-translations";
 import type { RegulationKey } from "@/i18n/country/types";
+import { DEADLINES, daysUntil } from "@/data/deadlines";
+
+/**
+ * Map regulation keys to urgency buckets based on the next active deadline.
+ * Logic:
+ *   - urgent: a deadline within the next 180 days
+ *   - thisYear: a deadline within 180–540 days
+ *   - longTerm: further than 540 days, or only past deadlines
+ *   - inForce: already fully in force (all deadlines past and no upcoming)
+ */
+type UrgencyBucket = "urgent" | "thisYear" | "longTerm" | "inForce";
+
+/** Map regulation.key to the deadline.reg acronym used in deadlines.ts */
+const REG_KEY_TO_DEADLINE_REG: Record<string, string> = {
+  dsgvo: "DSGVO",
+  nis2: "NISG",
+  "ai-act": "AI Act",
+  dora: "DORA",
+  cra: "CRA",
+  csrd: "CSRD",
+  dsa: "DSA",
+  mica: "MiCA",
+  "data-act": "Data Act",
+  eprivacy: "ePrivacy",
+  eidas: "eIDAS",
+  produkthaftung: "PLD",
+  ehds: "EHDS",
+  "green-claims": "Green Claims",
+  dpp: "DPP",
+  bafg: "BaFG",
+  hschg: "HSchG",
+};
+
+function getUrgency(regKey: string): {
+  bucket: UrgencyBucket;
+  nextDeadline: { label: string; daysLeft: number; title: string } | null;
+} {
+  const regAcronym = REG_KEY_TO_DEADLINE_REG[regKey];
+  if (!regAcronym) return { bucket: "longTerm", nextDeadline: null };
+
+  const matching = DEADLINES.filter((d) => d.reg === regAcronym).map((d) => ({
+    ...d,
+    daysLeft: daysUntil(d.iso),
+  }));
+
+  const upcoming = matching.filter((d) => d.daysLeft >= 0).sort((a, b) => a.daysLeft - b.daysLeft);
+  const past = matching.filter((d) => d.daysLeft < 0);
+
+  if (upcoming.length === 0) {
+    // All deadlines are past → regulation already in force
+    if (past.length > 0) return { bucket: "inForce", nextDeadline: null };
+    return { bucket: "longTerm", nextDeadline: null };
+  }
+
+  const next = upcoming[0];
+  const nextDeadline = { label: next.label, daysLeft: next.daysLeft, title: next.title };
+
+  if (next.daysLeft <= 180) return { bucket: "urgent", nextDeadline };
+  if (next.daysLeft <= 540) return { bucket: "thisYear", nextDeadline };
+  return { bucket: "longTerm", nextDeadline };
+}
+
+const URGENCY_META: Record<UrgencyBucket, { label: string; desc: string; color: string; bg: string; border: string }> = {
+  urgent: {
+    label: "Jetzt dran (nächste 6 Monate)",
+    desc: "Kritische Frist steht an — sofort mit der Umsetzung beginnen.",
+    color: "#dc2626",
+    bg: "rgba(220, 38, 38, 0.08)",
+    border: "rgba(220, 38, 38, 0.25)",
+  },
+  thisYear: {
+    label: "Dieses Jahr angehen",
+    desc: "Frist in 6–18 Monaten. Projektplan aufsetzen, Budget sichern.",
+    color: "#eab308",
+    bg: "rgba(234, 179, 8, 0.08)",
+    border: "rgba(234, 179, 8, 0.25)",
+  },
+  longTerm: {
+    label: "Mittelfristig beobachten",
+    desc: "Frist weiter entfernt — regelmäßiges Monitoring genügt.",
+    color: "#3b82f6",
+    bg: "rgba(59, 130, 246, 0.08)",
+    border: "rgba(59, 130, 246, 0.2)",
+  },
+  inForce: {
+    label: "Bereits in Kraft — laufende Pflichten",
+    desc: "Die Regulierung gilt bereits. Laufende Compliance sicherstellen.",
+    color: "#10b981",
+    bg: "rgba(16, 185, 129, 0.08)",
+    border: "rgba(16, 185, 129, 0.2)",
+  },
+};
 
 /* ══════════════════════════════════════════════════════════════
    Regulierung-Finder — Interactive Quiz
@@ -595,84 +687,131 @@ export default function RegulierungFinderTool() {
                     </p>
                   </div>
 
-                  {/* Results Cards */}
-                  <div className="space-y-3">
-                    {results.map((reg, i) => {
-                      const regData = countryData?.regulations?.[reg.countryKey];
-                      const status = regData?.implementationStatus;
-                      const statusLabel = status === "implemented" ? "In Kraft" : status === "pending" ? "In Umsetzung" : status === "overdue" ? "Überfällig" : null;
-                      const statusColor = status === "implemented" ? "bg-emerald-500/15 text-emerald-400" : status === "pending" ? "bg-amber-500/15 text-amber-400" : status === "overdue" ? "bg-red-500/15 text-red-400" : "";
+                  {/* Results grouped by urgency bucket */}
+                  {(() => {
+                    const enriched = results.map((reg) => ({ reg, urgency: getUrgency(reg.key) }));
+                    const rawBuckets: { key: UrgencyBucket; items: typeof enriched }[] = [
+                      { key: "urgent" as const, items: enriched.filter((e) => e.urgency.bucket === "urgent") },
+                      { key: "thisYear" as const, items: enriched.filter((e) => e.urgency.bucket === "thisYear") },
+                      { key: "inForce" as const, items: enriched.filter((e) => e.urgency.bucket === "inForce") },
+                      { key: "longTerm" as const, items: enriched.filter((e) => e.urgency.bucket === "longTerm") },
+                    ];
+                    const buckets = rawBuckets.filter((b) => b.items.length > 0);
 
-                      return (
-                        <motion.div
-                          key={reg.key}
-                          initial={{ opacity: 0, y: 16 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.08, duration: 0.3 }}
-                        >
-                          <Link
-                            href={`/${locale}${reg.href}`}
-                            className="block rounded-2xl border border-white/5 bg-slate-900/40 p-5 sm:p-6 hover:bg-slate-900/60 hover:border-white/10 transition-all duration-200 group"
-                          >
-                            <div className="flex items-start gap-4">
+                    let renderIndex = 0;
+                    return (
+                      <div className="space-y-6">
+                        {buckets.map((bucket) => {
+                          const meta = URGENCY_META[bucket.key];
+                          return (
+                            <div key={bucket.key}>
                               <div
-                                className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                                style={{ background: `${reg.color}20` }}
+                                className="mb-3 rounded-xl border px-4 py-3"
+                                style={{ borderColor: meta.border, background: meta.bg }}
                               >
-                                <div
-                                  className="w-3 h-3 rounded-full"
-                                  style={{ background: reg.color }}
-                                />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                  <h3 className="font-[Syne] font-bold text-white text-base group-hover:text-yellow-400 transition-colors">
-                                    {reg.name}
-                                  </h3>
-                                  <span
-                                    className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide ${
-                                      reg.relevance === "hoch"
-                                        ? "bg-red-500/15 text-red-400"
-                                        : reg.relevance === "mittel"
-                                        ? "bg-yellow-500/15 text-yellow-400"
-                                        : "bg-slate-500/15 text-slate-400"
-                                    }`}
-                                  >
-                                    {reg.relevance}
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: meta.color }} />
+                                  <span className="text-[13px] font-[Syne] font-bold" style={{ color: meta.color }}>
+                                    {meta.label}
                                   </span>
-                                  {statusLabel && countryMeta && (
-                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${statusColor}`}>
-                                      {countryMeta.flag} {statusLabel}
-                                    </span>
-                                  )}
+                                  <span className="text-[11px] text-slate-400 ml-1">
+                                    ({bucket.items.length} {bucket.items.length === 1 ? "Regulierung" : "Regulierungen"})
+                                  </span>
                                 </div>
-                                <p className="text-xs text-slate-500 mb-2">
-                                  {regData?.nationalLawName ? `${reg.subtitle} · ${regData.nationalLawName}` : reg.subtitle}
-                                </p>
-                                <p className="text-sm text-slate-300 leading-relaxed">
-                                  {reg.reason}
-                                </p>
-                                {regData?.authority && countryMeta && (
-                                  <p className="mt-1.5 text-[11px] text-slate-500">
-                                    {countryMeta.flag} Aufsicht in {countryMeta.nameDE}: {regData.authority}
-                                  </p>
-                                )}
+                                <p className="text-[11px] text-slate-400 mt-1">{meta.desc}</p>
                               </div>
-                              <svg
-                                className="w-5 h-5 text-slate-600 group-hover:text-yellow-400 transition-colors flex-shrink-0 mt-1"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={2}
-                              >
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                              </svg>
+
+                              <div className="space-y-3">
+                                {bucket.items.map(({ reg, urgency }) => {
+                                  const i = renderIndex++;
+                                  const regData = countryData?.regulations?.[reg.countryKey];
+                                  const status = regData?.implementationStatus;
+                                  const statusLabel = status === "implemented" ? "In Kraft" : status === "pending" ? "In Umsetzung" : status === "overdue" ? "Überfällig" : null;
+                                  const statusColor = status === "implemented" ? "bg-emerald-500/15 text-emerald-400" : status === "pending" ? "bg-amber-500/15 text-amber-400" : status === "overdue" ? "bg-red-500/15 text-red-400" : "";
+
+                                  return (
+                                    <motion.div
+                                      key={reg.key}
+                                      initial={{ opacity: 0, y: 16 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: i * 0.05, duration: 0.3 }}
+                                    >
+                                      <Link
+                                        href={`/${locale}${reg.href}`}
+                                        className="block rounded-2xl border border-white/5 bg-slate-900/40 p-5 sm:p-6 hover:bg-slate-900/60 hover:border-white/10 transition-all duration-200 group"
+                                      >
+                                        <div className="flex items-start gap-4">
+                                          <div
+                                            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                                            style={{ background: `${reg.color}20` }}
+                                          >
+                                            <div
+                                              className="w-3 h-3 rounded-full"
+                                              style={{ background: reg.color }}
+                                            />
+                                          </div>
+                                          <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                              <h3 className="font-[Syne] font-bold text-white text-base group-hover:text-yellow-400 transition-colors">
+                                                {reg.name}
+                                              </h3>
+                                              <span
+                                                className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide ${
+                                                  reg.relevance === "hoch"
+                                                    ? "bg-red-500/15 text-red-400"
+                                                    : reg.relevance === "mittel"
+                                                    ? "bg-yellow-500/15 text-yellow-400"
+                                                    : "bg-slate-500/15 text-slate-400"
+                                                }`}
+                                              >
+                                                {reg.relevance}
+                                              </span>
+                                              {statusLabel && countryMeta && (
+                                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${statusColor}`}>
+                                                  {countryMeta.flag} {statusLabel}
+                                                </span>
+                                              )}
+                                              {urgency.nextDeadline && (
+                                                <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-white/[0.06] text-slate-300">
+                                                  {urgency.nextDeadline.daysLeft > 0
+                                                    ? `${urgency.nextDeadline.daysLeft} Tage: ${urgency.nextDeadline.title}`
+                                                    : urgency.nextDeadline.title}
+                                                </span>
+                                              )}
+                                            </div>
+                                            <p className="text-xs text-slate-500 mb-2">
+                                              {regData?.nationalLawName ? `${reg.subtitle} · ${regData.nationalLawName}` : reg.subtitle}
+                                            </p>
+                                            <p className="text-sm text-slate-300 leading-relaxed">
+                                              {reg.reason}
+                                            </p>
+                                            {regData?.authority && countryMeta && (
+                                              <p className="mt-1.5 text-[11px] text-slate-500">
+                                                {countryMeta.flag} Aufsicht in {countryMeta.nameDE}: {regData.authority}
+                                              </p>
+                                            )}
+                                          </div>
+                                          <svg
+                                            className="w-5 h-5 text-slate-600 group-hover:text-yellow-400 transition-colors flex-shrink-0 mt-1"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                            strokeWidth={2}
+                                          >
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                          </svg>
+                                        </div>
+                                      </Link>
+                                    </motion.div>
+                                  );
+                                })}
+                              </div>
                             </div>
-                          </Link>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
 
                   {/* Actions */}
                   <div className="mt-8 flex flex-col sm:flex-row gap-3">

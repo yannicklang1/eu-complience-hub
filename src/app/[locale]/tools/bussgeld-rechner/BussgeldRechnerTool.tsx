@@ -106,6 +106,44 @@ function calculateFine(rule: FineRule, revenue: number): number {
   return rule.higherOfTwo ? Math.max(rule.fixedMax, percentFine) : rule.fixedMax;
 }
 
+/**
+ * Severity-factor for realistic fine ranges.
+ * Maximums are rarely imposed — real cases cluster at ~5–25% of maximum
+ * based on DSB/EDPB decisions 2020–2025.
+ */
+const SEVERITY_FACTORS: Record<string, { min: number; typical: number; label: string; desc: string }> = {
+  minor: { min: 0.005, typical: 0.02, label: "Geringfügig", desc: "Einzelfall, kooperativ, keine Vorstrafen, behoben" },
+  moderate: { min: 0.03, typical: 0.08, label: "Mittel", desc: "Strukturelles Versagen, fahrlässig, begrenzte Betroffene" },
+  serious: { min: 0.10, typical: 0.25, label: "Schwer", desc: "Vorsätzlich oder grob fahrlässig, viele Betroffene, Wiederholungstat" },
+  severe: { min: 0.30, typical: 0.55, label: "Schwerwiegend", desc: "Systematisch, Datendiebstahl, massive Schäden, keine Kooperation" },
+};
+
+/**
+ * Real-world precedent cases (2020–2025) sorted by regulation.
+ * Source: EDPB register, DSK enforcement decisions, national DPA reports.
+ */
+const PRECEDENT_CASES: Record<string, { company: string; year: number; fine: number; summary: string }[]> = {
+  dsgvo: [
+    { company: "Meta Platforms Ireland", year: 2023, fine: 1_200_000_000, summary: "EU-US-Datentransfers ohne angemessene Rechtsgrundlage" },
+    { company: "Amazon Europe", year: 2021, fine: 746_000_000, summary: "Cookie-Tracking ohne gültige Einwilligung" },
+    { company: "TikTok", year: 2023, fine: 345_000_000, summary: "Kinderdaten-Verarbeitung ohne DSFA" },
+    { company: "H&M Deutschland", year: 2020, fine: 35_300_000, summary: "Mitarbeiter-Profiling im Service-Center" },
+    { company: "Österreichische Post", year: 2019, fine: 18_000_000, summary: "Verkauf von politischen Affinitäts-Scores" },
+  ],
+  aiact: [
+    { company: "(keine finalen Fälle)", year: 2026, fine: 0, summary: "Erste Durchsetzungen erwartet ab H2 2026 (verbotene Praktiken)" },
+  ],
+  cra: [
+    { company: "(keine Fälle)", year: 2027, fine: 0, summary: "Volle Anwendung ab 11. Dezember 2027" },
+  ],
+  nis2: [
+    { company: "(nationale Fälle in Vorbereitung)", year: 2026, fine: 0, summary: "DE/AT: Erste Bußgelder nach NIS2UmsuCG/NISG 2026 erwartet" },
+  ],
+  dora: [
+    { company: "(Aufsichtspraxis laufend)", year: 2025, fine: 0, summary: "BaFin/FMA: Laufende Prüfungen, erste Sanktionen zeichnen sich ab" },
+  ],
+};
+
 function formatEuro(amount: number): string {
   if (amount >= 1_000_000_000) return `${(amount / 1_000_000_000).toFixed(1)} Mrd. EUR`;
   if (amount >= 1_000_000) return `${(amount / 1_000_000).toFixed(1)} Mio. EUR`;
@@ -159,11 +197,14 @@ const REVENUE_PRESETS = [
   { label: "1 Mrd.", value: 1_000_000_000 },
 ];
 
+type SeverityKey = "minor" | "moderate" | "serious" | "severe";
+
 export default function BussgeldRechnerTool() {
   const [revenue, setRevenue] = useState<number | null>(null);
   const [revenueInput, setRevenueInput] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [selectedRegs, setSelectedRegs] = useState<string[]>(FINE_RULES.map((r) => r.id));
+  const [severity, setSeverity] = useState<SeverityKey>("moderate");
 
   const { countryCode, countryData } = useCountry();
   const { locale } = useTranslations();
@@ -196,12 +237,19 @@ export default function BussgeldRechnerTool() {
     );
   };
 
+  const severityFactor = SEVERITY_FACTORS[severity];
+
   const activeFines = FINE_RULES.filter((r) => selectedRegs.includes(r.id)).map((rule) => {
     const regData = countryData?.regulations?.[rule.countryKey];
+    const maxFine = revenue ? calculateFine(rule, revenue) : 0;
     return {
       ...rule,
       guideUrl: `/${locale}${rule.guideUrl}`,
-      fine: revenue ? calculateFine(rule, revenue) : 0,
+      maxFine,
+      fine: maxFine, // Back-compat for existing rendering
+      /* Realistic range: typical fines cluster around severity.typical × max */
+      realisticFine: Math.round(maxFine * severityFactor.typical),
+      realisticMin: Math.round(maxFine * severityFactor.min),
       nationalFines: regData?.nationalFines,
       nationalAuthority: regData?.authority,
       nationalAuthorityUrl: regData?.authorityUrl,
@@ -209,7 +257,14 @@ export default function BussgeldRechnerTool() {
     };
   });
 
-  const totalRisk = activeFines.reduce((sum, f) => sum + f.fine, 0);
+  /* Total MAX risk — shown as upper theoretical ceiling (disclaimer required) */
+  const totalRisk = activeFines.reduce((sum, f) => sum + f.maxFine, 0);
+  /* Realistic worst-case single event — NOT summed (cumulative sum is misleading).
+     Regulators typically address ONE violation category per enforcement action. */
+  const realisticWorstCase = activeFines.reduce(
+    (max, f) => (f.realisticFine > max ? f.realisticFine : max),
+    0,
+  );
 
   return (
     <>
@@ -317,6 +372,35 @@ export default function BussgeldRechnerTool() {
                 </div>
               </div>
 
+              {/* Severity selector — dramatically changes realistic fine estimate */}
+              <div className="mb-6">
+                <div className="font-mono text-[10px] text-[#7a8db0] uppercase tracking-wider mb-2">Verstoß-Szenario</div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {(Object.keys(SEVERITY_FACTORS) as SeverityKey[]).map((key) => {
+                    const s = SEVERITY_FACTORS[key];
+                    const isActive = severity === key;
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => setSeverity(key)}
+                        className={`text-left px-3 py-2 rounded-lg border transition-all ${
+                          isActive
+                            ? "border-amber-400 bg-amber-50"
+                            : "border-[#e0e5f0] bg-white hover:border-amber-200"
+                        }`}
+                      >
+                        <div className={`text-[12px] font-bold ${isActive ? "text-amber-700" : "text-[#3a4a6b]"}`}>
+                          {s.label}
+                        </div>
+                        <div className="text-[10px] text-[#7a8db0] leading-snug mt-0.5">
+                          {s.desc}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Calculate button */}
               {!showResults && (
                 <button
@@ -350,17 +434,40 @@ export default function BussgeldRechnerTool() {
                   role="region"
                   aria-label="Berechnungsergebnis"
                 >
-                  {/* Total Risk */}
-                  <div className="rounded-2xl border-2 border-[#fde68a] bg-gradient-to-br from-[#fffbeb] to-[#fef3c7] p-6 sm:p-8 mb-6 text-center">
-                    <div className="font-mono text-[10px] text-[#92400e] uppercase tracking-wider mb-2">
-                      Maximales Gesamtrisiko
+                  {/* Realistic vs. Maximum — two cards side by side */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    {/* Realistic scenario */}
+                    <div className="rounded-2xl border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-amber-100 p-6 text-center">
+                      <div className="font-mono text-[10px] text-amber-800 uppercase tracking-wider mb-2">
+                        Realistisches Szenario
+                      </div>
+                      <div className="mb-2">
+                        <AnimatedCounter value={realisticWorstCase} color="#92400e" />
+                      </div>
+                      <p className="text-[11px] text-amber-900/80 leading-snug max-w-xs mx-auto">
+                        Typische Strafe bei <strong>{severityFactor.label.toLowerCase()}em</strong> Verstoß
+                        gegen die teuerste Regulierung.
+                      </p>
+                      <p className="text-[10px] text-amber-900/60 mt-2 italic">
+                        Median-Faktor: {Math.round(severityFactor.typical * 100)}% des Höchstmaßes
+                      </p>
                     </div>
-                    <div className="mb-3">
-                      <AnimatedCounter value={totalRisk} color="#92400e" />
+
+                    {/* Theoretical maximum */}
+                    <div className="rounded-2xl border border-[#d8dff0] bg-white p-6 text-center">
+                      <div className="font-mono text-[10px] text-[#7a8db0] uppercase tracking-wider mb-2">
+                        Theoretisches Höchstmaß
+                      </div>
+                      <div className="mb-2">
+                        <span className="font-[Syne] font-extrabold text-2xl sm:text-3xl text-[#3a4a6b] tabular-nums">
+                          {formatEuro(totalRisk)}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#7a8db0] leading-snug max-w-xs mx-auto">
+                        Summe aller Maximal-Bußgelder — statistisch nicht kumuliert,
+                        aber rechtlich möglich.
+                      </p>
                     </div>
-                    <p className="text-[13px] text-[#92400e]/70 max-w-md mx-auto">
-                      Kumuliertes maximales Bußgeldrisiko bei Verstößen gegen alle {activeFines.length} ausgewählten Regulierungen
-                    </p>
                   </div>
 
                   {/* Per-regulation breakdown */}
@@ -443,13 +550,44 @@ export default function BussgeldRechnerTool() {
                       ))}
                   </div>
 
+                  {/* Real precedent cases */}
+                  <div className="rounded-2xl border border-[#d8dff0] bg-white p-6 sm:p-8 mb-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <svg className="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                      </svg>
+                      <h3 className="font-[Syne] font-bold text-[15px] text-[#060c1a]">Echte Präzedenzfälle zur Einordnung</h3>
+                    </div>
+                    <p className="text-[12px] text-[#7a8db0] mb-4">
+                      Die aktuellen Top-Bußgelder aus DSB/EDPB-Verfahren 2019–2025 geben den realistischen Rahmen:
+                    </p>
+                    <div className="space-y-2">
+                      {PRECEDENT_CASES.dsgvo.map((c, i) => (
+                        <div key={i} className="flex items-start justify-between gap-4 py-2 border-b border-[#f0f2f8] last:border-0">
+                          <div className="min-w-0 flex-1">
+                            <div className="text-[13px] font-semibold text-[#060c1a]">{c.company}</div>
+                            <div className="text-[11px] text-[#7a8db0] mt-0.5">{c.summary}</div>
+                          </div>
+                          <div className="flex-shrink-0 text-right">
+                            <div className="text-[13px] font-[Syne] font-bold text-amber-700 tabular-nums">{formatEuro(c.fine)}</div>
+                            <div className="text-[10px] text-[#7a8db0]">{c.year}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[11px] text-[#7a8db0] mt-4 italic">
+                      Für NIS2, AI Act und CRA liegen noch keine finalen Bußgeld-Entscheidungen vor —
+                      Aufsichtsbehörden erwarten erste Präzedenzfälle im Laufe 2026.
+                    </p>
+                  </div>
+
                   {/* Context note */}
                   <div className="rounded-2xl border border-[#d8dff0] bg-white p-6 sm:p-8 mb-6">
                     <h3 className="font-[Syne] font-bold text-[15px] text-[#060c1a] mb-3">Wichtige Hinweise</h3>
                     <div className="space-y-2 text-[13px] text-[#3a4a6b] leading-relaxed">
                       <div className="flex items-start gap-2">
                         <span className="text-amber-500 mt-0.5">1.</span>
-                        <span>Die angezeigten Beträge sind <strong>Maximalstrafen</strong>. Die tatsächliche Höhe hängt von der Schwere des Verstoßes, Kooperationsbereitschaft und Vorgeschichte ab.</span>
+                        <span>Das Höchstmaß wird selten verhängt. Reale Strafen liegen typischerweise bei <strong>5–25% des Maximums</strong>, abhängig von Schwere, Kooperation und Vorstrafen.</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="text-amber-500 mt-0.5">2.</span>
@@ -457,6 +595,10 @@ export default function BussgeldRechnerTool() {
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="text-amber-500 mt-0.5">3.</span>
+                        <span>Bußgelder werden pro Verstoß einzeln verhängt — ein Vorfall kann aber mehrere Regulierungen berühren (z.B. Data Breach → DSGVO + NIS2-Meldepflicht).</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-amber-500 mt-0.5">4.</span>
                         <span>Zusätzlich zu Bußgeldern drohen: <strong>persönliche GF-Haftung</strong>, Reputationsschäden, Betriebsuntersagung und zivilrechtliche Schadensersatzansprüche.</span>
                       </div>
                     </div>

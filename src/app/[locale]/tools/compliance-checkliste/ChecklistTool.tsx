@@ -466,6 +466,96 @@ export default function ChecklistTool() {
                     Ihre Compliance-Auswertung
                   </h3>
 
+                  {/* Top 5 offene Baustellen — priorisiert nach Regulierungs-Kritikalität */}
+                  {(() => {
+                    /* Priority order: NIS2 + DSGVO are most immediately enforced for SMEs,
+                       followed by AI Act, CRA, DORA, CSRD. */
+                    const PRIORITY_ORDER = ["nis2", "dsgvo", "ai-act", "cra", "dora", "csrd"];
+                    const openItems: Array<{ reg: typeof REGULATIONS[number]; item: typeof REGULATIONS[number]["items"][number] }> = [];
+                    for (const regKey of PRIORITY_ORDER) {
+                      const reg = REGULATIONS.find((r) => r.key === regKey);
+                      if (!reg) continue;
+                      for (const item of reg.items) {
+                        if (!checkedItems.has(item.id)) {
+                          openItems.push({ reg, item });
+                        }
+                      }
+                    }
+                    const top5 = openItems.slice(0, 5);
+                    if (top5.length === 0) {
+                      return (
+                        <div className="mb-8 rounded-xl border border-emerald-400/20 bg-emerald-500/5 p-5">
+                          <div className="flex items-center gap-3">
+                            <svg className="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div>
+                              <p className="font-[Syne] font-bold text-sm text-white">Alle Positionen erledigt</p>
+                              <p className="text-xs text-slate-400 mt-0.5">
+                                Sie haben alle Checklisten-Punkte abgehakt. Führen Sie regelmäßige Reviews durch, um den Status zu halten.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return (
+                      <div className="mb-8 rounded-xl border border-red-400/15 bg-red-500/[0.04] p-5">
+                        <div className="flex items-center gap-2 mb-3 flex-wrap">
+                          <svg className="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                          </svg>
+                          <h4 className="font-[Syne] font-bold text-sm text-white">
+                            Top offene Baustellen
+                          </h4>
+                          <span className="text-[11px] text-slate-400 ml-auto">
+                            Priorisiert nach Regulierungs-Kritikalität
+                          </span>
+                        </div>
+                        <ol className="space-y-2">
+                          {top5.map(({ reg, item }, i) => (
+                            <li key={item.id} className="flex items-start gap-3 p-2 rounded-lg hover:bg-white/[0.02] transition-colors">
+                              <span
+                                className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-[Syne] font-bold"
+                                style={{ background: `${reg.accent}20`, color: reg.accent }}
+                              >
+                                {i + 1}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                  <span
+                                    className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider"
+                                    style={{ background: `${reg.accent}20`, color: reg.accent }}
+                                  >
+                                    {reg.shortTitle}
+                                  </span>
+                                  {reg.deadline && (
+                                    <span className="text-[10px] text-slate-500">
+                                      Frist: {reg.deadline}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[13px] text-slate-200 leading-snug">
+                                  {item.text}
+                                </p>
+                                {"hint" in item && item.hint && (
+                                  <p className="text-[11px] text-slate-500 mt-0.5 italic">
+                                    💡 {item.hint}
+                                  </p>
+                                )}
+                              </div>
+                            </li>
+                          ))}
+                        </ol>
+                        {openItems.length > 5 && (
+                          <p className="text-[11px] text-slate-500 mt-3 pl-9">
+                            + {openItems.length - 5} weitere offene Punkte. Fokussieren Sie zunächst auf diese Top 5.
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                     {REGULATIONS.map((reg) => {
                       const stats = regStats.find((s) => s.key === reg.key)!;

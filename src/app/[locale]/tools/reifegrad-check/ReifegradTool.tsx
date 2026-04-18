@@ -117,6 +117,106 @@ function calculateResults(ratings: Record<string, Rating>) {
   });
 }
 
+/**
+ * Actionable advice per question — what to DO if it's rated "not implemented" or "partial".
+ * Keyed by question ID.
+ */
+const QUESTION_ACTIONS: Record<string, { action: string; effort: string; guide?: string }> = {
+  g1: { action: "Benennen Sie eine Compliance-Verantwortliche Person (CEO-Delegation reicht für KMU; größere Firmen: eigene Stelle).", effort: "2–4h Governance-Beschluss", guide: "/glossar" },
+  g2: { action: "Etablieren Sie ein Quartals-Reporting an die GF mit Kennzahlen (offene Themen, Fristen, Vorfälle).", effort: "4 Quartale × 1h Template", guide: "/haftungs-check" },
+  g3: { action: "Dokumentieren Sie ein Basic-CMS nach IDW PS 980 oder ISO 37301 — auch 20 Seiten reichen für KMU-Start.", effort: "10–15h Erstellung", guide: "/faq" },
+  g4: { action: "Erstellen Sie eine zentrale Compliance-Intranet-Seite mit 5 Kern-Richtlinien (DSGVO, IT-Sicherheit, Meldekanal, Schulung, GF-Haftung).", effort: "4–6h Setup" },
+  g5: { action: "Budgetieren Sie initial ≥ 0,5% des Umsatzes p.a. für Compliance (externe Beratung, Tools, Schulungen).", effort: "1h Budget-Planung" },
+  d1: { action: "Erstellen Sie ein Verarbeitungsverzeichnis nach Art. 30 DSGVO — Excel-Template reicht, aber alle Verarbeitungen müssen erfasst sein.", effort: "8–16h je nach Komplexität", guide: "/dsgvo" },
+  d2: { action: "Definieren Sie Kriterien für DSFA-Pflicht und führen Sie bei Hochrisiko-Verarbeitungen eine durch.", effort: "4–8h pro Fall", guide: "/dsgvo" },
+  d3: { action: "Dokumentieren Sie einen Betroffenen-Prozess (Auskunft, Löschung, Widerspruch) mit 30-Tage-SLA.", effort: "4h Prozess-Design" },
+  d4: { action: "Prüfen Sie alle Dienstleister, mit denen Sie Daten austauschen, auf AVVs (Art. 28). Mustervertrag nutzen.", effort: "0,5h pro Anbieter" },
+  d5: { action: "Dokumentieren Sie den 72h-Meldeprozess (intern → DSB → ggf. Betroffene) mit Template.", effort: "2–3h Prozess + Template" },
+  c1: { action: "Starten Sie mit VdS 10000 (KMU-Standard) oder ISO 27001-Gap-Analyse. Ein ISMS-Tool wie Secjur/DataGuard beschleunigt.", effort: "3–6 Monate Projekt", guide: "/nisg-2026" },
+  c2: { action: "Erstellen Sie ein IT-Risikoregister (Bedrohungen × Eintrittswahrscheinlichkeit × Schaden) — einmal jährlich updaten.", effort: "8–12h Erstanalyse" },
+  c3: { action: "Dokumentieren Sie einen Incident-Response-Plan mit klaren Rollen und eskalationspfaden (24h/72h-NIS2-Meldung).", effort: "6–10h Plan-Erstellung", guide: "/nisg-2026" },
+  c4: { action: "Rollen Sie jährliche Phishing-Simulationen und verpflichtende Security-Awareness-Trainings aus (z.B. SoSafe, KnowBe4).", effort: "2–5k €/Jahr SaaS-Tool" },
+  c5: { action: "Fordern Sie von Top-10-Lieferanten aktuelle Zertifikate an (ISO 27001, SOC 2) und pflegen Sie eine SBOM.", effort: "3–5h pro Lieferant" },
+  k1: { action: "Legen Sie ein KI-Inventar an (alle eingesetzten KI-Systeme + Klassifizierung nach AI-Act-Risikoklassen).", effort: "4–8h Erstinventur", guide: "/eu-ai-act" },
+  k2: { action: "Erstellen Sie eine KI-Nutzungsrichtlinie (erlaubte Tools, Datenfreigabe, Freigabeprozess).", effort: "3–5h Richtlinie" },
+  k3: { action: "Definieren Sie für Hochrisiko-KI (Anhang III): Human-in-the-Loop-Prozesse mit Dokumentation.", effort: "4–6h pro System" },
+  k4: { action: "Ergänzen Sie Transparenz-Hinweise (Chatbot-Disclaimer, KI-generierte Inhalte, automatisierte Entscheidungen).", effort: "2–4h UI-Updates" },
+  k5: { action: "Führen Sie Bias-Tests bei KI-Systemen mit personenbezogenen Entscheidungen durch (HR, Credit, Insurance).", effort: "8–16h pro Modell" },
+  r1: { action: "Führen Sie ein Compliance-Tagebuch (wer hat wann was entschieden) — in OneDrive/Google Drive mit Audit-Log.", effort: "1h Setup + laufend" },
+  r2: { action: "Prüfen Sie Ihre CSRD-Pflicht (nach Omnibus 2026: > 1000 MA + > 50 Mio. €). VSME-Standard für KMU erwägen.", effort: "2–4h Prüfung", guide: "/csrd-esg" },
+  r3: { action: "Planen Sie mindestens 1 internes Audit pro Jahr (kann auch extern durchgeführt werden, 2–5k €).", effort: "1 Tag Audit + Report" },
+  r4: { action: "Ab 50 MA verpflichtend: Internen Meldekanal einrichten (z.B. EQS-Plattform, ab 1200 €/Jahr).", effort: "4–6h Setup + laufend", guide: "/hschg" },
+  r5: { action: "Dokumentieren Sie Compliance-Schulungen pro Mitarbeiter (Teilnahme, Datum, Quiz-Ergebnis).", effort: "2–4h Tracking-Setup" },
+};
+
+/**
+ * Build priority action list from user's ratings.
+ * Order: rating=1 (not implemented) first, then rating=2 (partial).
+ * Within each group: order by category (as listed in CATEGORIES).
+ * Return up to 8 actions.
+ */
+function buildPriorityActions(ratings: Record<string, Rating>, max = 8): Array<{
+  category: string;
+  categoryColor: string;
+  question: string;
+  action: string;
+  effort: string;
+  guide?: string;
+  severity: "critical" | "improvement";
+}> {
+  const items: Array<{
+    category: string;
+    categoryColor: string;
+    question: string;
+    action: string;
+    effort: string;
+    guide?: string;
+    severity: "critical" | "improvement";
+  }> = [];
+
+  // First pass: not implemented (rating=1) → critical
+  for (const cat of CATEGORIES) {
+    for (const q of cat.questions) {
+      if (ratings[q.id] === 1) {
+        const info = QUESTION_ACTIONS[q.id];
+        if (info) {
+          items.push({
+            category: cat.title,
+            categoryColor: cat.color,
+            question: q.text,
+            action: info.action,
+            effort: info.effort,
+            guide: info.guide,
+            severity: "critical",
+          });
+        }
+      }
+    }
+  }
+
+  // Second pass: partial (rating=2) → improvement
+  for (const cat of CATEGORIES) {
+    for (const q of cat.questions) {
+      if (ratings[q.id] === 2 && items.length < max) {
+        const info = QUESTION_ACTIONS[q.id];
+        if (info) {
+          items.push({
+            category: cat.title,
+            categoryColor: cat.color,
+            question: q.text,
+            action: info.action,
+            effort: info.effort,
+            guide: info.guide,
+            severity: "improvement",
+          });
+        }
+      }
+    }
+  }
+
+  return items.slice(0, max);
+}
+
 function getOverallGrade(percentage: number): { label: string; color: string; description: string } {
   if (percentage >= 80) return { label: "A – Vorbildlich", color: "#10b981", description: "Ihr Unternehmen ist hervorragend aufgestellt. Fokussieren Sie auf kontinuierliche Verbesserung und bleiben Sie bei Gesetzesänderungen am Ball." };
   if (percentage >= 60) return { label: "B – Fortgeschritten", color: "#3b82f6", description: "Gute Grundlage vorhanden. Schließen Sie die verbleibenden Lücken systematisch und dokumentieren Sie alle Maßnahmen." };
@@ -341,6 +441,101 @@ export default function ReifegradTool() {
                     </div>
                   ))}
                 </div>
+
+                {/* Priority Actions — the ACTIONABLE output */}
+                {(() => {
+                  const priorityActions = buildPriorityActions(ratings, 8);
+                  if (priorityActions.length === 0) {
+                    return (
+                      <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/5 p-6 mb-6">
+                        <div className="flex items-center gap-3 mb-2">
+                          <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <h3 className="font-[Syne] font-bold text-base text-white">Kein akuter Handlungsbedarf</h3>
+                        </div>
+                        <p className="text-sm text-slate-400">
+                          Alle bewerteten Bereiche sind vollständig umgesetzt. Fokussieren Sie auf laufende Reviews
+                          und halten Sie sich bei Gesetzesänderungen auf dem Laufenden.
+                        </p>
+                      </div>
+                    );
+                  }
+                  const criticalCount = priorityActions.filter((a) => a.severity === "critical").length;
+                  return (
+                    <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 sm:p-7 mb-6">
+                      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                        <div>
+                          <h3 className="font-[Syne] font-bold text-lg text-white">
+                            Ihre priorisierten Maßnahmen
+                          </h3>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Konkrete nächste Schritte, sortiert nach Dringlichkeit
+                          </p>
+                        </div>
+                        {criticalCount > 0 && (
+                          <span className="text-[11px] px-2.5 py-1 rounded-full font-bold bg-red-500/15 text-red-400">
+                            {criticalCount} kritisch
+                          </span>
+                        )}
+                      </div>
+                      <ol className="space-y-3">
+                        {priorityActions.map((item, i) => (
+                          <li key={i} className="rounded-xl border border-white/5 bg-white/[0.02] p-4">
+                            <div className="flex items-start gap-3">
+                              <span
+                                className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-[Syne] font-bold"
+                                style={{
+                                  background: item.severity === "critical" ? "rgba(239, 68, 68, 0.15)" : "rgba(245, 158, 11, 0.15)",
+                                  color: item.severity === "critical" ? "#f87171" : "#fbbf24",
+                                }}
+                              >
+                                {i + 1}
+                              </span>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                  <span
+                                    className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider"
+                                    style={{ background: `${item.categoryColor}20`, color: item.categoryColor }}
+                                  >
+                                    {item.category}
+                                  </span>
+                                  {item.severity === "critical" && (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider bg-red-500/15 text-red-400">
+                                      Lücke
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[13px] text-slate-300 leading-snug mb-1 italic">
+                                  {item.question}
+                                </p>
+                                <p className="text-sm text-white leading-relaxed mb-2">
+                                  {item.action}
+                                </p>
+                                <div className="flex items-center gap-3 text-[11px] text-slate-500 flex-wrap">
+                                  <span className="flex items-center gap-1">
+                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Aufwand: {item.effort}
+                                  </span>
+                                  {item.guide && (
+                                    <Link
+                                      href={`/${locale}${item.guide}`}
+                                      className="text-yellow-400 hover:underline"
+                                    >
+                                      Leitfaden →
+                                    </Link>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  );
+                })()}
 
                 {/* Actions */}
                 <div className="flex flex-col sm:flex-row gap-3 mb-4">
