@@ -289,7 +289,7 @@ export default function ToolsHubContent() {
                           {tool.features.map((f) => (
                             <span
                               key={f}
-                              className="px-2 py-1 rounded-md bg-white/[0.04] text-[11px] text-slate-500 font-medium"
+                              className="px-2 py-1 rounded-md bg-white/[0.08] text-[11px] text-slate-300 font-medium"
                             >
                               {f}
                             </span>
@@ -322,7 +322,7 @@ export default function ToolsHubContent() {
 
             {filtered.length === 0 && (
               <div className="text-center py-16">
-                <p className="text-slate-500 text-sm">
+                <p className="text-slate-300 text-sm">
                   Keine Tools in dieser Kategorie.
                 </p>
               </div>
@@ -353,7 +353,7 @@ export default function ToolsHubContent() {
                     <p className="text-sm font-semibold text-slate-300 group-hover:text-yellow-400 transition-colors">
                       {res.title}
                     </p>
-                    <p className="text-xs text-slate-500">{res.description}</p>
+                    <p className="text-xs text-slate-300">{res.description}</p>
                   </div>
                 </Link>
               ))}

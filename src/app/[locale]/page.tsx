@@ -31,7 +31,7 @@ const pillarMeta = [
 const toolsMeta = [
   { href: "/tools/regulierung-finder", icon: "compass", accent: "#FACC15", accentLight: "#fef9e7" },
   { href: "/tools/compliance-checkliste", icon: "list", accent: "#FACC15", accentLight: "#fef9e7" },
-  { href: "/haftungs-check", icon: "scale", accent: "#0A2540", accentLight: "#e8eeff" },
+  { href: "/tools/haftungs-pruefer", icon: "scale", accent: "#0A2540", accentLight: "#e8eeff" },
   { href: "/fristen-radar", icon: "calendar", accent: "#1e40af", accentLight: "#e8ecff" },
   { href: "/tools/reifegrad-check", icon: "coins", accent: "#16a34a", accentLight: "#f0fdf4" },
   { href: "/glossar", icon: "book", accent: "#7c3aed", accentLight: "#f3f0ff" },

@@ -188,7 +188,7 @@ export default function GuidePageLayout({
 
           <div className="relative max-w-7xl mx-auto px-6 lg:px-12">
             {/* Breadcrumb with JSON-LD */}
-            <div className="mb-8 [&_nav]:text-white/40 [&_a]:text-white/40 [&_a:hover]:text-white/70 [&_span]:text-white/60 [&_span[aria-hidden]]:text-white/35">
+            <div className="mb-8 [&_nav]:text-white/70 [&_a]:text-white/70 [&_a:hover]:text-white [&_span]:text-white/85 [&_span[aria-hidden]]:text-white/55">
               <Breadcrumbs
                 items={[{ label: title, href: href }]}
                 homeLabel={t("breadcrumb.home")}
@@ -207,7 +207,7 @@ export default function GuidePageLayout({
               )}
               <div>
                 <div className="flex items-center gap-3 mb-3 flex-wrap">
-                  <span className="font-mono text-[11px] font-semibold tracking-[0.15em] uppercase text-white/40">
+                  <span className="font-mono text-[11px] font-semibold tracking-[0.15em] uppercase text-white/70">
                     {regulationKey}
                   </span>
                   {badgeLabel && (
@@ -228,7 +228,7 @@ export default function GuidePageLayout({
                 <h1 className="font-[Syne] font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.1] mb-4">
                   {title}
                 </h1>
-                <p className="text-white/45 text-base sm:text-lg leading-relaxed max-w-2xl">
+                <p className="text-white/75 text-base sm:text-lg leading-relaxed max-w-2xl">
                   {subtitle}
                 </p>
               </div>

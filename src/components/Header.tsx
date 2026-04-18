@@ -117,10 +117,10 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Mobile Menu Button */}
+        {/* Mobile Menu Button — min 44×44 touch target (WCAG 2.5.5 AAA) */}
         <button
           ref={menuButtonRef}
-          className="md:hidden flex flex-col gap-1.5 p-2"
+          className="md:hidden flex flex-col items-center justify-center gap-1.5 p-3 min-w-[44px] min-h-[44px]"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? t("nav.mobile.closeMenu") : t("nav.mobile.openMenu")}
           aria-expanded={mobileOpen}

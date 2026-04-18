@@ -75,7 +75,7 @@ export default function Footer() {
                       <li key={item.href}>
                         <Link
                           href={`/${locale}${item.href}`}
-                          className="text-[13px] text-white/50 transition-colors duration-200 hover:text-white/80"
+                          className="text-[13px] text-white/70 transition-colors duration-200 hover:text-white"
                         >
                           {item.label}
                         </Link>
@@ -92,7 +92,7 @@ export default function Footer() {
                       <li key={item.href}>
                         <Link
                           href={`/${locale}${item.href}`}
-                          className="text-[13px] text-white/50 transition-colors duration-200 hover:text-white/80"
+                          className="text-[13px] text-white/70 transition-colors duration-200 hover:text-white"
                         >
                           {item.label}
                         </Link>
@@ -114,7 +114,7 @@ export default function Footer() {
                 <li key={item.href}>
                   <Link
                     href={`/${locale}${item.href}`}
-                    className="text-[13px] text-white/50 transition-colors duration-200 hover:text-white/80"
+                    className="text-[13px] text-white/70 transition-colors duration-200 hover:text-white"
                   >
                     {item.label}
                   </Link>
@@ -126,14 +126,14 @@ export default function Footer() {
 
         {/* Legal disclaimer */}
         <div className="py-6 border-b border-white/[0.04]">
-          <p className="font-mono text-[10px] text-white/35 leading-relaxed max-w-3xl">
+          <p className="font-mono text-[10px] text-white/65 leading-relaxed max-w-3xl">
             {t("footer.legalDisclaimer")}
           </p>
         </div>
 
         {/* Bottom bar */}
         <div className="flex flex-col md:flex-row items-center justify-between pt-6 gap-4">
-          <p className="font-mono text-[11px] text-white/35">
+          <p className="font-mono text-[11px] text-white/60">
             &copy; {new Date().getFullYear()} {t("footer.copyright")}
           </p>
           <div className="flex items-center gap-6 flex-wrap justify-center">
@@ -148,14 +148,14 @@ export default function Footer() {
               <Link
                 key={href}
                 href={href}
-                className="text-[11px] text-white/40 transition-colors duration-200 hover:text-white/60"
+                className="text-[11px] text-white/70 transition-colors duration-200 hover:text-white"
               >
                 {label}
               </Link>
             ))}
             <button
               onClick={resetCookieConsent}
-              className="text-[11px] text-white/40 transition-colors duration-200 hover:text-white/60 cursor-pointer"
+              className="text-[11px] text-white/70 transition-colors duration-200 hover:text-white cursor-pointer"
             >
               {t("footer.cookieSettings")}
             </button>
